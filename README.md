@@ -1,1 +1,2 @@
-# twitter7ToRDF
+# TWIG
+## TwitterBenchmarkGenerator
