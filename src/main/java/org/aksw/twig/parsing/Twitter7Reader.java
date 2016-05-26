@@ -17,11 +17,10 @@ import java.util.function.Supplier;
 
 /**
  * This class reads a file that contains twitter7 data block-wise.
- * Each block must be formatted by following regex:
- *      T .*[\n]+
- *      U .*[\n]+
- *      W .*[\n]+
- *
+ * Each block must be formatted by following regex:<br/>
+ *      T .*[\n]+<br/>
+ *      U .*[\n]+<br/>
+ *      W .*[\n]+<br/>
  * Blocks that do not match this criteria will be skipped.
  */
 public class Twitter7Reader implements Runnable {
