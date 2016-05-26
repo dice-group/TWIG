@@ -15,6 +15,15 @@ import java.util.concurrent.Executors;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 
+/**
+ * This class reads a file that contains twitter7 data block-wise.
+ * Each block must be formatted by following regex:
+ *      T .*[\n]+
+ *      U .*[\n]+
+ *      W .*[\n]+
+ *
+ * Blocks that do not match this criteria will be skipped.
+ */
 public class Twitter7Reader implements Runnable {
 
     private static final Logger LOGGER = LogManager.getLogger(Twitter7Reader.class);
