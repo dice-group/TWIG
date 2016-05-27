@@ -11,42 +11,68 @@ import java.time.format.DateTimeFormatter;
 import java.util.Arrays;
 import java.util.concurrent.Callable;
 
+/**
+ * Parses a {@link org.apache.jena.rdf.model.Model} from a twitter7 block triple.
+ */
 public class Twitter7BlockParser implements Callable<Model> {
 
     private static final DateTimeFormatter DATE_TIME_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
 
     private static final String TWITTER_AUTHORITY = "twitter.com";
 
+    /** T line of the twitter7 block. */
     private String lineT;
 
+    /** Parsed timestamp form T line. */
     private LocalDateTime messageDateTime;
 
+    /**
+     * Getter to parsed timestamp.
+     * @return Timestamp.
+     */
     public LocalDateTime getMessageDateTime() {
         return messageDateTime;
     }
 
+    /** U line of the twitter7 block. */
     private String lineU;
 
+    /** Parsed twitter user name from U line. */
     private String twitterUserName;
 
+    /**
+     * Getter to parsed twitter username.
+     * @return Twitter username.
+     */
     public String getTwitterUserName() {
         return twitterUserName;
     }
 
+    /** W line from twittter7 block. */
     private String lineW;
 
+    /** Parsed message content from W line. */
     private String messageContent;
 
+    /**
+     * Getter to parsed message content.
+     * @return Message content.
+     */
     public String getMessageContent() {
         return messageContent;
     }
 
+    /**
+     * Creates a new parser for given triple. Triple must contain twitter7 data for one block.
+     * @param twitter7Triple Triple to parse.
+     */
     public Twitter7BlockParser(Triple<String, String, String> twitter7Triple) {
         this.lineT = twitter7Triple.getLeft();
         this.lineU = twitter7Triple.getMiddle();
         this.lineW = twitter7Triple.getRight();
     }
 
+    @Override
     public Model call() throws Twitter7BlockParseException {
 
         // Parse date and time

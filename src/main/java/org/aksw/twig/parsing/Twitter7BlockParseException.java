@@ -1,5 +1,8 @@
 package org.aksw.twig.parsing;
 
+/**
+ * Exception thrown by {@link Twitter7BlockParser} upon malformed data.
+ */
 public class Twitter7BlockParseException extends Exception {
 
     public enum Error {
@@ -14,6 +17,10 @@ public class Twitter7BlockParseException extends Exception {
     private static final String ERROR_MSG_NO_TWITTER_LINK = "The twitter7 block didn't contain a twitter link.";
     private static final String ERROR_MSG_URL_MALFORMED = "The twitter7 block contained a malformed URL to the twitter account.";
 
+    /**
+     * Creates a new exception with error type.
+     * @param error Error type.
+     */
     public Twitter7BlockParseException(Error error) {
         super(getErrorMessage(error));
     }

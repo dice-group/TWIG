@@ -39,6 +39,7 @@ public class Twitter7Reader<T> implements Runnable {
 
     private Function<Triple<String, String, String>, Callable<T>> resultParser;
 
+    /** Stores all futures that are unfinished. Futures will remove themselves from this collection. */
     private Set<ListenableFuture<T>> unfinishedFutures;
 
     private boolean running = false;

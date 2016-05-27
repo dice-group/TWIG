@@ -30,6 +30,9 @@ public class Twitter7ReaderTest {
         this.emptySampleDataPath = getClass().getClassLoader().getResource("data/sample_empty.txt").getPath();
     }
 
+    /**
+     * Tests reading two blocks of twitter7 data.
+     */
     @Test
     public void testBlockReading() {
         try {
@@ -48,6 +51,9 @@ public class Twitter7ReaderTest {
         }
     }
 
+    /**
+     * Tests skipping broken blocks of twitter7 data.
+     */
     @Test
     public void testBrokenBlockReading() {
         try {
@@ -61,6 +67,9 @@ public class Twitter7ReaderTest {
         }
     }
 
+    /**
+     * Tests correct termination on empty file.
+     */
     @Test
     public void testEmptyBlockReading() {
         try {
@@ -73,7 +82,9 @@ public class Twitter7ReaderTest {
         }
     }
 
-
+    /**
+     * Tests reading a whole file.
+     */
     @Test
     public void testReading() {
         allBlocks.add("T       2009-09-30 23:55:53\n" +
