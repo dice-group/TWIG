@@ -9,7 +9,7 @@ public class Twitter7ResultCollector implements FutureCallback<Model> {
 
     private static final Logger LOGGER = LogManager.getLogger(Twitter7ResultCollector.class);
 
-    private Model currentModel = Twitter7ModelFactory.get();
+    private Model currentModel = Twitter7ModelFactory.createModel();
 
     private Twitter7ModelWriter writer = new Twitter7ModelWriter();
 
@@ -25,7 +25,7 @@ public class Twitter7ResultCollector implements FutureCallback<Model> {
 
         if (this.currentModel.size() >= modelMaxSize) {
             writer.write(this.currentModel);
-            this.currentModel = Twitter7ModelFactory.get();
+            this.currentModel = Twitter7ModelFactory.createModel();
         }
     }
 

@@ -2,9 +2,6 @@ package org.aksw.twig.parsing;
 
 import org.apache.commons.lang3.tuple.Triple;
 import org.apache.jena.rdf.model.Model;
-import org.apache.jena.rdf.model.ModelFactory;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -81,7 +78,7 @@ public class Twitter7BlockParser implements Callable<Model> {
         // Parse message content
         this.messageContent = this.lineW.trim();
 
-        Model model = ModelFactory.createDefaultModel();
+        Model model = Twitter7ModelFactory.createModel();
 
         return model;
     }

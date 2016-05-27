@@ -5,7 +5,7 @@ import org.apache.jena.rdf.model.ModelFactory;
 
 public final class Twitter7ModelFactory {
 
-    public static Model get() {
+    public static Model createModel() {
         return ModelFactory.createDefaultModel();
     }
 }
