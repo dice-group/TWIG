@@ -18,10 +18,12 @@ import java.util.function.Supplier;
 /**
  * This class reads a file that contains twitter7 data block-wise.
  * Each block must be formatted by following regex:<br/>
- *      T .*[\n]+<br/>
+ *      {T .*[\n]+<br/>
  *      U .*[\n]+<br/>
- *      W .*[\n]+<br/>
+ *      W .*[\n]}+}*<br/>
  * Blocks that do not match this criteria will be skipped.
+ *
+ * @author Felix Linker
  */
 public class Twitter7Reader implements Runnable {
 
@@ -89,8 +91,9 @@ public class Twitter7Reader implements Runnable {
                 return null;
             }
 
-            if (line.startsWith(lineIdentifier(readState))) {
-                triplePutLine(readState, triple).accept(line);
+            String linePrefix = lineIdentifier(readState);
+            if (line.startsWith(linePrefix)) {
+                triplePutLine(readState, triple).accept(line.substring(linePrefix.length()));
                 readState = nextState(readState);
             } else {
 
