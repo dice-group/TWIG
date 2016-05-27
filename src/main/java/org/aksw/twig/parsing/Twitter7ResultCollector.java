@@ -8,6 +8,7 @@ import org.apache.logging.log4j.Logger;
 /**
  * This class will handle parsed models. It will do so by collecting results of {@link com.google.common.util.concurrent.ListenableFuture} to which this collector has been added.
  * Results will be merged into one {@link Model} that is then handed to {@link Twitter7ModelWriter}.
+ * @author Felix Linker
  */
 public class Twitter7ResultCollector implements FutureCallback<Model> {
 

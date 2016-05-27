@@ -2,6 +2,7 @@ package org.aksw.twig.parsing;
 
 /**
  * Exception thrown by {@link Twitter7BlockParser} upon malformed data.
+ * @author Felix Linker
  */
 public class Twitter7BlockParseException extends Exception {
 

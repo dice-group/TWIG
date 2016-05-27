@@ -7,6 +7,7 @@ import java.io.IOException;
 
 /**
  * Class that handles parsing of Twitter7 data files.
+ * @author Felix Linker
  */
 public final class Twitter7Parser {
 

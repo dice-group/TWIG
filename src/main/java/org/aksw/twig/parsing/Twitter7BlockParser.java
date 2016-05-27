@@ -13,6 +13,7 @@ import java.util.concurrent.Callable;
 
 /**
  * Parses a {@link org.apache.jena.rdf.model.Model} from a twitter7 block triple.
+ * @author Felix Linker
  */
 public class Twitter7BlockParser implements Callable<Model> {
 
