@@ -1,5 +1,6 @@
 package org.aksw.twig.parsing;
 
+import org.apache.commons.lang3.tuple.ImmutableTriple;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.junit.Assert;
@@ -7,17 +8,15 @@ import org.junit.Test;
 
 public class Twitter7BlockParserTest {
 
-    private static final Logger LOGGER = LogManager.getLogger(Twitter7BlockParserTest.class);
-
     private Twitter7BlockParser parser;
 
     @Test
     public void parseTest() {
-        this.parser = new Twitter7BlockParser(
+        this.parser = new Twitter7BlockParser(new ImmutableTriple<>(
                 "       2009-09-30 23:55:53",
                 "       http://twitter.com/andreavaleriac",
                 "       I'm starting to feel really sick, hope is not the S**** flu! (That's the new S-word)"
-        );
+        ));
 
         try {
             this.parser.call();

@@ -1,7 +1,6 @@
 package org.aksw.twig.parsing;
 
 import com.google.common.util.concurrent.*;
-import org.apache.commons.lang3.tuple.ImmutableTriple;
 import org.apache.commons.lang3.tuple.MutableTriple;
 import org.apache.commons.lang3.tuple.Triple;
 import org.apache.logging.log4j.LogManager;
@@ -11,8 +10,12 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
+import java.util.HashSet;
+import java.util.Set;
+import java.util.concurrent.Callable;
 import java.util.concurrent.Executors;
 import java.util.function.Consumer;
+import java.util.function.Function;
 import java.util.function.Supplier;
 
 /**
@@ -23,53 +26,100 @@ import java.util.function.Supplier;
  *      W .*[\n]}+}*<br/>
  * Blocks that do not match this criteria will be skipped.
  *
+ * @param <T> Type of the parsing result.
  * @author Felix Linker
  */
-public class Twitter7Reader implements Runnable {
+public class Twitter7Reader<T> implements Runnable {
 
     private static final Logger LOGGER = LogManager.getLogger(Twitter7Reader.class);
 
     private BufferedReader fileReader;
 
-    private Supplier<FutureCallback<String>> callbackSupplier;
+    private Supplier<FutureCallback<T>> callbackSupplier;
+
+    private Function<Triple<String, String, String>, Callable<T>> resultParser;
+
+    private Set<ListenableFuture<T>> unfinishedFutures;
+
+    private boolean running = false;
 
     /**
      * Initializes a file reader to given file and sets class variables.
      * @param fileToParse File to parse.
      * @param callbackSupplier Supplier for result consumers.
+     * @param resultParser Function to apply  a triple as twitter7 block reading result to a callable parser.
      * @throws IOException Can be thrown by errors during reader creation.
+     * @throws NullPointerException Thrown if {@code callBackSupplier} or {@code resultParser} is {@code null}.
      */
-    public Twitter7Reader(File fileToParse, Supplier<FutureCallback<String>> callbackSupplier) throws IOException {
+    public Twitter7Reader(
+            File fileToParse,
+            Supplier<FutureCallback<T>> callbackSupplier,
+            Function<Triple<String, String, String>, Callable<T>> resultParser) throws IOException, NullPointerException {
+        if (callbackSupplier == null || resultParser == null) {
+            throw new NullPointerException();
+        }
+
         this.fileReader = new BufferedReader(new FileReader(fileToParse));
         this.callbackSupplier = callbackSupplier;
+        this.resultParser = resultParser;
     }
 
     /**
      * Initializes a file reader to given file and sets class variables.
      * @param fileToParsePath File to parse.
      * @param callbackSupplier Supplier for result consumers.
+     * @param resultParser Function to apply  a triple as twitter7 block reading result to a callable parser.
      * @throws IOException Can be thrown by errors during reader creation.
+     * @throws NullPointerException Thrown if {@code callBackSupplier} or {@code resultParser} is {@code null}.
      */
-    public Twitter7Reader(String fileToParsePath, Supplier<FutureCallback<String>> callbackSupplier) throws IOException {
-        this(new File(fileToParsePath), callbackSupplier);
+    public Twitter7Reader(
+            String fileToParsePath,
+            Supplier<FutureCallback<T>> callbackSupplier,
+            Function<Triple<String, String, String>, Callable<T>> resultParser) throws IOException, NullPointerException {
+        this(new File(fileToParsePath), callbackSupplier, resultParser);
     }
 
+
     @Override
-    public void run() {
+    public void run() throws IllegalStateException {
+        if (this.running) {
+            throw new IllegalStateException();
+        }
+
+        this.running = true;
+        this.unfinishedFutures = new HashSet<>();
         ListeningExecutorService service = MoreExecutors.listeningDecorator(Executors.newCachedThreadPool());
 
         try {
 
             Triple<String, String, String> twitter7Block;
             while ((twitter7Block = this.readTwitter7Block()) != null) {
-                ListenableFuture<String> fut = service.submit(new Twitter7BlockParser(twitter7Block.getLeft(), twitter7Block.getMiddle(), twitter7Block.getRight()));
+                ListenableFuture<T> fut = service.submit(this.resultParser.apply(twitter7Block));
                 Futures.addCallback(fut, this.callbackSupplier.get());
+
+                // Track futures
+                synchronized (this.unfinishedFutures) {
+                    this.unfinishedFutures.add(fut);
+                    fut.addListener(() -> {
+                        synchronized (this.unfinishedFutures) {
+                            this.unfinishedFutures.remove(fut);
+                        }
+                    }, service);
+                }
             }
 
         } catch (IOException e) {
             LOGGER.error("Encountered IOException during file parsing.");
-            return;
         }
+        this.running = false;
+    }
+
+    /**
+     * Returns whether the reading of the file has finished or hasn't been started.
+     * @return Returns {@code true} if there is no file reading ongoing.
+     */
+    public boolean isFinished() {
+        return !this.running && this.unfinishedFutures.isEmpty();
     }
 
     /**

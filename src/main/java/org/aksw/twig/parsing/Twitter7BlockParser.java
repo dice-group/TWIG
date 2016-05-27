@@ -1,5 +1,8 @@
 package org.aksw.twig.parsing;
 
+import org.apache.commons.lang3.tuple.Triple;
+import org.apache.jena.rdf.model.Model;
+import org.apache.jena.rdf.model.ModelFactory;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -11,9 +14,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.Arrays;
 import java.util.concurrent.Callable;
 
-public class Twitter7BlockParser implements Callable<String> {
-
-    private static final Logger LOGGER = LogManager.getLogger(Twitter7BlockParser.class);
+public class Twitter7BlockParser implements Callable<Model> {
 
     private static final DateTimeFormatter DATE_TIME_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
 
@@ -43,13 +44,13 @@ public class Twitter7BlockParser implements Callable<String> {
         return messageContent;
     }
 
-    public Twitter7BlockParser(String lineT, String lineU, String lineW) {
-        this.lineT = lineT;
-        this.lineU = lineU;
-        this.lineW = lineW;
+    public Twitter7BlockParser(Triple<String, String, String> twitter7Triple) {
+        this.lineT = twitter7Triple.getLeft();
+        this.lineU = twitter7Triple.getMiddle();
+        this.lineW = twitter7Triple.getRight();
     }
 
-    public String call() throws Twitter7BlockParseException {
+    public Model call() throws Twitter7BlockParseException {
 
         // Parse date and time
         try {
@@ -69,6 +70,7 @@ public class Twitter7BlockParser implements Callable<String> {
                     .filter(pathPart -> !pathPart.isEmpty())
                     .findFirst()
                     .orElse(null);
+
             if (this.twitterUserName == null) {
                 throw new Twitter7BlockParseException(Twitter7BlockParseException.Error.NO_TWITTER_ACCOUNT);
             }
@@ -79,16 +81,8 @@ public class Twitter7BlockParser implements Callable<String> {
         // Parse message content
         this.messageContent = this.lineW.trim();
 
-        StringBuilder builder = new StringBuilder();
-        builder.append('T');
-        builder.append(lineT);
-        builder.append('\n');
-        builder.append('U');
-        builder.append(lineU);
-        builder.append('\n');
-        builder.append('W');
-        builder.append(lineW);
-        builder.append('\n');
-        return builder.toString();
+        Model model = ModelFactory.createDefaultModel();
+
+        return model;
     }
 }
