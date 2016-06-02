@@ -16,6 +16,8 @@ class Twitter7ResultCollector implements FutureCallback<TwitterModelWrapper> {
 
     private static final Logger LOGGER = LogManager.getLogger(Twitter7ResultCollector.class);
 
+    private static final String WRITE_LANG = "TURTLE";
+
     private TwitterModelWrapper currentModel = new TwitterModelWrapper();
 
     private long modelMaxSize;
@@ -50,7 +52,7 @@ class Twitter7ResultCollector implements FutureCallback<TwitterModelWrapper> {
         LOGGER.info("Writing result model {}.", this.currentModel);
 
         try (Writer writer = new BufferedWriter(new OutputStreamWriter(new FileOutputStream("C:/Git/TWIG/RDF/tmp.rdf")))) {
-            this.currentModel.model.write(writer, "TURTLE");
+            this.currentModel.model.write(writer, WRITE_LANG);
             writer.flush();
         } catch (IOException e) {
             LOGGER.error(e.getMessage());
