@@ -21,9 +21,9 @@ import java.util.function.Supplier;
 /**
  * This class reads a file that contains twitter7 data block-wise.
  * Each block must be formatted by following regex:<br/>
- *      {T .*[\n]+<br/>
- *      U .*[\n]+<br/>
- *      W .*[\n]}+}*<br/>
+ *      <ul><li>{T .*[\n]+
+ *      U .*[\n]+
+ *      W .*[\n]}+}*</li></ul>
  * Blocks that do not match this criteria will be skipped.
  *
  * @param <T> Type of the parsing result.

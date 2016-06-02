@@ -8,7 +8,7 @@ import org.apache.logging.log4j.Logger;
 
 /**
  * This class will handle parsed models. It will do so by collecting results of {@link com.google.common.util.concurrent.ListenableFuture} to which this collector has been added.
- * Results will be merged into one {@link Model} that is then handed to {@link Twitter7ModelWriter}.
+ * Results will be merged into one {@link TwitterModelWrapper} that is then handed to {@link Twitter7ModelWriter}.
  * @author Felix Linker
  */
 public class Twitter7ResultCollector implements FutureCallback<TwitterModelWrapper> {
@@ -23,7 +23,7 @@ public class Twitter7ResultCollector implements FutureCallback<TwitterModelWrapp
 
     /**
      * Creates a new instance and sets class variables.
-     * @param modelMaxSize Max size of a {@link Model} to contain. If this size is exceeded by a {@link Model} it will be written into a file.
+     * @param modelMaxSize Max size of a {@link TwitterModelWrapper#model} to contain. If this size is exceeded by a {@link TwitterModelWrapper#model} it will be written into a file.
      */
     public Twitter7ResultCollector(long modelMaxSize) {
         this.modelMaxSize = modelMaxSize;
