@@ -2,13 +2,14 @@ package org.aksw.twig.parsing;
 
 import com.google.common.util.concurrent.FutureCallback;
 import org.aksw.twig.model.TwitterModelWrapper;
-import org.apache.jena.rdf.model.Model;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import java.io.*;
+
 /**
  * This class will handle parsed models. It will do so by collecting results of {@link com.google.common.util.concurrent.ListenableFuture} to which this collector has been added.
- * Results will be merged into one {@link TwitterModelWrapper} that is then handed to {@link Twitter7ModelWriter}.
+ * Results will be merged into one {@link TwitterModelWrapper} that is then printed into a file.
  * @author Felix Linker
  */
 public class Twitter7ResultCollector implements FutureCallback<TwitterModelWrapper> {
@@ -16,8 +17,6 @@ public class Twitter7ResultCollector implements FutureCallback<TwitterModelWrapp
     private static final Logger LOGGER = LogManager.getLogger(Twitter7ResultCollector.class);
 
     private TwitterModelWrapper currentModel = new TwitterModelWrapper();
-
-    private Twitter7ModelWriter writer = new Twitter7ModelWriter();
 
     private long modelMaxSize;
 
@@ -31,16 +30,35 @@ public class Twitter7ResultCollector implements FutureCallback<TwitterModelWrapp
 
     @Override
     public synchronized void onSuccess(TwitterModelWrapper result) {
+
+        LOGGER.info("Collected result model.");
+
         this.currentModel.model.add(result.model);
 
-        if (this.currentModel.model.size() >= modelMaxSize) {
-            writer.write(this.currentModel);
-            this.currentModel = new TwitterModelWrapper();
+        if (this.currentModel.model.size() >= this.modelMaxSize) {
+            writeModel();
         }
     }
 
     @Override
     public void onFailure(Throwable t) {
         LOGGER.error(t.getMessage());
+    }
+
+    public void writeModel() {
+
+        LOGGER.info("Writing result model {}.", this.currentModel);
+
+        Writer writer;
+        try {
+            writer = new BufferedWriter(new OutputStreamWriter(new FileOutputStream("C:/Git/TWIG/RDF/tmp.rdf")));
+        } catch (FileNotFoundException e) {
+            LOGGER.error(e.getMessage());
+            return;
+        }
+
+        this.currentModel.model.write(writer, "TURTLE");
+
+        this.currentModel = new TwitterModelWrapper();
     }
 }

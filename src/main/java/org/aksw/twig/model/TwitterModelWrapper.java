@@ -9,7 +9,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * Wraps a {@link Model} using TWIG ontology to create RDF-graphs that make use of this ontology.
+ * Wraps a {@link Model} using TWIG ontology to create RDF-graphs.
  */
 public class TwitterModelWrapper {
 
@@ -18,21 +18,12 @@ public class TwitterModelWrapper {
     private static final String FOAF_PREF = "foaf";
     private static final String TWIG_IRI = "http://aksw.org/twig";
     private static final String TWIG_PREF = "twig";
-    private static final String OWL_IRI = "http://www.w3.org/2002/07/owl";
-    private static final String OWL_PREF = "owl";
-    private static final String RDF_IRI = "http://www.w3.org/1999/02/22-rdf-syntax-ns";
-    private static final String RDF_PREF = "rdf";
-    private static final String RDFS_IRI = "http://www.w3.org/2000/01/rdf-schema";
-    private static final String RDFS_PREF = "rdfs";
 
     private static final Map<String, String> PREFIXES_MAPPING = new HashMap<>();
     static
     {
         PREFIXES_MAPPING.put(FOAF_PREF, FOAF_IRI);
         PREFIXES_MAPPING.put(TWIG_PREF, TWIG_IRI);
-        PREFIXES_MAPPING.put(OWL_IRI, OWL_PREF);
-        PREFIXES_MAPPING.put(RDF_IRI, RDF_PREF);
-        PREFIXES_MAPPING.put(RDFS_IRI, RDFS_PREF);
     }
 
     // RDF statement parts.

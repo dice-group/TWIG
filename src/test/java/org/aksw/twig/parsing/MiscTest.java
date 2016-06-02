@@ -10,19 +10,18 @@ import org.junit.Test;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * This class will only be used for small tests by author in order to test some jave constructs.
  */
 public class MiscTest {
 
-    private static final Logger LOGGER = LogManager.getLogger(MiscTest.class);
+    Logger LOGGER = LogManager.getLogger(MiscTest.class);
 
     @Test
     public void test() {
-        Model model = ModelFactory.createDefaultModel();
-        Literal stringLiteral = model.createTypedLiteral(LocalDateTime.from(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss").parse("2016-12-01 00:00:00")).toString(), XSDDatatype.XSDdateTime);
 
-        LOGGER.info(stringLiteral.getDatatypeURI());
     }
 }

@@ -112,6 +112,7 @@ public class Twitter7Reader<T> implements Runnable {
         } catch (IOException e) {
             LOGGER.error("Encountered IOException during file parsing.");
         }
+
         this.running = false;
     }
 
@@ -120,7 +121,9 @@ public class Twitter7Reader<T> implements Runnable {
      * @return Returns {@code true} if there is no file reading ongoing.
      */
     public boolean isFinished() {
-        return !this.running && this.unfinishedFutures.isEmpty();
+        synchronized (this.unfinishedFutures) {
+            return !this.running && this.unfinishedFutures.isEmpty();
+        }
     }
 
     /**
