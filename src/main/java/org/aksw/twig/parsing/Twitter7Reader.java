@@ -29,7 +29,7 @@ import java.util.function.Supplier;
  * @param <T> Type of the parsing result.
  * @author Felix Linker
  */
-public class Twitter7Reader<T> implements Runnable {
+class Twitter7Reader<T> {
 
     private static final Logger LOGGER = LogManager.getLogger(Twitter7Reader.class);
 
@@ -40,7 +40,7 @@ public class Twitter7Reader<T> implements Runnable {
     private Function<Triple<String, String, String>, Callable<T>> resultParser;
 
     /** Stores all futures that are unfinished. Futures will remove themselves from this collection. */
-    private Set<ListenableFuture<T>> unfinishedFutures;
+    private final Set<ListenableFuture<T>> unfinishedFutures = new HashSet<>();
 
     private boolean running = false;
 
@@ -52,7 +52,7 @@ public class Twitter7Reader<T> implements Runnable {
      * @throws IOException Can be thrown by errors during reader creation.
      * @throws NullPointerException Thrown if {@code callBackSupplier} or {@code resultParser} is {@code null}.
      */
-    public Twitter7Reader(
+    Twitter7Reader(
             File fileToParse,
             Supplier<FutureCallback<T>> callbackSupplier,
             Function<Triple<String, String, String>, Callable<T>> resultParser) throws IOException, NullPointerException {
@@ -66,29 +66,16 @@ public class Twitter7Reader<T> implements Runnable {
     }
 
     /**
-     * Initializes a file reader to given file and sets class variables.
-     * @param fileToParsePath File to parse.
-     * @param callbackSupplier Supplier for result consumers.
-     * @param resultParser Function to apply  a triple as twitter7 block reading result to a callable parser.
-     * @throws IOException Can be thrown by errors during reader creation.
-     * @throws NullPointerException Thrown if {@code callBackSupplier} or {@code resultParser} is {@code null}.
+     * Starts reading of the given file.
+     * @throws IllegalStateException Thrown if reader gets started twice.
      */
-    public Twitter7Reader(
-            String fileToParsePath,
-            Supplier<FutureCallback<T>> callbackSupplier,
-            Function<Triple<String, String, String>, Callable<T>> resultParser) throws IOException, NullPointerException {
-        this(new File(fileToParsePath), callbackSupplier, resultParser);
-    }
-
-
-    @Override
-    public void run() throws IllegalStateException {
+    void read() throws IllegalStateException {
         if (this.running) {
             throw new IllegalStateException();
         }
 
         this.running = true;
-        this.unfinishedFutures = new HashSet<>();
+        this.unfinishedFutures.clear();
         ListeningExecutorService service = MoreExecutors.listeningDecorator(Executors.newCachedThreadPool());
 
         try {
@@ -113,6 +100,10 @@ public class Twitter7Reader<T> implements Runnable {
             LOGGER.error("Encountered IOException during file parsing.");
         }
 
+        try {
+            this.fileReader.close();
+        } catch (IOException e) { }
+
         this.running = false;
     }
 
@@ -120,7 +111,7 @@ public class Twitter7Reader<T> implements Runnable {
      * Returns whether the reading of the file has finished or hasn't been started.
      * @return Returns {@code true} if there is no file reading ongoing.
      */
-    public boolean isFinished() {
+    boolean isFinished() {
         synchronized (this.unfinishedFutures) {
             return !this.running && this.unfinishedFutures.isEmpty();
         }
@@ -131,7 +122,7 @@ public class Twitter7Reader<T> implements Runnable {
      * @return Triple containing the three twitter7 data lines.
      * @throws IOException Thrown if exception occurs during file reading.
      */
-    protected Triple<String, String, String> readTwitter7Block() throws IOException {
+    Triple<String, String, String> readTwitter7Block() throws IOException {
 
         MutableTriple<String, String, String> triple = new MutableTriple<>();
         READ_STATE readState = START_STATE;
@@ -233,9 +224,9 @@ public class Twitter7Reader<T> implements Runnable {
      */
     private Consumer<String> triplePutLine(READ_STATE state, MutableTriple<String, String, String> triple) throws IllegalStateException {
         switch (state) {
-            case READ_T: return line -> triple.setLeft(line);
-            case READ_U: return line -> triple.setMiddle(line);
-            case READ_W: return line -> triple.setRight(line);
+            case READ_T: return triple::setLeft;
+            case READ_U: return triple::setMiddle;
+            case READ_W: return triple::setRight;
             default: throw new IllegalStateException();
         }
     }

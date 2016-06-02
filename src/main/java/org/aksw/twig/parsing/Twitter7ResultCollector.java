@@ -12,7 +12,7 @@ import java.io.*;
  * Results will be merged into one {@link TwitterModelWrapper} that is then printed into a file.
  * @author Felix Linker
  */
-public class Twitter7ResultCollector implements FutureCallback<TwitterModelWrapper> {
+class Twitter7ResultCollector implements FutureCallback<TwitterModelWrapper> {
 
     private static final Logger LOGGER = LogManager.getLogger(Twitter7ResultCollector.class);
 
@@ -24,7 +24,7 @@ public class Twitter7ResultCollector implements FutureCallback<TwitterModelWrapp
      * Creates a new instance and sets class variables.
      * @param modelMaxSize Max size of a {@link TwitterModelWrapper#model} to contain. If this size is exceeded by a {@link TwitterModelWrapper#model} it will be written into a file.
      */
-    public Twitter7ResultCollector(long modelMaxSize) {
+    Twitter7ResultCollector(long modelMaxSize) {
         this.modelMaxSize = modelMaxSize;
     }
 
@@ -45,19 +45,17 @@ public class Twitter7ResultCollector implements FutureCallback<TwitterModelWrapp
         LOGGER.error(t.getMessage());
     }
 
-    public void writeModel() {
+    void writeModel() {
 
         LOGGER.info("Writing result model {}.", this.currentModel);
 
-        Writer writer;
-        try {
-            writer = new BufferedWriter(new OutputStreamWriter(new FileOutputStream("C:/Git/TWIG/RDF/tmp.rdf")));
-        } catch (FileNotFoundException e) {
+        try (Writer writer = new BufferedWriter(new OutputStreamWriter(new FileOutputStream("C:/Git/TWIG/RDF/tmp.rdf")))) {
+            this.currentModel.model.write(writer, "TURTLE");
+            writer.flush();
+        } catch (IOException e) {
             LOGGER.error(e.getMessage());
             return;
         }
-
-        this.currentModel.model.write(writer, "TURTLE");
 
         this.currentModel = new TwitterModelWrapper();
     }

@@ -6,6 +6,7 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
+import java.io.File;
 import java.io.IOException;
 import java.util.HashSet;
 import java.util.Set;
@@ -17,7 +18,7 @@ public class Twitter7ReaderTest {
     private String brokenSampleDataPath;
     private String emptySampleDataPath;
 
-    private Set<String> allBlocks = new HashSet<>();
+    private final Set<String> allBlocks = new HashSet<>();
 
     @Before
     public void setSampleDataPath() {
@@ -32,7 +33,7 @@ public class Twitter7ReaderTest {
     @Test
     public void testBlockReading() {
         try {
-            Twitter7Reader<String> reader = new Twitter7Reader<>(sampleDataPath, Callback::new, Parser::new );
+            Twitter7Reader<String> reader = new Twitter7Reader<>(new File(sampleDataPath), Callback::new, Parser::new );
             Triple<String, String, String> triple = reader.readTwitter7Block();
             Assert.assertEquals("       2009-09-30 23:55:53", triple.getLeft());
             Assert.assertEquals("       http://twitter.com/andreavaleriac", triple.getMiddle());
@@ -53,7 +54,7 @@ public class Twitter7ReaderTest {
     @Test
     public void testBrokenBlockReading() {
         try {
-            Twitter7Reader<String> reader = new Twitter7Reader<>(brokenSampleDataPath, Callback::new, Parser::new );
+            Twitter7Reader<String> reader = new Twitter7Reader<>(new File(brokenSampleDataPath), Callback::new, Parser::new );
             Triple<String, String, String> triple = reader.readTwitter7Block();
             Assert.assertEquals("       2009-09-30 23:55:53", triple.getLeft());
             Assert.assertEquals("       http://twitter.com/elektrap2", triple.getMiddle());
@@ -69,7 +70,7 @@ public class Twitter7ReaderTest {
     @Test
     public void testEmptyBlockReading() {
         try {
-            Twitter7Reader<String> reader = new Twitter7Reader<>(emptySampleDataPath, Callback::new, Parser::new );
+            Twitter7Reader<String> reader = new Twitter7Reader<>(new File(emptySampleDataPath), Callback::new, Parser::new );
             Triple<String, String, String> triple = reader.readTwitter7Block();
             Assert.assertNull(triple);
 
@@ -106,8 +107,8 @@ public class Twitter7ReaderTest {
                 "W       I'm writing my first twitter!!\n");
 
         try {
-            Twitter7Reader<String> reader = new Twitter7Reader<>(sampleDataPath, Callback::new , Parser::new );
-            reader.run();
+            Twitter7Reader<String> reader = new Twitter7Reader<>(new File(sampleDataPath), Callback::new , Parser::new );
+            reader.read();
             while (!reader.isFinished());
             Assert.assertTrue(allBlocks.isEmpty());
         } catch (IOException e) {
@@ -134,18 +135,14 @@ public class Twitter7ReaderTest {
 
         private String result;
 
-        public Parser(Triple<String, String, String> parsingResult) {
-            StringBuilder resultBuilder = new StringBuilder();
-            resultBuilder.append('T');
-            resultBuilder.append(parsingResult.getLeft());
-            resultBuilder.append('\n');
-            resultBuilder.append('U');
-            resultBuilder.append(parsingResult.getMiddle());
-            resultBuilder.append('\n');
-            resultBuilder.append('W');
-            resultBuilder.append(parsingResult.getRight());
-            resultBuilder.append('\n');
-            this.result = resultBuilder.toString();
+        Parser(Triple<String, String, String> parsingResult) {
+            this.result = "T"
+                    .concat(parsingResult.getLeft())
+                    .concat("\nU")
+                    .concat(parsingResult.getMiddle())
+                    .concat("\nW")
+                    .concat(parsingResult.getRight())
+                    .concat("\n");
         }
 
         @Override
