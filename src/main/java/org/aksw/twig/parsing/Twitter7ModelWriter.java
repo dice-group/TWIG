@@ -1,10 +1,10 @@
 package org.aksw.twig.parsing;
 
-import org.apache.jena.rdf.model.Model;
+import org.aksw.twig.model.TwitterModelWrapper;
 
 public class Twitter7ModelWriter {
 
-    public void write(Model model) {
+    public void write(TwitterModelWrapper model) {
 
     }
 }

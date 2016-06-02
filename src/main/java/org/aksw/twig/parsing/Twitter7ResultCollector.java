@@ -1,6 +1,7 @@
 package org.aksw.twig.parsing;
 
 import com.google.common.util.concurrent.FutureCallback;
+import org.aksw.twig.model.TwitterModelWrapper;
 import org.apache.jena.rdf.model.Model;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -10,11 +11,11 @@ import org.apache.logging.log4j.Logger;
  * Results will be merged into one {@link Model} that is then handed to {@link Twitter7ModelWriter}.
  * @author Felix Linker
  */
-public class Twitter7ResultCollector implements FutureCallback<Model> {
+public class Twitter7ResultCollector implements FutureCallback<TwitterModelWrapper> {
 
     private static final Logger LOGGER = LogManager.getLogger(Twitter7ResultCollector.class);
 
-    private Model currentModel = Twitter7ModelFactory.createModel();
+    private TwitterModelWrapper currentModel = new TwitterModelWrapper();
 
     private Twitter7ModelWriter writer = new Twitter7ModelWriter();
 
@@ -29,12 +30,12 @@ public class Twitter7ResultCollector implements FutureCallback<Model> {
     }
 
     @Override
-    public synchronized void onSuccess(Model result) {
-        this.currentModel.add(result);
+    public synchronized void onSuccess(TwitterModelWrapper result) {
+        this.currentModel.model.add(result.model);
 
-        if (this.currentModel.size() >= modelMaxSize) {
+        if (this.currentModel.model.size() >= modelMaxSize) {
             writer.write(this.currentModel);
-            this.currentModel = Twitter7ModelFactory.createModel();
+            this.currentModel = new TwitterModelWrapper();
         }
     }
 

@@ -1,12 +1,12 @@
 package org.aksw.twig.parsing;
 
 import org.apache.commons.lang3.tuple.ImmutableTriple;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import org.junit.Assert;
 import org.junit.Test;
 
 public class Twitter7BlockParserTest {
+
+    // TODO: Test model creation
 
     /**
      * Tests parsing of twitter7 data information of one block.

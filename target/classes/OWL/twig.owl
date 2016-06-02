@@ -1,16 +1,17 @@
 <?xml version="1.0"?>
-<rdf:RDF xmlns="http://www.semanticweb.org/felix/ontologies/2016/4/twig#"
-     xml:base="http://www.semanticweb.org/felix/ontologies/2016/4/twig"
+<rdf:RDF xmlns="http://aksw.org/twig#"
+     xml:base="http://aksw.org/twig"
      xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
      xmlns:ns="http://www.w3.org/2003/06/sw-vocab-status/ns#"
      xmlns:owl="http://www.w3.org/2002/07/owl#"
      xmlns:xml="http://www.w3.org/XML/1998/namespace"
+     xmlns:twig="http://aksw.org/twig#"
      xmlns:xsd="http://www.w3.org/2001/XMLSchema#"
      xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#"
      xmlns:wot="http://xmlns.com/wot/0.1/"
      xmlns:foaf="http://xmlns.com/foaf/0.1/"
      xmlns:dc="http://purl.org/dc/elements/1.1/">
-    <owl:Ontology rdf:about="http://www.semanticweb.org/felix/ontologies/2016/4/twig">
+    <owl:Ontology rdf:about="http://aksw.org/twig">
         <owl:imports rdf:resource="http://xmlns.com/foaf/0.1/"/>
     </owl:Ontology>
     
@@ -27,21 +28,21 @@
     
 
 
-    <!-- http://www.semanticweb.org/felix/ontologies/2016/4/twig#mentions -->
+    <!-- http://aksw.org/twig#mentions -->
 
-    <owl:ObjectProperty rdf:about="http://www.semanticweb.org/felix/ontologies/2016/4/twig#mentions">
-        <rdfs:domain rdf:resource="http://www.semanticweb.org/felix/ontologies/2016/4/twig#Tweet"/>
-        <rdfs:range rdf:resource="http://www.semanticweb.org/felix/ontologies/2016/4/twig#OnlineTwitterAccount"/>
+    <owl:ObjectProperty rdf:about="http://aksw.org/twig#mentions">
+        <rdfs:domain rdf:resource="http://aksw.org/twig#Tweet"/>
+        <rdfs:range rdf:resource="http://aksw.org/twig#OnlineTwitterAccount"/>
     </owl:ObjectProperty>
     
 
 
-    <!-- http://www.semanticweb.org/felix/ontologies/2016/4/twig#sends -->
+    <!-- http://aksw.org/twig#sends -->
 
-    <owl:ObjectProperty rdf:about="http://www.semanticweb.org/felix/ontologies/2016/4/twig#sends">
+    <owl:ObjectProperty rdf:about="http://aksw.org/twig#sends">
         <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#InverseFunctionalProperty"/>
-        <rdfs:domain rdf:resource="http://www.semanticweb.org/felix/ontologies/2016/4/twig#OnlineTwitterAccount"/>
-        <rdfs:range rdf:resource="http://www.semanticweb.org/felix/ontologies/2016/4/twig#Tweet"/>
+        <rdfs:domain rdf:resource="http://aksw.org/twig#OnlineTwitterAccount"/>
+        <rdfs:range rdf:resource="http://aksw.org/twig#Tweet"/>
     </owl:ObjectProperty>
     
 
@@ -57,21 +58,21 @@
     
 
 
-    <!-- http://www.semanticweb.org/felix/ontologies/2016/4/twig#tweetContent -->
+    <!-- http://aksw.org/twig#tweetContent -->
 
-    <owl:DatatypeProperty rdf:about="http://www.semanticweb.org/felix/ontologies/2016/4/twig#tweetContent">
+    <owl:DatatypeProperty rdf:about="http://aksw.org/twig#tweetContent">
         <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#FunctionalProperty"/>
-        <rdfs:domain rdf:resource="http://www.semanticweb.org/felix/ontologies/2016/4/twig#Tweet"/>
+        <rdfs:domain rdf:resource="http://aksw.org/twig#Tweet"/>
         <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#string"/>
     </owl:DatatypeProperty>
     
 
 
-    <!-- http://www.semanticweb.org/felix/ontologies/2016/4/twig#tweetTime -->
+    <!-- http://aksw.org/twig#tweetTime -->
 
-    <owl:DatatypeProperty rdf:about="http://www.semanticweb.org/felix/ontologies/2016/4/twig#tweetTime">
+    <owl:DatatypeProperty rdf:about="http://aksw.org/twig#tweetTime">
         <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#FunctionalProperty"/>
-        <rdfs:domain rdf:resource="http://www.semanticweb.org/felix/ontologies/2016/4/twig#Tweet"/>
+        <rdfs:domain rdf:resource="http://aksw.org/twig#Tweet"/>
         <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#dateTime"/>
     </owl:DatatypeProperty>
     
@@ -88,36 +89,25 @@
     
 
 
-    <!-- http://www.semanticweb.org/felix/ontologies/2016/4/twig#OnlineTwitterAccount -->
+    <!-- http://aksw.org/twig#OnlineTwitterAccount -->
 
-    <owl:Class rdf:about="http://www.semanticweb.org/felix/ontologies/2016/4/twig#OnlineTwitterAccount">
-        <owl:equivalentClass>
-            <owl:Class>
-                <owl:intersectionOf rdf:parseType="Collection">
-                    <rdf:Description rdf:about="http://xmlns.com/foaf/0.1/OnlineAccount"/>
-                    <owl:Restriction>
-                        <owl:onProperty rdf:resource="http://xmlns.com/foaf/0.1/accountServiceHomepage"/>
-                        <owl:hasValue rdf:resource="http://www.semanticweb.org/felix/ontologies/2016/4/twig#Twitter"/>
-                    </owl:Restriction>
-                </owl:intersectionOf>
-            </owl:Class>
-        </owl:equivalentClass>
+    <owl:Class rdf:about="http://aksw.org/twig#OnlineTwitterAccount">
         <rdfs:subClassOf rdf:resource="http://xmlns.com/foaf/0.1/OnlineAccount"/>
     </owl:Class>
     
 
 
-    <!-- http://www.semanticweb.org/felix/ontologies/2016/4/twig#SocialNetwork -->
+    <!-- http://aksw.org/twig#SocialNetwork -->
 
-    <owl:Class rdf:about="http://www.semanticweb.org/felix/ontologies/2016/4/twig#SocialNetwork">
+    <owl:Class rdf:about="http://aksw.org/twig#SocialNetwork">
         <rdfs:subClassOf rdf:resource="http://xmlns.com/foaf/0.1/Document"/>
     </owl:Class>
     
 
 
-    <!-- http://www.semanticweb.org/felix/ontologies/2016/4/twig#Tweet -->
+    <!-- http://aksw.org/twig#Tweet -->
 
-    <owl:Class rdf:about="http://www.semanticweb.org/felix/ontologies/2016/4/twig#Tweet"/>
+    <owl:Class rdf:about="http://aksw.org/twig#Tweet"/>
     
 
 
@@ -132,10 +122,10 @@
     
 
 
-    <!-- http://www.semanticweb.org/felix/ontologies/2016/4/twig#Twitter -->
+    <!-- http://aksw.org/twig#Twitter -->
 
-    <owl:NamedIndividual rdf:about="http://www.semanticweb.org/felix/ontologies/2016/4/twig#Twitter">
-        <rdf:type rdf:resource="http://www.semanticweb.org/felix/ontologies/2016/4/twig#SocialNetwork"/>
+    <owl:NamedIndividual rdf:about="http://aksw.org/twig#Twitter">
+        <rdf:type rdf:resource="http://aksw.org/twig#SocialNetwork"/>
     </owl:NamedIndividual>
 </rdf:RDF>
 

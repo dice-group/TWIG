@@ -2,9 +2,6 @@ package org.aksw.twig.parsing;
 
 import com.google.common.util.concurrent.FutureCallback;
 import org.apache.commons.lang3.tuple.Triple;
-import org.apache.jena.rdf.model.Model;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -13,7 +10,6 @@ import java.io.IOException;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.concurrent.Callable;
-import java.util.concurrent.ConcurrentSkipListSet;
 
 public class Twitter7ReaderTest {
 

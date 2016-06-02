@@ -1,6 +1,6 @@
 package org.aksw.twig.parsing;
 
-import org.apache.jena.rdf.model.Model;
+import org.aksw.twig.model.TwitterModelWrapper;
 
 import java.io.File;
 import java.io.IOException;
@@ -29,6 +29,6 @@ public final class Twitter7Parser {
      */
     public static void parseFile(File file) throws IOException {
         Twitter7ResultCollector collector = new Twitter7ResultCollector(MODEL_MAX_SIZE);
-        Twitter7Reader<Model> reader = new Twitter7Reader<>(file, () -> collector, Twitter7BlockParser::new);
+        Twitter7Reader<TwitterModelWrapper> reader = new Twitter7Reader<>(file, () -> collector, Twitter7BlockParser::new);
     }
 }

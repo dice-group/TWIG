@@ -1,7 +1,7 @@
 package org.aksw.twig.parsing;
 
+import org.aksw.twig.model.TwitterModelWrapper;
 import org.apache.commons.lang3.tuple.Triple;
-import org.apache.jena.rdf.model.Model;
 
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -9,17 +9,23 @@ import java.time.DateTimeException;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Arrays;
+import java.util.Collection;
+import java.util.LinkedList;
 import java.util.concurrent.Callable;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * Parses a {@link org.apache.jena.rdf.model.Model} from a twitter7 block triple.
  * @author Felix Linker
  */
-public class Twitter7BlockParser implements Callable<Model> {
+public class Twitter7BlockParser implements Callable<TwitterModelWrapper> {
 
     private static final DateTimeFormatter DATE_TIME_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
 
     private static final String TWITTER_AUTHORITY = "twitter.com";
+
+    private static final Pattern MENTIONS_PATTERN = Pattern.compile("@([^ .]*)");
 
     /** T line of the twitter7 block. */
     private String lineT;
@@ -55,6 +61,9 @@ public class Twitter7BlockParser implements Callable<Model> {
     /** Parsed message content from W line. */
     private String messageContent;
 
+    /** Parsed '@' twitter username mentions from message content. */
+    private Collection<String> mentions = new LinkedList<>();
+
     /**
      * Getter to parsed message content.
      * @return Message content.
@@ -74,7 +83,7 @@ public class Twitter7BlockParser implements Callable<Model> {
     }
 
     @Override
-    public Model call() throws Twitter7BlockParseException {
+    public TwitterModelWrapper call() throws Twitter7BlockParseException {
 
         // Parse date and time
         try {
@@ -105,7 +114,13 @@ public class Twitter7BlockParser implements Callable<Model> {
         // Parse message content
         this.messageContent = this.lineW.trim();
 
-        Model model = Twitter7ModelFactory.createModel();
+        Matcher mentionsMatcher = MENTIONS_PATTERN.matcher(this.messageContent);
+        while (mentionsMatcher.find()) {
+            this.mentions.add(mentionsMatcher.group());
+        }
+
+        TwitterModelWrapper model = new TwitterModelWrapper();
+        model.addTweet(this.twitterUserName, this.messageContent, this.messageDateTime, this.mentions);
 
         return model;
     }
