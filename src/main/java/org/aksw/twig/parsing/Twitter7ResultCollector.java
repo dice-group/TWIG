@@ -10,15 +10,18 @@ import java.io.*;
 /**
  * This class will handle parsed models. It will do so by collecting results of {@link com.google.common.util.concurrent.ListenableFuture} to which this collector has been added.
  * Results will be merged into one {@link TwitterModelWrapper} that is then printed into a file.
+ * Language of printed results will be {@link #WRITE_LANG}.
  * @author Felix Linker
  */
 class Twitter7ResultCollector implements FutureCallback<TwitterModelWrapper> {
 
     private static final Logger LOGGER = LogManager.getLogger(Twitter7ResultCollector.class);
 
-    private static final String WRITE_LANG = "TURTLE";
+    public static final String WRITE_LANG = "TURTLE";
 
-    private static final String FILE_TYPE = ".rdf";
+    public static final String FILE_TYPE = ".rdf";
+
+    public static final int WRITE_ATTEMPTS = 10;
 
     private TwitterModelWrapper currentModel = new TwitterModelWrapper();
 
@@ -30,13 +33,17 @@ class Twitter7ResultCollector implements FutureCallback<TwitterModelWrapper> {
 
     private String fileName;
 
-    private static final int WRITE_ATTEMPTS = 10;
-
     /**
      * Creates a new instance and sets class variables.
      * @param modelMaxSize Max size of a {@link TwitterModelWrapper#model} to contain. If this size is exceeded by a {@link TwitterModelWrapper#model} it will be written into a file.
+     * @param outputDirectory Directory to write results into.
+     * @param fileName Base file name of result files. This filename will be accompanied by an ID and a file type ({@link #FILE_TYPE}).
      */
     Twitter7ResultCollector(long modelMaxSize, File outputDirectory, String fileName) {
+        if (!outputDirectory.isDirectory()) {
+            throw new IllegalArgumentException();
+        }
+
         this.modelMaxSize = modelMaxSize;
         this.outputDirectory = outputDirectory;
         this.fileName = fileName;
@@ -59,7 +66,10 @@ class Twitter7ResultCollector implements FutureCallback<TwitterModelWrapper> {
         LOGGER.error(t.getMessage());
     }
 
-    void writeModel() {
+    /**
+     * Writes the current collected model into a file.
+     */
+    synchronized void writeModel() {
 
         LOGGER.info("Writing result model {}.", this.currentModel);
 
@@ -74,6 +84,12 @@ class Twitter7ResultCollector implements FutureCallback<TwitterModelWrapper> {
         this.currentModel = new TwitterModelWrapper();
     }
 
+    /**
+     * Creates a new file to write into.
+     * If creation of a new file fails, it will try {@link #WRITE_ATTEMPTS} times to create a new one.
+     * @return New file.
+     * @throws IOException Thrown if no new file could be created.
+     */
     private File createNewWriteFile() throws IOException {
 
         int attempt = 0;
@@ -106,6 +122,10 @@ class Twitter7ResultCollector implements FutureCallback<TwitterModelWrapper> {
         return writeFile;
     }
 
+    /**
+     * Creates a new file without any checks.
+     * @return New file.
+     */
     private File nextFile() {
         return new File(outputDirectory, this.fileName.concat("_").concat(Integer.toString(id++)).concat(FILE_TYPE));
     }
