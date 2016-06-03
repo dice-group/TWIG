@@ -33,16 +33,13 @@ class Twitter7Reader<T> {
 
     private static final Logger LOGGER = LogManager.getLogger(Twitter7Reader.class);
 
-    private BufferedReader fileReader;
+    private File fileToParse;
 
     private Supplier<FutureCallback<T>> callbackSupplier;
 
     private Function<Triple<String, String, String>, Callable<T>> resultParser;
 
-    /** Stores all futures that are unfinished. Futures will remove themselves from this collection. */
-    private final Set<ListenableFuture<T>> unfinishedFutures = new HashSet<>();
-
-    private boolean running = false;
+    private final ListeningExecutorService service = MoreExecutors.listeningDecorator(Executors.newCachedThreadPool());
 
     /**
      * Initializes a file reader to given file and sets class variables.
@@ -60,51 +57,33 @@ class Twitter7Reader<T> {
             throw new NullPointerException();
         }
 
-        this.fileReader = new BufferedReader(new FileReader(fileToParse));
+        this.fileToParse = fileToParse;
         this.callbackSupplier = callbackSupplier;
         this.resultParser = resultParser;
     }
 
     /**
-     * Starts reading of the given file.
+     * Starts reading of the given file. If you want to read the same file twice you cannot do this with the same object.
      * @throws IllegalStateException Thrown if reader gets started twice.
      */
     void read() throws IllegalStateException {
-        if (this.running) {
+        if (this.service.isShutdown()) {
             throw new IllegalStateException();
         }
 
-        this.running = true;
-        this.unfinishedFutures.clear();
-        ListeningExecutorService service = MoreExecutors.listeningDecorator(Executors.newCachedThreadPool());
-
-        try {
+        try (BufferedReader fileReader = new BufferedReader(new FileReader(this.fileToParse))) {
 
             Triple<String, String, String> twitter7Block;
-            while ((twitter7Block = this.readTwitter7Block()) != null) {
+            while ((twitter7Block = this.readTwitter7Block(fileReader)) != null) {
                 ListenableFuture<T> fut = service.submit(this.resultParser.apply(twitter7Block));
                 Futures.addCallback(fut, this.callbackSupplier.get());
-
-                // Track futures
-                synchronized (this.unfinishedFutures) {
-                    this.unfinishedFutures.add(fut);
-                    fut.addListener(() -> {
-                        synchronized (this.unfinishedFutures) {
-                            this.unfinishedFutures.remove(fut);
-                        }
-                    }, service);
-                }
             }
 
         } catch (IOException e) {
             LOGGER.error("Encountered IOException during file parsing.");
         }
 
-        try {
-            this.fileReader.close();
-        } catch (IOException e) { }
-
-        this.running = false;
+        this.service.shutdown();
     }
 
     /**
@@ -112,9 +91,7 @@ class Twitter7Reader<T> {
      * @return Returns {@code true} if there is no file reading ongoing.
      */
     boolean isFinished() {
-        synchronized (this.unfinishedFutures) {
-            return !this.running && this.unfinishedFutures.isEmpty();
-        }
+        return this.service.isTerminated();
     }
 
     /**
@@ -122,7 +99,7 @@ class Twitter7Reader<T> {
      * @return Triple containing the three twitter7 data lines.
      * @throws IOException Thrown if exception occurs during file reading.
      */
-    Triple<String, String, String> readTwitter7Block() throws IOException {
+    Triple<String, String, String> readTwitter7Block(BufferedReader fileReader) throws IOException {
 
         MutableTriple<String, String, String> triple = new MutableTriple<>();
         READ_STATE readState = START_STATE;
@@ -131,7 +108,7 @@ class Twitter7Reader<T> {
 
             // Skip empty lines
             String line;
-            while ((line = this.fileReader.readLine()) != null && line.isEmpty());
+            while ((line = fileReader.readLine()) != null && line.isEmpty());
             if (line == null) {
                 return null;
             }
@@ -145,12 +122,12 @@ class Twitter7Reader<T> {
                 LOGGER.error("Encountered malformed block in twitter7 data.");
 
                 // Skip non-empty lines
-                while ((line = this.fileReader.readLine()) != null && !line.isEmpty());
+                while ((line = fileReader.readLine()) != null && !line.isEmpty());
                 if (line == null) {
                     return null;
                 }
 
-                return readTwitter7Block();
+                return readTwitter7Block(fileReader);
             }
         }
 
@@ -158,7 +135,7 @@ class Twitter7Reader<T> {
     }
 
     /**
-     * All states during one invoke of {@link #readTwitter7Block()}.
+     * All states during one invoke of {@link #readingFinished(READ_STATE)}.
      */
     private enum READ_STATE {
         READ_T,
@@ -168,7 +145,7 @@ class Twitter7Reader<T> {
     }
 
     /**
-     * Start state of {@link #readTwitter7Block()}.
+     * Start state of {@link #readingFinished(READ_STATE)}.
      */
     private static final READ_STATE START_STATE = READ_STATE.READ_T;
 

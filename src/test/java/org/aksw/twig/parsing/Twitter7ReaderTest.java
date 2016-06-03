@@ -6,7 +6,9 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
+import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileReader;
 import java.io.IOException;
 import java.util.HashSet;
 import java.util.Set;
@@ -32,14 +34,15 @@ public class Twitter7ReaderTest {
      */
     @Test
     public void testBlockReading() {
-        try {
-            Twitter7Reader<String> reader = new Twitter7Reader<>(new File(sampleDataPath), Callback::new, Parser::new );
-            Triple<String, String, String> triple = reader.readTwitter7Block();
+        File f = new File(sampleDataPath);
+        try (BufferedReader fileReader = new BufferedReader(new FileReader(f))) {
+            Twitter7Reader<String> reader = new Twitter7Reader<>(f, Callback::new, Parser::new );
+            Triple<String, String, String> triple = reader.readTwitter7Block(fileReader);
             Assert.assertEquals("       2009-09-30 23:55:53", triple.getLeft());
             Assert.assertEquals("       http://twitter.com/andreavaleriac", triple.getMiddle());
             Assert.assertEquals("       I'm starting to feel really sick, hope is not the S**** flu! (That's the new S-word)", triple.getRight());
 
-            triple = reader.readTwitter7Block();
+            triple = reader.readTwitter7Block(fileReader);
             Assert.assertEquals("       2009-09-30 23:55:53", triple.getLeft());
             Assert.assertEquals("       http://twitter.com/beautyismynam3", triple.getMiddle());
             Assert.assertEquals("       soooo i got sum advice from the 1 i love most...he goes drop all those lame ass birds uno unot like them...lol here it goes", triple.getRight());
@@ -53,9 +56,10 @@ public class Twitter7ReaderTest {
      */
     @Test
     public void testBrokenBlockReading() {
-        try {
-            Twitter7Reader<String> reader = new Twitter7Reader<>(new File(brokenSampleDataPath), Callback::new, Parser::new );
-            Triple<String, String, String> triple = reader.readTwitter7Block();
+        File f = new File(brokenSampleDataPath);
+        try (BufferedReader fileReader = new BufferedReader(new FileReader(f))) {
+            Twitter7Reader<String> reader = new Twitter7Reader<>(f, Callback::new, Parser::new );
+            Triple<String, String, String> triple = reader.readTwitter7Block(fileReader);
             Assert.assertEquals("       2009-09-30 23:55:53", triple.getLeft());
             Assert.assertEquals("       http://twitter.com/elektrap2", triple.getMiddle());
             Assert.assertEquals("       I'm writing my first twitter!!", triple.getRight());
@@ -69,9 +73,10 @@ public class Twitter7ReaderTest {
      */
     @Test
     public void testEmptyBlockReading() {
-        try {
-            Twitter7Reader<String> reader = new Twitter7Reader<>(new File(emptySampleDataPath), Callback::new, Parser::new );
-            Triple<String, String, String> triple = reader.readTwitter7Block();
+        File f = new File(emptySampleDataPath);
+        try (BufferedReader fileReader = new BufferedReader(new FileReader(f))) {
+            Twitter7Reader<String> reader = new Twitter7Reader<>(f, Callback::new, Parser::new );
+            Triple<String, String, String> triple = reader.readTwitter7Block(fileReader);
             Assert.assertNull(triple);
 
         } catch (IOException e) {
