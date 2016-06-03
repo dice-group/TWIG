@@ -9,11 +9,13 @@ import java.io.IOException;
 import java.nio.file.DirectoryStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Set;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 /**
@@ -28,17 +30,25 @@ public final class Twitter7Parser implements Runnable {
 
     private File fileToParse;
 
+    private File outputDirectory;
+
     /**
      * Creates a new instance setting class variables.
      * @param fileToParse File to be parsed by the parser.
+     * @param outputDirectory Output directory for parsing results.
      */
-    public Twitter7Parser(File fileToParse) {
+    public Twitter7Parser(File fileToParse, File outputDirectory) {
         this.fileToParse = fileToParse;
+        this.outputDirectory = outputDirectory;
     }
 
     @Override
     public void run() {
-        Twitter7ResultCollector collector = new Twitter7ResultCollector(MODEL_MAX_SIZE);
+        String fileName = this.fileToParse.getName();
+        int typeIndex = fileName.lastIndexOf('.');
+        fileName = fileName.substring(0, typeIndex);
+
+        Twitter7ResultCollector collector = new Twitter7ResultCollector(MODEL_MAX_SIZE, this.outputDirectory, fileName);
         Twitter7Reader<TwitterModelWrapper> reader;
         try {
             reader = new Twitter7Reader<>(fileToParse, () -> collector, Twitter7BlockParser::new);
@@ -57,9 +67,6 @@ public final class Twitter7Parser implements Runnable {
 
         collector.writeModel();
     }
-
-    private static final Pattern ARG_PREF_IN = Pattern.compile("--in=(.*)");
-    private static final Pattern ARG_PREF_REC= Pattern.compile("--rec=(.*)");
 
     /**
      * Gets all files from a directory.
@@ -89,40 +96,61 @@ public final class Twitter7Parser implements Runnable {
         return fileStream;
     }
 
+    private static final Pattern ARG_PREF_IN = Pattern.compile("--in=(.*)");
+    private static final Pattern ARG_PREF_REC = Pattern.compile("--rec=(.*)");
+    private static final Pattern ARG_PREF_OUT = Pattern.compile("--out=(.*)");
+
     /**
-     * Parses one or more files according to twitter7 format. Following arguments in arbitrary order can be passed:
+     * Parses one or more files according to twitter7 format.
+     * Following argument must be stated first:
      * <ul>
-     *     <li>{@code --in=FOLDER} parses all files in given folder</li>
-     *     <li>{@code --rec=FOLDER} parses all files in given folder including all sub-folders</li>
+     *     <li>{@code --out=DIRECTORY} will write parse results in stated output directory.</li>
+     * </ul>
+     * After that following arguments in arbitrary order can be passed:
+     * <ul>
+     *     <li>{@code --in=DIRECTORY} parses all files in given directory</li>
+     *     <li>{@code --rec=DIRECTORY} parses all files in given directory including all sub-directories</li>
      *     <li>{@code PATH} parses given file</li>
      * </ul>
+     * You should not parse files with the same name from different directories as that could mess up the output.
      * @param args One or more arguments as specified above.
      * @see Twitter7Reader
      */
     public static void main(String[] args) {
 
-        if (args.length == 0) {
-            LOGGER.info("No arguments given.");
+        if (args.length < 2) {
+            LOGGER.error("Insufficient arguments given.");
             return;
         }
 
+        Matcher outDirectoryMatcher = ARG_PREF_OUT.matcher(args[0]);
+        File outputDirectory = outDirectoryMatcher.find() ? new File(outDirectoryMatcher.group(1)) : null;
+
+        if (outputDirectory == null || !outputDirectory.isDirectory()) {
+            LOGGER.error("No --out argument given.");
+        }
+
+        // Get all files to parse
+        Set<File> filesToParse = new HashSet<>();
+        for (int i = 1; i < args.length; i++) {
+            Matcher matcher = ARG_PREF_IN.matcher(args[i]);
+            if (matcher.find()) {
+                filesToParse.addAll(getFiles(new File(matcher.group(1)), true).collect(Collectors.toList()));
+                continue;
+            }
+
+            matcher = ARG_PREF_REC.matcher(args[i]);
+            if (matcher.find()) {
+                filesToParse.addAll(getFiles(new File(matcher.group(1)), false).collect(Collectors.toList()));
+                continue;
+            }
+
+            filesToParse.add(new File(args[i]));
+        }
+
+        // Start parsing
         final ExecutorService service = Executors.newCachedThreadPool();
-        Arrays.stream(args)
-                .flatMap(arg -> {
-
-                    Matcher matcher = ARG_PREF_IN.matcher(arg);
-                    if (matcher.find()) {
-                        return getFiles(new File(matcher.group()), true);
-                    }
-
-                    matcher = ARG_PREF_REC.matcher(arg);
-                    if (matcher.find()) {
-                        return getFiles(new File(matcher.group()), false);
-                    }
-
-                    return Stream.of(new File(arg));
-                })
-                .forEach(file -> service.execute(new Twitter7Parser(file)));
+        filesToParse.stream().forEach(file -> service.execute(new Twitter7Parser(file, outputDirectory)));
         service.shutdown();
     }
 }

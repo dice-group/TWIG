@@ -1,0 +1,10 @@
+@prefix twig:  <http://aksw.org/twig> .
+@prefix foaf:  <http://xmlns.com/foaf/0.1/> .
+
+<twig:elektrap2_2009-09-30T23-55-53>
+        <rdf:type>           <owl:NamedIndividual> , <twig:Tweet> ;
+        <twig:tweetContent>  "I'm writing my first twitter!!" ;
+        <twig:tweetTime>     "2009-09-30T23:55:53"^^<http://www.w3.org/2001/XMLSchema#dateTime> .
+
+<twig:elektrap2>  <rdf:type>  <owl:NamedIndividual> , <twig:OnlineTwitterAccount> ;
+        <twig:sends>  <twig:elektrap2_2009-09-30T23-55-53> .
