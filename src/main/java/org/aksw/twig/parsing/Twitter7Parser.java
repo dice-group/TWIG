@@ -106,7 +106,7 @@ public final class Twitter7Parser implements Runnable {
             return;
         }
 
-        ExecutorService service = Executors.newCachedThreadPool();
+        final ExecutorService service = Executors.newCachedThreadPool();
         Arrays.stream(args)
                 .flatMap(arg -> {
 
@@ -123,5 +123,6 @@ public final class Twitter7Parser implements Runnable {
                     return Stream.of(new File(arg));
                 })
                 .forEach(file -> service.execute(new Twitter7Parser(file)));
+        service.shutdown();
     }
 }

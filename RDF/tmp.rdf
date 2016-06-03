@@ -1,13 +1,13 @@
 @prefix twig:  <http://aksw.org/twig> .
 @prefix foaf:  <http://xmlns.com/foaf/0.1/> .
 
+<twig:burkehramsey>  <rdf:type>  <owl:NamedIndividual> , <twig:OnlineTwitterAccount> ;
+        <twig:sends>  <twig:burkehramsey_2009-09-30T23-55-53> .
+
 <twig:beautyismynam3_2009-09-30T23-55-53>
         <rdf:type>           <owl:NamedIndividual> , <twig:Tweet> ;
         <twig:tweetContent>  "soooo i got sum advice from the 1 i love most...he goes drop all those lame ass birds uno unot like them...lol here it goes" ;
         <twig:tweetTime>     "2009-09-30T23:55:53"^^<http://www.w3.org/2001/XMLSchema#dateTime> .
-
-<twig:burkehramsey>  <rdf:type>  <owl:NamedIndividual> , <twig:OnlineTwitterAccount> ;
-        <twig:sends>  <twig:burkehramsey_2009-09-30T23-55-53> .
 
 <twig:bhightower1_2009-09-30T23-55-53>
         <rdf:type>           <owl:NamedIndividual> , <twig:Tweet> ;
