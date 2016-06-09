@@ -1,4 +1,4 @@
-package org.aksw.twig.performance;
+package org.aksw.twig.automaton.learning;
 
 import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.logging.log4j.Logger;
@@ -34,7 +34,7 @@ public class MapPerformance {
             mapToTest.keySet().stream()
                     .forEach(key -> mapToTest.get(key));
 
-            LOGGER.info("Map test needed {} milliseconds to complete. Map was of type {}.", System.currentTimeMillis() - start, mapToTest.getClass().getName());
+            LOGGER.info("Map test took {} milliseconds to complete. Map was of type {}.", System.currentTimeMillis() - start, mapToTest.getClass().getName());
         }
     }
 
