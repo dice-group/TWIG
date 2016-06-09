@@ -1,10 +1,12 @@
 package org.aksw.twig.automaton.learning;
 
 import org.apache.commons.lang3.tuple.MutablePair;
+import org.apache.commons.lang3.tuple.Pair;
 
 import java.io.*;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 /**
@@ -26,6 +28,14 @@ public class WordMatrix implements IWordMatrix, Serializable {
         Map<String, Long> columns = mapping.getRight();
         Long val = columns.get(successor);
         columns.put(successor, val == null ? 1 : ++val);
+    }
+
+    /**
+     * Adds all pairs. Value of {@link Pair#getLeft()} will be taken as predecessor, value of {@link Pair#getRight()} will be taken as successor.
+     * @param iterable Pairs to add.
+     */
+    public void putAll(Iterable<Pair<String, String>> iterable) {
+        iterable.forEach(pair -> this.put(pair.getLeft(), pair.getRight()));
     }
 
     @Override
@@ -51,6 +61,11 @@ public class WordMatrix implements IWordMatrix, Serializable {
                         entry -> entry.getKey(),
                         entry -> (double) entry.getValue() / (double) size
                 ));
+    }
+
+    @Override
+    public Set<String> getPredecessors() {
+        return matrix.keySet();
     }
 
     @Override

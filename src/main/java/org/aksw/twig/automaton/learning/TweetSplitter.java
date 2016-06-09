@@ -9,6 +9,7 @@ import java.util.stream.Stream;
 /**
  * This class splits tweets in pairs of words succeeding each other. A pair of predecessor and successor is determined by following regex:<br/>
  * {@code ([a-zA-Z0-9'@]+)[ ,-]+([a-zA-Z0-9'@]+)}<br/><br/>
+ *
  * The first group is succeeded by the second. Words can only succeed one another if they are in the same sentence. Sentences are delimited by '.', '!' or '?'.<br/>
  * If the empty string is succeeded by a word that means the word starts the sentence.
  * If a word is succeeded by the empty string that means the word ends the sentence.
@@ -55,7 +56,7 @@ public class TweetSplitter implements Iterable<Pair<String, String>> {
 
     /**
      * Returns a stream to all pairs of predecessors and successors.
-     * @return Stream to pairs of predecessors and successors. If {@link #splitTweet(String)} hasn't been invoked the stream will be empty.
+     * @return Stream to pairs of predecessors and successors. If no tweet was split the stream will be empty.
      */
     public Stream<Pair<String, String>> getSplit() {
         return this.split == null ? Stream.empty() : this.split.stream();
