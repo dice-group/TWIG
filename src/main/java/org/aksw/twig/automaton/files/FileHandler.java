@@ -20,7 +20,8 @@ import java.util.stream.Stream;
 
 
 /**
- * Holds static functions for fetching files.
+ * An instance of this class handles creation of new files.
+ * It also has some static functions that are generally useful for file handling.
  */
 public class FileHandler {
 
@@ -28,7 +29,7 @@ public class FileHandler {
 
     private int id = 0;
 
-    private int maxAttempts = 10;
+    private int maxAttempts = 100;
 
     private File outputDirectory;
 
@@ -36,20 +37,33 @@ public class FileHandler {
 
     private String fileType;
 
+    /**
+     * Creates a new file handler.
+     * @param outputDirectory Directory to output the files into.
+     * @param fileName Basic file name.
+     * @param fileType File type (including '.').
+     */
     public FileHandler(File outputDirectory, String fileName, String fileType) {
         this.outputDirectory = outputDirectory;
         this.fileName = fileName;
         this.fileType = fileType;
     }
 
+    /**
+     * Creates a new file handler.
+     * @param outputDirectory Directory to output the files into.
+     * @param fileName Basic file name.
+     * @param fileType File type (including '.').
+     * @param maxAttempts How many times should the file handler attempt to create a new file?
+     */
     public FileHandler(File outputDirectory, String fileName, String fileType, int maxAttempts) {
         this(outputDirectory, fileName, fileType);
         this.maxAttempts = maxAttempts;
     }
 
     /**
-     * Creates a new file to write into.
-     * If creation of a new file fails, it will try {@link #WRITE_ATTEMPTS} times to create a new one.
+     * Creates a new file to write into. File will be name like: {@code NAME_NUMBER.TYPE}.
+     * If creation of a new file fails, it will try {@link #maxAttempts} times to create a new one.
      * @return New file.
      * @throws IOException Thrown if no new file could be created.
      */
