@@ -8,7 +8,7 @@ import java.util.stream.Stream;
 
 /**
  * This class splits tweets in pairs of words succeeding each other. A pair of predecessor and successor is determined by following regex:<br/>
- * {@code ([a-zA-Z0-9'@]+)[ ,-]+([a-zA-Z0-9'@]+)}<br/><br/>
+ * {@code ([a-zA-Z0-9'@#]+)[ ,-]+([a-zA-Z0-9'@#]+)}<br/><br/>
  *
  * The first group is succeeded by the second. Words can only succeed one another if they are in the same sentence. Sentences are delimited by '.', '!' or '?'.<br/>
  * If the empty string is succeeded by a word that means the word starts the sentence.
@@ -20,7 +20,7 @@ public class TweetSplitter implements Iterable<Pair<String, String>> {
 
     private static final Set<Character> WORD_DELIMITERS = new HashSet<>();
 
-    private static final String ALLOWED_CHARACTERS = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789'@";
+    private static final String ALLOWED_CHARACTERS = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789'@#";
 
     private static final Set<Character> ALLOW_CHARACTERS = new HashSet<>();
 
