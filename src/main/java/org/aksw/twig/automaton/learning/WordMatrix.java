@@ -1,7 +1,10 @@
 package org.aksw.twig.automaton.learning;
 
+import org.aksw.twig.automaton.files.FileHandler;
 import org.apache.commons.lang3.tuple.MutablePair;
 import org.apache.commons.lang3.tuple.Pair;
+import org.apache.jena.rdf.model.Model;
+import org.apache.jena.riot.RDFDataMgr;
 
 import java.io.*;
 import java.util.HashMap;
@@ -87,5 +90,24 @@ public class WordMatrix implements IWordMatrix, Serializable {
         IWordMatrix matrix = (IWordMatrix) inputStream.readObject();
         inputStream.close();
         return matrix;
+    }
+
+    /**
+     * Creates a word matrix by reading given TWIG rdf data and writes it into a file.
+     * Arguments must be formatted as stated in {@link FileHandler#readArgs(String[])}.
+     * @param args Arguments.
+     */
+    public static void main(String[] args) {
+
+        Pair<File, Set<File>> parsedArgs = FileHandler.readArgs(args);
+        File outputDirectory = parsedArgs.getLeft();
+        Set<File> filesToRead = parsedArgs.getRight();
+
+        WordMatrix matrix = new WordMatrix();
+        filesToRead.stream()
+                .forEach(file -> {
+                    Model fileModel = RDFDataMgr.loadModel(file.getPath());
+
+                });
     }
 }
