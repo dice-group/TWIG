@@ -3,8 +3,12 @@ package org.aksw.twig.automaton.learning;
 import org.aksw.twig.automaton.files.FileHandler;
 import org.apache.commons.lang3.tuple.MutablePair;
 import org.apache.commons.lang3.tuple.Pair;
+import org.apache.jena.query.*;
 import org.apache.jena.rdf.model.Model;
+import org.apache.jena.riot.Lang;
 import org.apache.jena.riot.RDFDataMgr;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.io.*;
 import java.util.HashMap;
@@ -16,6 +20,8 @@ import java.util.stream.Collectors;
  * An implementation to {@link IWordMatrix}. Allows writing predecessor / successor pairs and allows reading from files.
  */
 public class WordMatrix implements IWordMatrix, Serializable {
+
+    private static final Logger LOGGER = LogManager.getLogger(WordMatrix.class);
 
     private Map<String, MutablePair<Long, Map<String, Long>>> matrix = new HashMap<>();
 
@@ -92,6 +98,11 @@ public class WordMatrix implements IWordMatrix, Serializable {
         return matrix;
     }
 
+    private static final Query TWITTER_CONTENT_QUERY = QueryFactory.create(
+            "BASE <http://aksw.org/twig#> " +
+            "SELECT ?c WHERE { ?x <rdf:type> <Tweet> . ?x <tweetContent> ?c . }"
+    );
+
     /**
      * Creates a word matrix by reading given TWIG rdf data and writes it into a file.
      * Arguments must be formatted as stated in {@link FileHandler#readArgs(String[])}.
@@ -106,8 +117,28 @@ public class WordMatrix implements IWordMatrix, Serializable {
         WordMatrix matrix = new WordMatrix();
         filesToRead.stream()
                 .forEach(file -> {
-                    Model fileModel = RDFDataMgr.loadModel(file.getPath());
-
+                    Model fileModel = RDFDataMgr.loadModel(file.getPath(), Lang.TURTLE);
+                    try (QueryExecution execution = QueryExecutionFactory.create(TWITTER_CONTENT_QUERY, fileModel)) {
+                        ResultSet resultSet = execution.execSelect();
+                        while (resultSet.hasNext()) {
+                            matrix.putAll(new TweetSplitter(resultSet.next().get("c").toString()));
+                        }
+                    }
                 });
+
+        File writeFile;
+        try {
+            writeFile = new FileHandler(outputDirectory, "wordMatrix", ".matrix").nextFile();
+        } catch (IOException e) {
+            LOGGER.error("Error: exception - {}", e.getMessage());
+            return;
+        }
+
+        try (ObjectOutputStream outputStream = new ObjectOutputStream(new FileOutputStream(writeFile))) {
+            outputStream.writeObject(matrix);
+        } catch (IOException e) {
+            LOGGER.error("Error: exception - {}", e.getMessage());
+            return;
+        }
     }
 }
