@@ -17,7 +17,7 @@ class Twitter7ResultCollector implements FutureCallback<TwitterModelWrapper> {
 
     private static final Logger LOGGER = LogManager.getLogger(Twitter7ResultCollector.class);
 
-    public static final String WRITE_LANG = "TURTLE";
+    public static final String WRITE_LANG = "Turtle";
 
     public static final String FILE_TYPE = ".ttl";
 

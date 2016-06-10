@@ -2,11 +2,10 @@ package org.aksw.twig.model;
 
 import org.apache.jena.datatypes.xsd.XSDDatatype;
 import org.apache.jena.rdf.model.*;
+import org.apache.jena.shared.PrefixMapping;
 
 import java.time.LocalDateTime;
 import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map;
 
 /**
  * Wraps a {@link Model} using TWIG ontology to create RDF-graphs.
@@ -16,25 +15,31 @@ public class TwitterModelWrapper {
     // Prefix mappings
     private static final String FOAF_IRI = "http://xmlns.com/foaf/0.1/";
     private static final String FOAF_PREF = "foaf";
-    private static final String TWIG_IRI = "http://aksw.org/twig";
+    private static final String TWIG_IRI = "http://aksw.org/twig#";
     private static final String TWIG_PREF = "twig";
+    private static final String OWL_IRI = "http://www.w3.org/2002/07/owl#";
+    private static final String OWL_PREF = "owl";
+    private static final String RDF_IRI = "http://www.w3.org/1999/02/22-rdf-syntax-ns#";
+    private static final String RDF_PREF = "rdf";
 
-    private static final Map<String, String> PREFIXES_MAPPING = new HashMap<>();
+    private static final PrefixMapping PREFIX_MAPPING = PrefixMapping.Factory.create();
     static
     {
-        PREFIXES_MAPPING.put(FOAF_PREF, FOAF_IRI);
-        PREFIXES_MAPPING.put(TWIG_PREF, TWIG_IRI);
+        PREFIX_MAPPING.setNsPrefix(FOAF_PREF, FOAF_IRI);
+        PREFIX_MAPPING.setNsPrefix(TWIG_PREF, TWIG_IRI);
+        PREFIX_MAPPING.setNsPrefix(OWL_PREF, OWL_IRI);
+        PREFIX_MAPPING.setNsPrefix(RDF_PREF, RDF_IRI);
     }
 
     // RDF statement parts.
-    private static final Resource TWEET = ResourceFactory.createResource("twig:Tweet");
-    private static final Resource ONLINE_TWITTER_ACCOUNT = ResourceFactory.createResource("twig:OnlineTwitterAccount");
-    private static final Resource OWL_NAMED_INDIVIDUAL = ResourceFactory.createResource("owl:NamedIndividual");
-    private static final Property SENDS = ResourceFactory.createProperty("twig:sends");
-    private static final Property MENTIONS = ResourceFactory.createProperty("twig:mentions");
-    private static final Property TWEET_TIME = ResourceFactory.createProperty("twig:tweetTime");
-    private static final Property TWEET_CONTENT = ResourceFactory.createProperty("twig:tweetContent");
-    private static final Property RDF_TYPE = ResourceFactory.createProperty("rdf:type");
+    private static final Resource TWEET = ResourceFactory.createResource(PREFIX_MAPPING.expandPrefix("twig:Tweet"));
+    private static final Resource ONLINE_TWITTER_ACCOUNT = ResourceFactory.createResource(PREFIX_MAPPING.expandPrefix("twig:OnlineTwitterAccount"));
+    private static final Resource OWL_NAMED_INDIVIDUAL = ResourceFactory.createResource(PREFIX_MAPPING.expandPrefix("owl:NamedIndividual"));
+    private static final Property SENDS = ResourceFactory.createProperty(PREFIX_MAPPING.expandPrefix("twig:sends"));
+    private static final Property MENTIONS = ResourceFactory.createProperty(PREFIX_MAPPING.expandPrefix("twig:mentions"));
+    private static final Property TWEET_TIME = ResourceFactory.createProperty(PREFIX_MAPPING.expandPrefix("twig:tweetTime"));
+    private static final Property TWEET_CONTENT = ResourceFactory.createProperty(PREFIX_MAPPING.expandPrefix("twig:tweetContent"));
+    private static final Property RDF_TYPE = ResourceFactory.createProperty(PREFIX_MAPPING.expandPrefix("rdf:type"));
 
     /** The wrapped model. */
     public final Model model = ModelFactory.createDefaultModel();
@@ -43,7 +48,7 @@ public class TwitterModelWrapper {
      * Creates a new instance along with a new {@link Model} to wrap.
      */
     public TwitterModelWrapper() {
-        this.model.setNsPrefixes(PREFIXES_MAPPING);
+        this.model.setNsPrefixes(PREFIX_MAPPING);
     }
 
     /**
@@ -106,8 +111,7 @@ public class TwitterModelWrapper {
      * @return Prefixed string.
      */
     private static String prefixedIri(String original) {
-        StringBuilder builder = new StringBuilder(TWIG_PREF);
-        builder.append(':');
+        StringBuilder builder = new StringBuilder(TWIG_IRI);
         builder.append(original);
         return builder.toString();
     }
