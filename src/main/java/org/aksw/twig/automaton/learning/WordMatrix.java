@@ -99,8 +99,9 @@ public class WordMatrix implements IWordMatrix, Serializable {
     }
 
     private static final Query TWITTER_CONTENT_QUERY = QueryFactory.create(
-            "BASE <http://aksw.org/twig#> " +
-            "SELECT ?c WHERE { ?x <rdf:type> <Tweet> . ?x <tweetContent> ?c . }"
+            "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> " +
+            "PREFIX twig: <http://aksw.org/twig#> " +
+            "SELECT ?c WHERE { ?x rdf:type twig:Tweet . ?x twig:tweetContent ?c . }"
     );
 
     /**
