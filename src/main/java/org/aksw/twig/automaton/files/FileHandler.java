@@ -6,6 +6,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.nio.file.DirectoryStream;
 import java.nio.file.Files;
@@ -21,9 +22,74 @@ import java.util.stream.Stream;
 /**
  * Holds static functions for fetching files.
  */
-public final class FileHandler {
+public class FileHandler {
 
     private static final Logger LOGGER = LogManager.getLogger(FileHandler.class);
+
+    private int id = 0;
+
+    private int maxAttempts = 10;
+
+    private File outputDirectory;
+
+    private String fileName;
+
+    private String fileType;
+
+    public FileHandler(File outputDirectory, String fileName, String fileType) {
+        this.outputDirectory = outputDirectory;
+        this.fileName = fileName;
+        this.fileType = fileType;
+    }
+
+    public FileHandler(File outputDirectory, String fileName, String fileType, int maxAttempts) {
+        this(outputDirectory, fileName, fileType);
+        this.maxAttempts = maxAttempts;
+    }
+
+    /**
+     * Creates a new file to write into.
+     * If creation of a new file fails, it will try {@link #WRITE_ATTEMPTS} times to create a new one.
+     * @return New file.
+     * @throws IOException Thrown if no new file could be created.
+     */
+    public File nextFile() throws IOException {
+
+        int attempt = 0;
+        File writeFile = incrementFile();
+
+        while (writeFile.exists() && attempt < maxAttempts) {
+            writeFile = incrementFile();
+            attempt++;
+        }
+
+        if (attempt >= maxAttempts) {
+            throw new FileNotFoundException("Couldn't resolve new file.");
+        }
+
+        while (!writeFile.exists() && attempt < maxAttempts) {
+            try {
+                writeFile.createNewFile();
+            } catch (IOException e) {
+                attempt++;
+                continue;
+            }
+        }
+
+        if (attempt >= maxAttempts) {
+            throw new FileNotFoundException("Couldn't resolve new file.");
+        }
+
+        return writeFile;
+    }
+
+    /**
+     * Creates a new file without any checks.
+     * @return New file.
+     */
+    private File incrementFile() {
+        return new File(outputDirectory, this.fileName.concat("_").concat(Integer.toString(id++)).concat(fileType));
+    }
 
     /**
      * Gets all files from a directory.

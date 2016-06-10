@@ -1,6 +1,7 @@
 package org.aksw.twig.parsing;
 
 import com.google.common.util.concurrent.FutureCallback;
+import org.aksw.twig.automaton.files.FileHandler;
 import org.aksw.twig.model.TwitterModelWrapper;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -33,6 +34,8 @@ class Twitter7ResultCollector implements FutureCallback<TwitterModelWrapper> {
 
     private String fileName;
 
+    private FileHandler fileHandler;
+
     /**
      * Creates a new instance and sets class variables.
      * @param modelMaxSize Max size of a {@link TwitterModelWrapper#model} to contain. If this size is exceeded by a {@link TwitterModelWrapper#model} it will be written into a file.
@@ -47,6 +50,7 @@ class Twitter7ResultCollector implements FutureCallback<TwitterModelWrapper> {
         this.modelMaxSize = modelMaxSize;
         this.outputDirectory = outputDirectory;
         this.fileName = fileName;
+        this.fileHandler = new FileHandler(outputDirectory, fileName, FILE_TYPE);
     }
 
     @Override
@@ -73,7 +77,7 @@ class Twitter7ResultCollector implements FutureCallback<TwitterModelWrapper> {
 
         LOGGER.info("Writing result model {}.", this.currentModel);
 
-        try (PrintWriter writer = new PrintWriter(createNewWriteFile())) {
+        try (PrintWriter writer = new PrintWriter(this.fileHandler.nextFile())) {
             this.currentModel.model.write(writer, WRITE_LANG);
             writer.flush();
         } catch (IOException e) {
@@ -82,51 +86,5 @@ class Twitter7ResultCollector implements FutureCallback<TwitterModelWrapper> {
         }
 
         this.currentModel = new TwitterModelWrapper();
-    }
-
-    /**
-     * Creates a new file to write into.
-     * If creation of a new file fails, it will try {@link #WRITE_ATTEMPTS} times to create a new one.
-     * @return New file.
-     * @throws IOException Thrown if no new file could be created.
-     */
-    private File createNewWriteFile() throws IOException {
-
-        int attempt = 0;
-        File writeFile = nextFile();
-
-
-        while (writeFile.exists() && attempt < WRITE_ATTEMPTS) {
-            writeFile = nextFile();
-            attempt++;
-        }
-
-        if (attempt >= WRITE_ATTEMPTS) {
-            throw new FileNotFoundException("Couldn't resolve file to print parsing results in.");
-        }
-
-        while (!writeFile.exists() && attempt < WRITE_ATTEMPTS) {
-            try {
-                writeFile.createNewFile();
-            } catch (IOException e) {
-                continue;
-            } finally {
-                attempt++;
-            }
-        }
-
-        if (attempt >= WRITE_ATTEMPTS) {
-            throw new FileNotFoundException("Couldn't resolve file to print parsing results in.");
-        }
-
-        return writeFile;
-    }
-
-    /**
-     * Creates a new file without any checks.
-     * @return New file.
-     */
-    private File nextFile() {
-        return new File(outputDirectory, this.fileName.concat("_").concat(Integer.toString(id++)).concat(FILE_TYPE));
     }
 }
