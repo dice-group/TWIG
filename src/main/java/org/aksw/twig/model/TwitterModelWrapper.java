@@ -6,6 +6,8 @@ import org.apache.jena.shared.PrefixMapping;
 
 import java.time.LocalDateTime;
 import java.util.Collection;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * Wraps a {@link Model} using TWIG ontology to create RDF-graphs.
@@ -41,6 +43,10 @@ public class TwitterModelWrapper {
     private static final Property TWEET_CONTENT = ResourceFactory.createProperty(PREFIX_MAPPING.expandPrefix("twig:tweetContent"));
     private static final Property RDF_TYPE = ResourceFactory.createProperty(PREFIX_MAPPING.expandPrefix("rdf:type"));
 
+    private static long userId = 0;
+
+    private static Map<String, Long> userIdMapping = new ConcurrentHashMap<>();
+
     /** The wrapped model. */
     public final Model model = ModelFactory.createDefaultModel();
 
@@ -61,10 +67,15 @@ public class TwitterModelWrapper {
     public void addTweet(String accountName, String tweetContent, LocalDateTime tweetTime, Collection<String> mentions) {
         Resource twitterAccount = getTwitterAccount(accountName);
 
+        String anonymizedTweetContent = tweetContent;
+        for (String mention: mentions) {
+            anonymizedTweetContent = anonymizedTweetContent.replaceAll(mention, anonymizeTwitterAccount(mention));
+        }
+
         Resource tweet = this.model.getResource(createTweetIri(accountName, tweetTime))
                 .addProperty(RDF_TYPE, OWL_NAMED_INDIVIDUAL)
                 .addProperty(RDF_TYPE, TWEET)
-                .addLiteral(TWEET_CONTENT, this.model.createTypedLiteral(tweetContent))
+                .addLiteral(TWEET_CONTENT, this.model.createTypedLiteral(anonymizedTweetContent))
                 .addLiteral(TWEET_TIME, this.model.createTypedLiteral(tweetTime.toString(), XSDDatatype.XSDdateTime)); // TODO: add timezone
 
         twitterAccount.addProperty(SENDS, tweet);
@@ -84,12 +95,22 @@ public class TwitterModelWrapper {
     }
 
     /**
+     * Replaces a twitter account with a unique but non deterministic twitterUser_X.
+     * @param twitterAccountName User account name.
+     * @return Anonymized name.
+     */
+    private static String anonymizeTwitterAccount(String twitterAccountName) {
+        long id = userIdMapping.computeIfAbsent(twitterAccountName, name -> userId++);
+        return "twitterUser_".concat(Long.toString(id));
+    }
+
+    /**
      * Creates the IRI of a twitter account.
      * @param twitterAccountName Name of the account.
      * @return IRI of the twitter account.
      */
     private static String createTwitterAccountIri(String twitterAccountName) {
-        return prefixedIri(twitterAccountName);
+        return prefixedIri(anonymizeTwitterAccount(twitterAccountName));
     }
 
     /**
@@ -99,7 +120,7 @@ public class TwitterModelWrapper {
      * @return IRI of the tweet.
      */
     private static String createTweetIri(String twitterAccountName, LocalDateTime messageTime) {
-        StringBuilder builder = new StringBuilder(twitterAccountName);
+        StringBuilder builder = new StringBuilder(anonymizeTwitterAccount(twitterAccountName));
         builder.append('_');
         builder.append(messageTime.toString().replaceAll(":", "-"));
         return prefixedIri(builder.toString());

@@ -22,17 +22,9 @@ class Twitter7ResultCollector implements FutureCallback<TwitterModelWrapper> {
 
     public static final String FILE_TYPE = ".ttl";
 
-    public static final int WRITE_ATTEMPTS = 10;
-
     private TwitterModelWrapper currentModel = new TwitterModelWrapper();
 
     private long modelMaxSize;
-
-    private int id = 0;
-
-    private File outputDirectory;
-
-    private String fileName;
 
     private FileHandler fileHandler;
 
@@ -48,8 +40,6 @@ class Twitter7ResultCollector implements FutureCallback<TwitterModelWrapper> {
         }
 
         this.modelMaxSize = modelMaxSize;
-        this.outputDirectory = outputDirectory;
-        this.fileName = fileName;
         this.fileHandler = new FileHandler(outputDirectory, fileName, FILE_TYPE);
     }
 
