@@ -1,6 +1,6 @@
 package org.aksw.twig.parsing;
 
-import org.aksw.twig.automaton.files.FileHandler;
+import org.aksw.twig.files.FileHandler;
 import org.aksw.twig.model.TwitterModelWrapper;
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.logging.log4j.LogManager;

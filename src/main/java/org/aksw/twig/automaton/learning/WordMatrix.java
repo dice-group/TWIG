@@ -1,6 +1,6 @@
 package org.aksw.twig.automaton.learning;
 
-import org.aksw.twig.automaton.files.FileHandler;
+import org.aksw.twig.files.FileHandler;
 import org.apache.commons.lang3.tuple.MutablePair;
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.jena.query.*;

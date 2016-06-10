@@ -1,7 +1,7 @@
 package org.aksw.twig.parsing;
 
 import com.google.common.util.concurrent.FutureCallback;
-import org.aksw.twig.automaton.files.FileHandler;
+import org.aksw.twig.files.FileHandler;
 import org.aksw.twig.model.TwitterModelWrapper;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;

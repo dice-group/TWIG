@@ -1,4 +1,4 @@
-package org.aksw.twig.automaton.files;
+package org.aksw.twig.files;
 
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.Pair;
