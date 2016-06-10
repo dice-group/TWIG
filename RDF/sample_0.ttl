@@ -1,9 +1,6 @@
 @prefix twig:  <http://aksw.org/twig> .
 @prefix foaf:  <http://xmlns.com/foaf/0.1/> .
 
-<twig:burkehramsey>  <rdf:type>  <owl:NamedIndividual> , <twig:OnlineTwitterAccount> ;
-        <twig:sends>  <twig:burkehramsey_2009-09-30T23-55-53> .
-
 <twig:Audition_Portal>
         <rdf:type>  <owl:NamedIndividual> , <twig:OnlineTwitterAccount> .
 
@@ -11,6 +8,9 @@
         <rdf:type>           <owl:NamedIndividual> , <twig:Tweet> ;
         <twig:tweetContent>  "soooo i got sum advice from the 1 i love most...he goes drop all those lame ass birds uno unot like them...lol here it goes" ;
         <twig:tweetTime>     "2009-09-30T23:55:53"^^<http://www.w3.org/2001/XMLSchema#dateTime> .
+
+<twig:burkehramsey>  <rdf:type>  <owl:NamedIndividual> , <twig:OnlineTwitterAccount> ;
+        <twig:sends>  <twig:burkehramsey_2009-09-30T23-55-53> .
 
 <twig:bhightower1_2009-09-30T23-55-53>
         <rdf:type>           <owl:NamedIndividual> , <twig:Tweet> ;
@@ -49,14 +49,14 @@
         <twig:tweetContent>  "I'm starting to feel really sick, hope is not the S**** flu! (That's the new S-word)" ;
         <twig:tweetTime>     "2009-09-30T23:55:53"^^<http://www.w3.org/2001/XMLSchema#dateTime> .
 
-<twig:andreavaleriac>
-        <rdf:type>    <owl:NamedIndividual> , <twig:OnlineTwitterAccount> ;
-        <twig:sends>  <twig:andreavaleriac_2009-09-30T23-55-53> .
-
 <twig:elektrap2_2009-09-30T23-55-53>
         <rdf:type>           <owl:NamedIndividual> , <twig:Tweet> ;
         <twig:tweetContent>  "I'm writing my first twitter!!" ;
         <twig:tweetTime>     "2009-09-30T23:55:53"^^<http://www.w3.org/2001/XMLSchema#dateTime> .
+
+<twig:andreavaleriac>
+        <rdf:type>    <owl:NamedIndividual> , <twig:OnlineTwitterAccount> ;
+        <twig:sends>  <twig:andreavaleriac_2009-09-30T23-55-53> .
 
 <twig:bonita_bob16_2009-09-30T23-55-53>
         <rdf:type>           <owl:NamedIndividual> , <twig:Tweet> ;

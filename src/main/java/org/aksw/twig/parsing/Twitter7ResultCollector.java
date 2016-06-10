@@ -19,7 +19,7 @@ class Twitter7ResultCollector implements FutureCallback<TwitterModelWrapper> {
 
     public static final String WRITE_LANG = "TURTLE";
 
-    public static final String FILE_TYPE = ".rdf";
+    public static final String FILE_TYPE = ".ttl";
 
     public static final int WRITE_ATTEMPTS = 10;
 
