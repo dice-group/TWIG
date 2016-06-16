@@ -172,7 +172,6 @@ public class AVLTree<T extends Comparable<T>> implements Collection<T> {
     }
 
     private class AVLNode {
-        private int level;
 
         private T val;
 
@@ -181,6 +180,8 @@ public class AVLTree<T extends Comparable<T>> implements Collection<T> {
         private AVLNode leq;
 
         private AVLNode gtr;
+
+        private int balanceFactor = 0;
 
         AVLNode(final T val, final AVLNode parent) {
             this.val = val;
@@ -220,9 +221,36 @@ public class AVLTree<T extends Comparable<T>> implements Collection<T> {
             return prev;
         }
 
-        int depth() {
-            return leq.depth() > gtr.depth() ? leq.depth() : gtr.depth();
+        void add(final T value) {
+            AVLNode newNode = new AVLNode(value, this);
+            if (val.compareTo(value) <= 0) {
+                if (leq != null) {
+                    throw new IllegalStateException();
+                }
+
+                balanceFactor--;
+                leq = newNode;
+            } else {
+                if (gtr != null) {
+                    throw new IllegalStateException();
+                }
+
+                balanceFactor++;
+                gtr = newNode;
+            }
+
+            /*if (balanceFactor!= 0) {
+                for (AVLNode currentParent = parent; currentParent != null; currentParent = currentParent.parent) {
+                    int oldDepth = currentParent.depth;
+                    currentParent.refreshDepth();
+                    if (currentParent.depth == oldDepth) {
+                        break;
+                    }
+                }
+            }*/
         }
+
+
     }
 
     private class AVLIterator implements Iterator<T> {
