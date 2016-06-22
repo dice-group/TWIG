@@ -27,6 +27,10 @@ public class ExponentialLikeDistribution implements IntegerDistribution {
 
     private double mean;
 
+    /**
+     * Creates a new exponential like distribution with given lambda.
+     * @param lambdaArg Characteristic variable to the distribution.
+     */
     public ExponentialLikeDistribution(double lambdaArg) {
         lambda = lambdaArg;
         expLambda = Math.exp(-lambda);
@@ -132,5 +136,18 @@ public class ExponentialLikeDistribution implements IntegerDistribution {
         }
 
         return randoms;
+    }
+
+    /**
+     * Creates an exponential like distribution by taking the given exponential regression as frequency distribution.
+     * @param regression Frequency distribution.
+     * @return Exponential like distribution.
+     */
+    public static ExponentialLikeDistribution of(SimpleExponentialRegression regression) {
+        if (regression.getBeta() >= 0) {
+            throw new IllegalArgumentException("The regressions beta must be < 0.");
+        }
+
+        return new ExponentialLikeDistribution(regression.getBeta());
     }
 }
