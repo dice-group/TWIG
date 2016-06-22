@@ -112,19 +112,15 @@ public class ExponentialLikeDistribution implements IntegerDistribution {
 
         while (true) {
             if (r.nextDouble() < cumulativeProbability(lowerK - 1, pivot) / cumulativeProbability(lowerK - 1, upperK)) {
-                if (lowerK == pivot) {
-                    return pivot;
-                }
-
                 upperK = pivot;
             } else {
-                if (upperK - pivot == 1) {
-                    return upperK;
-                }
-
                 lowerK = pivot + 1;
             }
             pivot = lowerK + (upperK - lowerK) / 2;
+
+            if (lowerK >= upperK) {
+                return upperK;
+            }
         }
     }
 
