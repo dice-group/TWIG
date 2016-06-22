@@ -6,33 +6,42 @@ import org.apache.commons.math3.exception.OutOfRangeException;
 
 import java.util.Random;
 
+/**
+ * This class implements a discrete distribution using an exponential function for calculating probabilities.
+ * The sample space consists of all natural numbers including 0. The probability mass function and cumulative probability function are defined as:
+ * <ul>
+ *     <li>{@code p(x) = (1 - e^(-lambda)) * e^(-lambda * x)}</li>
+ *     <li>{@code P(X <= x) = sum from 0 to x: p(x) = 1 - e^(-lambda * (x + 1))}</li>
+ * </ul>
+ * Where {@code lambda} is the characteristic variable of the distribution. All methods supplied by this distribution run in {@code O(1)}.
+ */
 public class ExponentialLikeDistribution implements IntegerDistribution {
 
     private Random r = new Random();
 
     private double multiplier;
 
-    private double beta;
+    private double lambda;
 
-    private double expBeta;
+    private double expLambda;
 
     private double mean;
 
-    private ExponentialLikeDistribution(double betaArg) {
-        beta = betaArg;
-        expBeta = Math.exp(-beta);
-        multiplier = (1 - expBeta);
-        mean = multiplier * expBeta / Math.pow(expBeta - 1, 2);
+    public ExponentialLikeDistribution(double lambdaArg) {
+        lambda = lambdaArg;
+        expLambda = Math.exp(-lambda);
+        multiplier = (1 - expLambda);
+        mean = multiplier * expLambda / Math.pow(expLambda - 1, 2);
     }
 
     @Override
     public double probability(int x) {
-        return multiplier * Math.exp(-beta * x);
+        return multiplier * Math.exp(-lambda * x);
     }
 
     @Override
     public double cumulativeProbability(int x) {
-        return multiplier * (1 - Math.exp(-beta * (x + 1))) / (1 - expBeta);
+        return 1 - Math.exp(-lambda * (x + 1));
     }
 
     @Override
@@ -41,7 +50,7 @@ public class ExponentialLikeDistribution implements IntegerDistribution {
             throw new NumberIsTooLargeException(x0, x1, true);
         }
 
-        if (x0 < getSupportLowerBound() - 1 || x1 > getSupportUpperBound()) {
+        if (x0 < getSupportLowerBound() - 1 || x1 + 1 > getSupportUpperBound()) {
             throw new IllegalArgumentException("Arguments out of bonds");
         }
 
@@ -54,7 +63,11 @@ public class ExponentialLikeDistribution implements IntegerDistribution {
 
     @Override
     public int inverseCumulativeProbability(double p) throws OutOfRangeException {
-        throw new UnsupportedOperationException("Method not implemented yet"); // TODO
+        if (p == 0d) {
+            return 0;
+        }
+
+        return (int) Math.ceil(- Math.log(1 - p) / lambda);
     }
 
     @Override
@@ -62,6 +75,10 @@ public class ExponentialLikeDistribution implements IntegerDistribution {
         return mean;
     }
 
+    /**
+     * This method is currently unsupported.
+     * @return None.
+     */
     @Override
     public double getNumericalVariance() {
         throw new UnsupportedOperationException("Method not implemented yet"); // TODO
@@ -89,7 +106,26 @@ public class ExponentialLikeDistribution implements IntegerDistribution {
 
     @Override
     public int sample() {
-        return 0; // TODO
+        int lowerK = 0;
+        int upperK = Integer.MAX_VALUE - 1;
+        int pivot = upperK / 2;
+
+        while (true) {
+            if (r.nextDouble() < cumulativeProbability(lowerK - 1, pivot) / cumulativeProbability(lowerK - 1, upperK)) {
+                if (lowerK == pivot) {
+                    return pivot;
+                }
+
+                upperK = pivot;
+            } else {
+                if (upperK - pivot == 1) {
+                    return upperK;
+                }
+
+                lowerK = pivot + 1;
+            }
+            pivot = lowerK + (upperK - lowerK) / 2;
+        }
     }
 
     @Override

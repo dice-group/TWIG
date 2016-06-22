@@ -1,6 +1,6 @@
 package org.aksw.twig.automaton;
 
-import org.aksw.twig.statistics.PlaceholderDistribution;
+import org.apache.commons.math3.distribution.IntegerDistribution;
 
 import java.time.Duration;
 import java.util.LinkedList;
@@ -9,7 +9,7 @@ import java.util.Random;
 
 public class Automaton {
 
-    private PlaceholderDistribution<Integer> userToMessageCountDistribution;
+    private IntegerDistribution userToMessageCountDistribution;
 
     private Duration atomicTimeUnit = Duration.ofDays(1);
 
