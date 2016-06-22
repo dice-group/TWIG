@@ -10,6 +10,8 @@ public class AVLTree<T extends Comparable<T>> implements Collection<T> {
 
     private int size = 0;
 
+    private int height = 0; // TODO: use and maintain
+
     @Override
     public int size() {
         return size;
@@ -162,7 +164,7 @@ public class AVLTree<T extends Comparable<T>> implements Collection<T> {
 
     @Override
     public boolean retainAll(final Collection<?> c) {
-        return false; // TODO
+        throw new UnsupportedOperationException();
     }
 
     @Override
@@ -255,14 +257,52 @@ public class AVLTree<T extends Comparable<T>> implements Collection<T> {
 
     private class AVLIterator implements Iterator<T> {
 
+        private int traverseIndex = 0;
+
+        private Object[] traverseArray = new Object[height];
+
+        AVLIterator() {
+            if (root != null) {
+                traverseArray[traverseIndex] = root;
+            }
+        }
+
         @Override
         public boolean hasNext() {
-            return false; // TODO
+            // other || (init check)
+            return traverseIndex > -1 || (traverseIndex == 0 && traverseArray[traverseIndex] == null && root != null);
         }
 
         @Override
         public T next() {
-            return null; // TODO
+            AVLNode output = (AVLNode) traverseArray[traverseIndex++];
+            if (traverseIndex == traverseArray.length) {
+                branch();
+            } else {
+                setNext();
+            }
+
+            return output.val;
+        }
+
+        private void setNext() {
+            AVLNode output = (AVLNode) traverseArray[traverseIndex - 1];
+            AVLNode next = (AVLNode) traverseArray[traverseIndex];
+            if ((next == output.leq && output.gtr == null) || next == output.gtr) {
+                branch();
+            } else if (next == null && output.leq != null) {
+                traverseArray[traverseIndex] = output.leq;
+            } else {
+                traverseArray[traverseIndex] = output.gtr;
+            }
+        }
+
+        private void branch() {
+            if (traverseIndex-- != traverseArray.length) {
+                traverseArray[traverseIndex] = null;
+            }
+
+            setNext();
         }
     }
 }
