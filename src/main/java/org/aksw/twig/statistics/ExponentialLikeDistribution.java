@@ -55,7 +55,7 @@ public class ExponentialLikeDistribution implements IntegerDistribution {
         }
 
         if (x0 < getSupportLowerBound() - 1 || x1 + 1 > getSupportUpperBound()) {
-            throw new IllegalArgumentException("Arguments out of bonds");
+            throw new IllegalArgumentException("Arguments out of bounds");
         }
 
         if (x0 == -1) {

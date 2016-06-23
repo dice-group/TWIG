@@ -10,11 +10,13 @@ public class AVLTree<T extends Comparable<T>> implements Collection<T> {
 
     private int size = 0;
 
-    private int height = 0; // TODO: use and maintain
-
     @Override
     public int size() {
         return size;
+    }
+
+    public int height() {
+        return root == null ? 0 : root.height;
     }
 
     @Override
@@ -34,6 +36,9 @@ public class AVLTree<T extends Comparable<T>> implements Collection<T> {
         }
 
         AVLNode node = root.traverse(value, true);
+        if (node == null) {
+            return false;
+        }
         return node.val.equals(value);
     }
 
@@ -94,26 +99,31 @@ public class AVLTree<T extends Comparable<T>> implements Collection<T> {
 
     @Override
     public boolean add(final T t) {
+        if (t == null) {
+            throw new NullPointerException();
+        }
+
         if (root == null) {
             root = new AVLNode(t, null);
             size++;
             return true;
         }
 
-        // TODO grant AVL property
-        root.traverse(t, false).entail(t);
+        root.traverse(t, false).add(t);
         size++;
+        root = root.root();
         return true;
     }
 
-    public boolean remove(final T value) {
-        if (root == null || value == null) {
+    public boolean remove(final T t) {
+        if (root == null || t == null) {
             return false;
         }
 
-        AVLNode toRemove = root.traverse(value, true);
-        if (toRemove.val.equals(value)) {
-            // TODO
+        AVLNode toRemove = root.traverse(t, true);
+        if (toRemove.val.equals(t)) {
+            toRemove.parent.remove(toRemove);
+            root = root.root();
             return true;
         }
 
@@ -126,14 +136,15 @@ public class AVLTree<T extends Comparable<T>> implements Collection<T> {
             return false;
         }
 
-        Iterator<T> iterator = iterator();
+        AVLIterator iterator = new AVLIterator();
         while (iterator.hasNext()) {
-            if (iterator.next().equals(iterator)) {
-                // TODO
+            AVLNode node = iterator.nextNode();
+            if (node.val.equals(o)) {
+                node.parent.remove(node);
+                root = root.root();
                 return true;
             }
         }
-
 
         return false;
     }
@@ -179,87 +190,177 @@ public class AVLTree<T extends Comparable<T>> implements Collection<T> {
 
         private AVLNode parent;
 
-        private AVLNode leq;
+        private AVLNode leq = null;
 
-        private AVLNode gtr;
+        private AVLNode gtr = null;
 
         private int balanceFactor = 0;
+
+        private int height = 1;
 
         AVLNode(final T val, final AVLNode parent) {
             this.val = val;
             this.parent = parent;
         }
 
-        boolean hasNext(final T val) {
-            return val.compareTo(val) <= 0 ? leq != null : gtr != null;
+        AVLNode traverse(final T toFind, final boolean lookup) {
+            for (AVLNode traversed = this;;) {
+                AVLNode tmp = traversed.val.compareTo(toFind) > 0 ? traversed.leq : traversed.gtr;
+                if (tmp == null) {
+                    if (lookup) {
+                        return null;
+                    }
+                    return traversed;
+                }
+                traversed = tmp;
+                if (lookup && traversed.val.equals(toFind)) {
+                    return traversed;
+                }
+            }
         }
 
-        AVLNode next(final T val) {
-            return val.compareTo(val) <= 0 ? leq : gtr;
-        }
-
-        AVLNode traverse(final T val, final boolean lookup) {
-            AVLNode last = this;
-            while (last.hasNext(val) || (lookup && last.val.equals(val))) {
-                last = last.next(val);
+        AVLNode root() {
+            AVLNode node = this;
+            while (node.parent != null) {
+                node = node.parent;
             }
-
-            return last;
-        }
-
-        AVLNode entail(final T value) {
-            AVLNode prev;
-            if (val.compareTo(value) <= 0) {
-                prev = leq;
-                leq = new AVLNode(value, this);
-            } else {
-                prev = gtr;
-                gtr = new AVLNode(value, this);
-            }
-
-            if (prev != null) {
-                prev.parent = null;
-            }
-            return prev;
+            return node;
         }
 
         void add(final T value) {
-            AVLNode newNode = new AVLNode(value, this);
-            if (val.compareTo(value) <= 0) {
-                if (leq != null) {
-                    throw new IllegalStateException();
-                }
-
-                balanceFactor--;
-                leq = newNode;
-            } else {
-                if (gtr != null) {
-                    throw new IllegalStateException();
-                }
-
-                balanceFactor++;
-                gtr = newNode;
-            }
-
-            /*if (balanceFactor!= 0) {
-                for (AVLNode currentParent = parent; currentParent != null; currentParent = currentParent.parent) {
-                    int oldDepth = currentParent.depth;
-                    currentParent.refreshDepth();
-                    if (currentParent.depth == oldDepth) {
-                        break;
-                    }
-                }
-            }*/
+            addTree(new AVLNode(value, this));
         }
 
+        void addTree(final AVLNode toAdd) {
+            if (val.compareTo(toAdd.val) > 0) {
+                if (leq != null) throw new IllegalStateException();
+                leq = toAdd;
+            } else {
+                if (gtr != null) throw new IllegalStateException();
+                gtr = toAdd;
+            }
 
+            checkBalance();
+        }
+
+        void remove(final AVLNode toRemove) {
+            AVLNode removedLeq = toRemove.leq;
+            AVLNode removedGtr = toRemove.gtr;
+
+            if (leq == toRemove) {
+                leq = null;
+            } else if (gtr == toRemove) {
+                gtr = null;
+            } else {
+                throw new IllegalArgumentException();
+            }
+
+            if (removedGtr != null) {
+                removedGtr.parent = null;
+                if (removedLeq != null) {
+                    removedLeq.parent = null;
+                    removedGtr.traverse(removedLeq.val, false).addTree(removedLeq);
+                }
+
+                this.addTree(removedGtr.root());
+            } else if (removedLeq != null) {
+                removedLeq.parent = null;
+                this.addTree(removedLeq);
+            }
+        }
+
+        void refreshBalance() {
+            int gtrHeight = gtr == null ? 0 : gtr.height;
+            int leqHeight = leq == null ? 0 : leq.height;
+            height = Math.max(gtrHeight, leqHeight) + 1;
+            balanceFactor = gtrHeight - leqHeight;
+        }
+
+        void checkBalance() {
+            refreshBalance();
+            if (Math.abs(balanceFactor) > 1) {
+                rebalance();
+            }
+
+            if (balanceFactor != 0 && parent != null) {
+                parent.checkBalance();
+            }
+        }
+
+        void rebalance() {
+            if (balanceFactor < 0) {
+                if ((leq.gtr == null ? 0 : leq.gtr.height) <= (leq.leq == null ? 0 : leq.leq.height)) {
+                    rotateRight();
+                } else {
+                    leq.rotateRight();
+                    rotateLeft();
+                }
+            } else {
+                if ((gtr.leq == null ? 0 : gtr.leq.height) <= (gtr.gtr == null ? 0 : gtr.gtr.height)) {
+                    rotateLeft();
+                } else {
+                    gtr.rotateLeft();
+                    rotateRight();
+                }
+            }
+        }
+
+        void rotateLeft() {
+            gtr.parent = parent;
+            if (parent != null) {
+                if (parent.leq == this) {
+                    parent.leq = gtr;
+                } else {
+                    parent.gtr = gtr;
+                }
+            }
+
+            AVLNode gtrLeq = gtr.leq;
+            gtr.leq = this;
+            parent = gtr;
+
+            gtr = gtrLeq;
+            if (gtr != null) {
+                gtr.parent = this;
+            }
+
+            refreshBalance();
+            if (parent != null) {
+                parent.refreshBalance();
+            }
+        }
+
+        void rotateRight() {
+            leq.parent = parent;
+            if (parent != null) {
+                if (parent.leq == this) {
+                    parent.leq = leq;
+                } else {
+                    parent.gtr = leq;
+                }
+            }
+
+            AVLNode leqGtr = leq.gtr;
+            leq.gtr = this;
+            parent = leq;
+
+            leq = leqGtr;
+            if (leq != null) {
+                leq.parent = this;
+            }
+
+            refreshBalance();
+            if (parent != null) {
+                parent.refreshBalance();
+            }
+        }
     }
 
     private class AVLIterator implements Iterator<T> {
 
         private int traverseIndex = 0;
 
-        private Object[] traverseArray = new Object[height];
+        private Object[] traverseArray = new Object[height()];
 
         AVLIterator() {
             if (root != null) {
@@ -275,6 +376,10 @@ public class AVLTree<T extends Comparable<T>> implements Collection<T> {
 
         @Override
         public T next() {
+            return nextNode().val;
+        }
+
+        AVLNode nextNode() {
             AVLNode output = (AVLNode) traverseArray[traverseIndex++];
             if (traverseIndex == traverseArray.length) {
                 branch();
@@ -282,7 +387,7 @@ public class AVLTree<T extends Comparable<T>> implements Collection<T> {
                 setNext();
             }
 
-            return output.val;
+            return output;
         }
 
         private void setNext() {
