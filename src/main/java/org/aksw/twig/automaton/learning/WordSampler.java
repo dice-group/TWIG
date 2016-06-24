@@ -2,8 +2,10 @@ package org.aksw.twig.automaton.learning;
 
 import org.aksw.twig.structs.AVLTree;
 
-import java.util.*;
-import java.util.stream.Collectors;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Random;
 
 public class WordSampler {
 
@@ -31,13 +33,13 @@ public class WordSampler {
 
                     AVLTree<WordChanceMapping> tree = new AVLTree<>();
 
-                    List<WordChanceMapping> list = matrix.getMappings(predecessor).entrySet().stream()
+                    WordChanceMapping[] wordChanceMappings = matrix.getMappings(predecessor).entrySet().stream()
                             .map(entry -> new WordChanceMapping(entry.getKey(), entry.getValue()))
-                            .collect(Collectors.toList());
-                    Collections.sort(list, WordChanceMapping::compareTo);
+                            .toArray(WordChanceMapping[]::new);
+                    Arrays.sort(wordChanceMappings, WordChanceMapping::compareTo);
 
                     double cumulativeChance = 0d;
-                    for (WordChanceMapping mapping: list) {
+                    for (WordChanceMapping mapping: wordChanceMappings) {
                         mapping.chance += cumulativeChance;
                         cumulativeChance = mapping.chance;
                         tree.add(mapping);
