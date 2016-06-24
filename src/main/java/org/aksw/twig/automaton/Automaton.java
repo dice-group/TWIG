@@ -1,5 +1,7 @@
 package org.aksw.twig.automaton;
 
+import org.aksw.twig.automaton.learning.IWordMatrix;
+import org.aksw.twig.automaton.learning.WordSampler;
 import org.apache.commons.math3.distribution.IntegerDistribution;
 
 import java.time.Duration;
@@ -8,6 +10,13 @@ import java.util.List;
 import java.util.Random;
 
 public class Automaton {
+
+    public Automaton(IWordMatrix wordMatrix, IntegerDistribution userToMessageCountDistribution) {
+        wordSampler = new WordSampler(wordMatrix);
+        this.userToMessageCountDistribution = userToMessageCountDistribution;
+    }
+
+    private WordSampler wordSampler;
 
     private IntegerDistribution userToMessageCountDistribution;
 
