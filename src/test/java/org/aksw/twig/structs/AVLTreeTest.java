@@ -28,7 +28,7 @@ public class AVLTreeTest {
 
         Assert.assertFalse(tree.retainAll(valuesList));
         List<Integer> retain = new LinkedList<>();
-        
+
         retain.add(1);
         Assert.assertTrue(tree.retainAll(retain));
         Assert.assertTrue(tree.containsAll(retain));
@@ -69,5 +69,16 @@ public class AVLTreeTest {
         Assert.assertNotEquals(tree1, tree2);
         Assert.assertNotEquals(tree1, 0);
         Assert.assertNotEquals(tree1, null);
+    }
+
+    @Test
+    public void findClosestTest() {
+        Integer[] values = new Integer[] { 1, 2, 3, 4, 5, 6 };
+        AVLTree<Integer> tree = new AVLTree<>();
+        tree.addAll(Arrays.asList(values));
+
+        Integer min = Arrays.stream(values).min((a, b) -> a.compareTo(b)).orElse(null);
+        Assert.assertNotEquals(null, min);
+        Assert.assertEquals(min, tree.findClosest(min - 1));
     }
 }

@@ -1,15 +1,32 @@
 package org.aksw.twig.structs;
 
-import java.util.Collection;
-import java.util.Iterator;
-import java.util.LinkedList;
-import java.util.List;
+import java.util.*;
 
 public class AVLTree<T extends Comparable<T>> implements Collection<T> {
 
     private AVLNode root;
 
     private int size = 0;
+
+    public T findClosest(T toCompare) {
+        AVLNode current = root;
+        AVLNode best = null;
+        while (true) {
+            if (current == null) {
+                return best.val;
+            }
+
+            int comparison = current.val.compareTo(toCompare);
+            if (comparison == 0) {
+                return current.val;
+            } else if (comparison > 0) {
+                best = current;
+                current = current.leq;
+            } else {
+                current = current.gtr;
+            }
+        }
+    }
 
     @Override
     public int size() {
