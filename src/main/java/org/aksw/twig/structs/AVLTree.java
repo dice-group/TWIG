@@ -3,6 +3,7 @@ package org.aksw.twig.structs;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.LinkedList;
+import java.util.List;
 
 public class AVLTree<T extends Comparable<T>> implements Collection<T> {
 
@@ -120,10 +121,17 @@ public class AVLTree<T extends Comparable<T>> implements Collection<T> {
             return false;
         }
 
+        if (root.val.equals(t)) {
+            root = merge(root.leq, root.gtr);
+            size--;
+            return true;
+        }
+
         AVLNode toRemove = root.traverse(t, true);
         if (toRemove.val.equals(t)) {
             toRemove.parent.remove(toRemove);
             root = root.root();
+            size--;
             return true;
         }
 
@@ -142,6 +150,7 @@ public class AVLTree<T extends Comparable<T>> implements Collection<T> {
             if (node.val.equals(o)) {
                 node.parent.remove(node);
                 root = root.root();
+                size--;
                 return true;
             }
         }
@@ -151,7 +160,7 @@ public class AVLTree<T extends Comparable<T>> implements Collection<T> {
 
     @Override
     public boolean containsAll(final Collection<?> c) {
-        return c.stream().allMatch(element -> contains(element));
+        return c.stream().allMatch(this::contains);
     }
 
     @Override
@@ -175,13 +184,74 @@ public class AVLTree<T extends Comparable<T>> implements Collection<T> {
 
     @Override
     public boolean retainAll(final Collection<?> c) {
-        throw new UnsupportedOperationException();
+        List<T> toRemove = new LinkedList<T>();
+        Iterator<T> iterator = new AVLIterator();
+        while (iterator.hasNext()) {
+            T next = iterator.next();
+            if (!c.contains(next)) {
+                toRemove.add(next);
+            }
+        }
+
+        toRemove.stream().forEach(this::remove);
+
+        return !toRemove.isEmpty();
     }
 
     @Override
     public void clear() {
         root = null;
         size = 0;
+    }
+
+    private AVLNode merge(AVLNode tree1, AVLNode tree2) {
+        if (tree1 != null) {
+            tree1.parent = null;
+        }
+
+        if (tree2 != null) {
+            tree2.parent = null;
+        }
+
+        if (tree1 == null) {
+            return tree2;
+        }
+
+        if (tree2 == null) {
+            return tree1;
+        }
+
+        tree1.traverse(tree2, false).addTree(tree2);
+        return tree1.root();
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (obj == null) {
+            return false;
+        }
+
+        if (obj == this) {
+            return true;
+        }
+
+        if (!(obj instanceof AVLTree)) {
+            return false;
+        }
+
+        Iterator iterator = ((AVLTree) obj).iterator();
+        Iterator<T> thisIterator = iterator();
+        while (iterator.hasNext()) {
+            if (!thisIterator.hasNext()) {
+                return false;
+            }
+
+            if (!iterator.next().equals(thisIterator.next())) {
+                return false;
+            }
+        }
+
+        return !thisIterator.hasNext();
     }
 
     private class AVLNode {
@@ -203,8 +273,16 @@ public class AVLTree<T extends Comparable<T>> implements Collection<T> {
             this.parent = parent;
         }
 
+        AVLNode traverse(final AVLNode toFind, final boolean lookup) {
+            return traverse(toFind.val, lookup);
+        }
+
         AVLNode traverse(final T toFind, final boolean lookup) {
             for (AVLNode traversed = this;;) {
+                if (lookup && traversed.val.equals(toFind)) {
+                    return traversed;
+                }
+
                 AVLNode tmp = traversed.val.compareTo(toFind) > 0 ? traversed.leq : traversed.gtr;
                 if (tmp == null) {
                     if (lookup) {
@@ -213,9 +291,6 @@ public class AVLTree<T extends Comparable<T>> implements Collection<T> {
                     return traversed;
                 }
                 traversed = tmp;
-                if (lookup && traversed.val.equals(toFind)) {
-                    return traversed;
-                }
             }
         }
 
@@ -239,33 +314,23 @@ public class AVLTree<T extends Comparable<T>> implements Collection<T> {
                 if (gtr != null) throw new IllegalStateException();
                 gtr = toAdd;
             }
+            toAdd.parent = this;
 
             checkBalance();
         }
 
         void remove(final AVLNode toRemove) {
-            AVLNode removedLeq = toRemove.leq;
-            AVLNode removedGtr = toRemove.gtr;
-
-            if (leq == toRemove) {
-                leq = null;
-            } else if (gtr == toRemove) {
-                gtr = null;
-            } else {
-                throw new IllegalArgumentException();
+            AVLNode merged = merge(toRemove.gtr, toRemove.leq);
+            if (merged != null) {
+                merged.parent = this;
             }
 
-            if (removedGtr != null) {
-                removedGtr.parent = null;
-                if (removedLeq != null) {
-                    removedLeq.parent = null;
-                    removedGtr.traverse(removedLeq.val, false).addTree(removedLeq);
-                }
-
-                this.addTree(removedGtr.root());
-            } else if (removedLeq != null) {
-                removedLeq.parent = null;
-                this.addTree(removedLeq);
+            if (leq == toRemove) {
+                leq = merged;
+            } else if (gtr == toRemove) {
+                gtr = merged;
+            } else {
+                throw new IllegalArgumentException();
             }
         }
 
@@ -292,15 +357,15 @@ public class AVLTree<T extends Comparable<T>> implements Collection<T> {
                 if ((leq.gtr == null ? 0 : leq.gtr.height) <= (leq.leq == null ? 0 : leq.leq.height)) {
                     rotateRight();
                 } else {
-                    leq.rotateRight();
-                    rotateLeft();
+                    leq.rotateLeft();
+                    rotateRight();
                 }
             } else {
                 if ((gtr.leq == null ? 0 : gtr.leq.height) <= (gtr.gtr == null ? 0 : gtr.gtr.height)) {
                     rotateLeft();
                 } else {
-                    gtr.rotateLeft();
-                    rotateRight();
+                    gtr.rotateRight();
+                    rotateLeft();
                 }
             }
         }
@@ -354,24 +419,29 @@ public class AVLTree<T extends Comparable<T>> implements Collection<T> {
                 parent.refreshBalance();
             }
         }
+
+        @Override
+        public String toString() {
+            return val.toString();
+        }
     }
 
     private class AVLIterator implements Iterator<T> {
 
-        private int traverseIndex = 0;
+        private int traverseIndex = -1;
 
         private Object[] traverseArray = new Object[height()];
 
         AVLIterator() {
             if (root != null) {
-                traverseArray[traverseIndex] = root;
+                traverseArray[++traverseIndex] = root;
             }
         }
 
         @Override
         public boolean hasNext() {
             // other || (init check)
-            return traverseIndex > -1 || (traverseIndex == 0 && traverseArray[traverseIndex] == null && root != null);
+            return traverseIndex > -1;
         }
 
         @Override
@@ -380,34 +450,51 @@ public class AVLTree<T extends Comparable<T>> implements Collection<T> {
         }
 
         AVLNode nextNode() {
-            AVLNode output = (AVLNode) traverseArray[traverseIndex++];
-            if (traverseIndex == traverseArray.length) {
-                branch();
-            } else {
-                setNext();
+            if (traverseIndex == -1) {
+                return null;
             }
+
+            AVLNode output = (AVLNode) traverseArray[traverseIndex];
+            setNext();
 
             return output;
         }
 
         private void setNext() {
-            AVLNode output = (AVLNode) traverseArray[traverseIndex - 1];
-            AVLNode next = (AVLNode) traverseArray[traverseIndex];
-            if ((next == output.leq && output.gtr == null) || next == output.gtr) {
-                branch();
-            } else if (next == null && output.leq != null) {
-                traverseArray[traverseIndex] = output.leq;
-            } else {
-                traverseArray[traverseIndex] = output.gtr;
-            }
-        }
+            // while (true) {...} mimics recursion without filling up the stack
+            while (true) {
+                if (traverseIndex == -1) {
+                    return;
+                }
 
-        private void branch() {
-            if (traverseIndex-- != traverseArray.length) {
-                traverseArray[traverseIndex] = null;
-            }
+                traverseIndex++;
 
-            setNext();
+                if (traverseIndex == traverseArray.length) {
+                    traverseIndex -= 2;
+                    continue; // "recursive" call
+                }
+
+                AVLNode parent = (AVLNode) traverseArray[traverseIndex - 1];
+
+                if (parent.leq == null && parent.gtr == null) {
+                    traverseIndex -= 2;
+                    continue; // "recursive" call
+                }
+
+                AVLNode outputChild = (AVLNode) traverseArray[traverseIndex];
+
+                if (outputChild == null || (outputChild != parent.leq && outputChild != parent.gtr)) {
+                    AVLNode next = parent.leq != null ? parent.leq : parent.gtr;
+                    traverseArray[traverseIndex] = next;
+                    return;
+                } else if (outputChild == parent.leq && parent.gtr != null) {
+                    traverseArray[traverseIndex] = parent.gtr;
+                    return;
+                }
+
+                traverseIndex -= 2;
+                // "recursive" call
+            }
         }
     }
 }
