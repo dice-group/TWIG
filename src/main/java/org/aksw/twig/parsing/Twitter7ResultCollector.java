@@ -7,10 +7,11 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import java.io.*;
+import java.util.zip.GZIPOutputStream;
 
 /**
  * This class will handle parsed models. It will do so by collecting results of {@link com.google.common.util.concurrent.ListenableFuture} to which this collector has been added.
- * Results will be merged into one {@link TwitterModelWrapper} that is then printed into a file.
+ * Results will be merged into one {@link TwitterModelWrapper} that is then printed into a GZip compressed file.
  * Language of printed results will be {@link #WRITE_LANG}.
  * @author Felix Linker
  */
@@ -20,7 +21,7 @@ class Twitter7ResultCollector implements FutureCallback<TwitterModelWrapper> {
 
     public static final String WRITE_LANG = "Turtle";
 
-    public static final String FILE_TYPE = ".ttl";
+    public static final String FILE_TYPE = ".ttl.gz";
 
     private TwitterModelWrapper currentModel = new TwitterModelWrapper();
 
@@ -67,9 +68,11 @@ class Twitter7ResultCollector implements FutureCallback<TwitterModelWrapper> {
 
         LOGGER.info("Writing result model {}.", this.currentModel);
 
-        try (PrintWriter writer = new PrintWriter(this.fileHandler.nextFile())) {
-            this.currentModel.model.write(writer, WRITE_LANG);
-            writer.flush();
+        try (FileOutputStream fileOutputStream = new FileOutputStream(this.fileHandler.nextFile())) {
+            try (Writer writer = new OutputStreamWriter(new GZIPOutputStream(fileOutputStream))) {
+                this.currentModel.model.write(writer, WRITE_LANG);
+                writer.flush();
+            }
         } catch (IOException e) {
             LOGGER.error("Error: exception - {}", e.getMessage());
             return;
