@@ -15,7 +15,7 @@ public class Twitter7BlockParserTest {
     public void parseTest() {
         Twitter7BlockParser parser = new Twitter7BlockParser(new ImmutableTriple<>(
                 "       2009-09-30 23:55:53",
-                "       http://twitter.com/andreavaleriac",
+                "       http://twitter.com/user",
                 "       I'm starting to feel really sick, hope is not the S**** flu! (That's the new S-word)"
         ));
 
@@ -26,7 +26,7 @@ public class Twitter7BlockParserTest {
         }
 
         Assert.assertEquals("2009-09-30T23:55:53", parser.getMessageDateTime().toString());
-        Assert.assertEquals("andreavaleriac", parser.getTwitterUserName());
+        Assert.assertEquals("user", parser.getTwitterUserName());
         Assert.assertEquals("I'm starting to feel really sick, hope is not the S**** flu! (That's the new S-word)", parser.getMessageContent());
     }
 }

@@ -198,7 +198,7 @@ public class FileHandler {
     public static BufferedReader getDecodingReader(File file) throws IOException {
         InputStream fileStream = new FileInputStream(file);
 
-        String[] split = file.getName().split(".");
+        String[] split = file.getName().split("\\.");
         switch (split.length > 0 ? split[split.length - 1] : "") {
             case "gz": fileStream = new GZIPInputStream(fileStream); break;
             case "zip": fileStream = new ZipInputStream(fileStream); break;

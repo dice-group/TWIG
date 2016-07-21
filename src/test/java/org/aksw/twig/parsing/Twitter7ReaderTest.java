@@ -16,6 +16,7 @@ import java.util.concurrent.Callable;
 
 public class Twitter7ReaderTest {
 
+    private String compressedSampleDataPath;
     private String sampleDataPath;
     private String brokenSampleDataPath;
     private String emptySampleDataPath;
@@ -24,6 +25,7 @@ public class Twitter7ReaderTest {
 
     @Before
     public void setSampleDataPath() {
+        this.compressedSampleDataPath = getClass().getClassLoader().getResource("data/sample.txt.gz").getPath();
         this.sampleDataPath = getClass().getClassLoader().getResource("data/sample.txt").getPath();
         this.brokenSampleDataPath = getClass().getClassLoader().getResource("data/sample_broken.txt").getPath();
         this.emptySampleDataPath = getClass().getClassLoader().getResource("data/sample_empty.txt").getPath();
@@ -84,11 +86,20 @@ public class Twitter7ReaderTest {
         }
     }
 
+    @Test
+    public void testReadingCompressed() {
+        testReading(compressedSampleDataPath);
+    }
+
+    @Test
+    public void testReadingUncompressed() {
+        testReading(sampleDataPath);
+    }
+
     /**
      * Tests reading a whole file.
      */
-    @Test
-    public void testReading() {
+    private void testReading(String file) {
         allBlocks.add("T       2009-09-30 23:55:53\n" +
                 "U       http://twitter.com/user1\n" +
                 "W       I'm starting to feel really sick, hope is not the S**** flu! (That's the new S-word)\n");
@@ -112,7 +123,7 @@ public class Twitter7ReaderTest {
                 "W       I'm writing my first twitter!!\n");
 
         try {
-            Twitter7Reader<String> reader = new Twitter7Reader<>(new File(sampleDataPath), Callback::new , Parser::new );
+            Twitter7Reader<String> reader = new Twitter7Reader<>(new File(file), Callback::new , Parser::new );
             reader.read();
             while (!reader.isFinished());
             Assert.assertTrue(allBlocks.isEmpty());
