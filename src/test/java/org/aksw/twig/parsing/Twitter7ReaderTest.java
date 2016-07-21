@@ -39,12 +39,12 @@ public class Twitter7ReaderTest {
             Twitter7Reader<String> reader = new Twitter7Reader<>(f, Callback::new, Parser::new );
             Triple<String, String, String> triple = reader.readTwitter7Block(fileReader);
             Assert.assertEquals("       2009-09-30 23:55:53", triple.getLeft());
-            Assert.assertEquals("       http://twitter.com/andreavaleriac", triple.getMiddle());
+            Assert.assertEquals("       http://twitter.com/user1", triple.getMiddle());
             Assert.assertEquals("       I'm starting to feel really sick, hope is not the S**** flu! (That's the new S-word)", triple.getRight());
 
             triple = reader.readTwitter7Block(fileReader);
             Assert.assertEquals("       2009-09-30 23:55:53", triple.getLeft());
-            Assert.assertEquals("       http://twitter.com/beautyismynam3", triple.getMiddle());
+            Assert.assertEquals("       http://twitter.com/user2", triple.getMiddle());
             Assert.assertEquals("       soooo i got sum advice from the 1 i love most...he goes drop all those lame ass birds uno unot like them...lol here it goes", triple.getRight());
         } catch (IOException e) {
             Assert.fail("Class creation failed.");
@@ -61,7 +61,7 @@ public class Twitter7ReaderTest {
             Twitter7Reader<String> reader = new Twitter7Reader<>(f, Callback::new, Parser::new );
             Triple<String, String, String> triple = reader.readTwitter7Block(fileReader);
             Assert.assertEquals("       2009-09-30 23:55:53", triple.getLeft());
-            Assert.assertEquals("       http://twitter.com/elektrap2", triple.getMiddle());
+            Assert.assertEquals("       http://twitter.com/user7", triple.getMiddle());
             Assert.assertEquals("       I'm writing my first twitter!!", triple.getRight());
         } catch (IOException e) {
             Assert.fail("Class creation failed.");
@@ -90,25 +90,25 @@ public class Twitter7ReaderTest {
     @Test
     public void testReading() {
         allBlocks.add("T       2009-09-30 23:55:53\n" +
-                "U       http://twitter.com/andreavaleriac\n" +
+                "U       http://twitter.com/user1\n" +
                 "W       I'm starting to feel really sick, hope is not the S**** flu! (That's the new S-word)\n");
         allBlocks.add("T       2009-09-30 23:55:53\n" +
-                "U       http://twitter.com/beautyismynam3\n" +
+                "U       http://twitter.com/user2\n" +
                 "W       soooo i got sum advice from the 1 i love most...he goes drop all those lame ass birds uno unot like them...lol here it goes\n");
         allBlocks.add("T       2009-09-30 23:55:53\n" +
-                "U       http://twitter.com/bhightower1\n" +
-                "W       @Audition_Portal PAAAUULLLL! I miss youuu! Lol I thought I sent you an email, but it was placed in my Drafts so I'll resend that to you! =]\n");
+                "U       http://twitter.com/user3\n" +
+                "W       @user8 PAAAUULLLL! I miss youuu! Lol I thought I sent you an email, but it was placed in my Drafts so I'll resend that to you! =]\n");
         allBlocks.add("T       2009-09-30 23:55:53\n" +
-                "U       http://twitter.com/bonita_bob16\n" +
+                "U       http://twitter.com/user4\n" +
                 "W       I'm sad. I'm in pain. I want to cry.\n");
         allBlocks.add("T       2009-09-30 23:55:53\n" +
-                "U       http://twitter.com/burkehramsey\n" +
-                "W       @klewis33 haha yeah I made my own Twitter client! :-)\n");
+                "U       http://twitter.com/user5\n" +
+                "W       @user9 haha yeah I made my own Twitter client! :-)\n");
         allBlocks.add("T       2009-09-30 23:55:53\n" +
-                "U       http://twitter.com/chessiecat65\n" +
+                "U       http://twitter.com/user6\n" +
                 "W       Get this-I caught my mom listening to \"Slippery When Wet\" by Bon Jovi...and she said she LIKES IT! Winger next? ;)\n");
         allBlocks.add("T       2009-09-30 23:55:53\n" +
-                "U       http://twitter.com/elektrap2\n" +
+                "U       http://twitter.com/user7\n" +
                 "W       I'm writing my first twitter!!\n");
 
         try {
