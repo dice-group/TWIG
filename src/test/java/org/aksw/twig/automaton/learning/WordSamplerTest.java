@@ -34,6 +34,6 @@ public class WordSamplerTest {
             occurrences.put(sample, occurrences.get(sample) + 1);
         }
 
-        Assert.assertEquals(1d, (double) occurrences.get("a") / (double) occurrences.get("b"), 0.01);
+        Assert.assertEquals(1d, (double) occurrences.get("a") / (double) occurrences.get("b"), 0.1);
     }
 }
