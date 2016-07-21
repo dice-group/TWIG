@@ -1,6 +1,7 @@
 package org.aksw.twig.parsing;
 
 import com.google.common.util.concurrent.*;
+import org.aksw.twig.files.FileHandler;
 import org.apache.commons.lang3.tuple.MutableTriple;
 import org.apache.commons.lang3.tuple.Triple;
 import org.apache.logging.log4j.LogManager;
@@ -69,7 +70,7 @@ class Twitter7Reader<T> {
             throw new IllegalStateException();
         }
 
-        try (BufferedReader fileReader = new BufferedReader(new FileReader(this.fileToParse))) {
+        try (BufferedReader fileReader = FileHandler.getDecodingReader(this.fileToParse)) {
 
             Triple<String, String, String> twitter7Block;
             while ((twitter7Block = this.readTwitter7Block(fileReader)) != null) {

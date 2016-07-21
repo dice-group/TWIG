@@ -5,9 +5,7 @@ import org.apache.commons.lang3.tuple.Pair;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.IOException;
+import java.io.*;
 import java.nio.file.DirectoryStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -17,6 +15,8 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+import java.util.zip.GZIPInputStream;
+import java.util.zip.ZipInputStream;
 
 
 /**
@@ -183,5 +183,28 @@ public class FileHandler {
         }
 
         return new ImmutablePair<>(outputDirectory, filesToParse);
+    }
+
+    /**
+     * Creates a {@link BufferedReader} that decodes a file by recognizing its file ending. Possible values:
+     * <ul>
+     *     <li>.gz for GZip-compression</li>
+     *     <li>.zip for Zip-compression</li>
+     * </ul>
+     * @param file File to read.
+     * @return Reader that decodes the file.
+     * @throws IOException Thrown during reader creation.
+     */
+    public static BufferedReader getDecodingReader(File file) throws IOException {
+        InputStream fileStream = new FileInputStream(file);
+
+        String[] split = file.getName().split(".");
+        switch (split[split.length - 1]) {
+            case "gz": fileStream = new GZIPInputStream(fileStream); break;
+            case "zip": fileStream = new ZipInputStream(fileStream); break;
+        }
+
+        Reader decoder = new InputStreamReader(fileStream);
+        return new BufferedReader(decoder);
     }
 }
