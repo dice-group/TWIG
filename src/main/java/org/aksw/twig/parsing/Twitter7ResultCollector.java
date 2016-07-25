@@ -61,6 +61,7 @@ class Twitter7ResultCollector implements FutureCallback<TwitterModelWrapper> {
             for (StackTraceElement stackTraceElement: stackTraceElements) {
                 LOGGER.error(stackTraceElement.toString());
             }
+            LOGGER.error("");
         } else {
             LOGGER.error(t.getMessage(), t.getCause());
         }
