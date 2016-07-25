@@ -1,4 +1,4 @@
-package org.aksw.twig.automaton.learning;
+package org.aksw.twig.automaton.tweets;
 
 import org.aksw.twig.files.FileHandler;
 import org.apache.commons.lang3.tuple.MutablePair;

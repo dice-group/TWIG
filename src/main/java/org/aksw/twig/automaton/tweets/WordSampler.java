@@ -1,4 +1,4 @@
-package org.aksw.twig.automaton.learning;
+package org.aksw.twig.automaton.tweets;
 
 import org.aksw.twig.structs.AVLTree;
 

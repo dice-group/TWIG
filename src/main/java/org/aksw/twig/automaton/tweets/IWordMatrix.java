@@ -1,4 +1,4 @@
-package org.aksw.twig.automaton.learning;
+package org.aksw.twig.automaton.tweets;
 
 import java.io.File;
 import java.io.IOException;
