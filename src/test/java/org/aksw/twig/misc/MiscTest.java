@@ -15,6 +15,12 @@ public class MiscTest implements Callable<Void> {
 
     public final Model model = ModelFactory.createDefaultModel();
 
+    public MiscTest() {
+        if (model == null) {
+            throw new ExceptionInInitializerError();
+        }
+    }
+
     @Override
     public Void call() throws Exception {
         new MiscTest();
