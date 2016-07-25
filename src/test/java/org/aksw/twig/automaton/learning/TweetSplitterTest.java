@@ -12,13 +12,10 @@ import java.util.stream.Collectors;
 
 public class TweetSplitterTest {
 
-    private static final Logger LOGGER = LogManager.getLogger(TweetSplitter.class);
-
     @Test
     public void splitTweet() {
         TweetSplitter splitter = new TweetSplitter("@Audition_Portal PAAAUULLLL! I miss youuu! Lol I thought I sent you an email, but it was placed in my Drafts so I'll resend that to you! =]");
         Set<Pair<String, String>> tweet = splitter.getSplit().collect(Collectors.toSet());
-        tweet.forEach(pair -> LOGGER.info("{} {}", pair.getLeft(), pair.getRight()));
         // Check randoms
         Assert.assertTrue(tweet.contains(new ImmutablePair<>("miss", "youuu")));
         Assert.assertTrue(tweet.contains(new ImmutablePair<>("Drafts", "so")));
