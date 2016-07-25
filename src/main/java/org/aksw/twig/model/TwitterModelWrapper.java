@@ -7,6 +7,7 @@ import org.apache.jena.shared.PrefixMapping;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import java.io.Writer;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.time.LocalDateTime;
@@ -19,6 +20,8 @@ import java.util.Random;
 public class TwitterModelWrapper {
 
     private static final Logger LOGGER = LogManager.getLogger(TwitterModelWrapper.class);
+
+    public static final String WRITE_LANG = "Turtle";
 
     // Prefix mappings
     private static final String FOAF_IRI = "http://xmlns.com/foaf/0.1/";
@@ -158,5 +161,14 @@ public class TwitterModelWrapper {
      */
     private static String prefixedIri(String original) {
         return TWIG_IRI.concat(original);
+    }
+
+    /**
+     * Writes the model into the given writer.
+     * No other methods (such as flush()) are invoked at the writer.
+     * @param writer Writer to write in.
+     */
+    public void write(Writer writer) {
+        model.write(writer, WRITE_LANG);
     }
 }

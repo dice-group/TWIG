@@ -19,8 +19,6 @@ class Twitter7ResultCollector implements FutureCallback<TwitterModelWrapper> {
 
     private static final Logger LOGGER = LogManager.getLogger(Twitter7ResultCollector.class);
 
-    public static final String WRITE_LANG = "Turtle";
-
     public static final String FILE_TYPE = ".ttl.gz";
 
     private TwitterModelWrapper currentModel = new TwitterModelWrapper();
@@ -74,7 +72,7 @@ class Twitter7ResultCollector implements FutureCallback<TwitterModelWrapper> {
 
         try (FileOutputStream fileOutputStream = new FileOutputStream(this.fileHandler.nextFile())) {
             try (Writer writer = new OutputStreamWriter(new GZIPOutputStream(fileOutputStream))) {
-                this.currentModel.model.write(writer, WRITE_LANG);
+                this.currentModel.write(writer);
                 writer.flush();
             }
         } catch (IOException e) {
