@@ -1,5 +1,6 @@
 package org.aksw.twig.files;
 
+import org.apache.commons.compress.archivers.tar.TarArchiveInputStream;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.logging.log4j.LogManager;
@@ -188,23 +189,44 @@ public class FileHandler {
     /**
      * Creates a {@link BufferedReader} that decodes a file by recognizing its file ending. Possible values:
      * <ul>
-     *     <li>.gz for GZip-compression</li>
-     *     <li>.zip for Zip-compression</li>
+     *     <li>.gz</li>
+     *     <li>.zip</li>
+     *     <li>.tar</li>
      * </ul>
      * @param file File to read.
      * @return Reader that decodes the file.
      * @throws IOException Thrown during reader creation.
      */
     public static BufferedReader getDecodingReader(File file) throws IOException {
-        InputStream fileStream = new FileInputStream(file);
-
-        String[] split = file.getName().split("\\.");
-        switch (split.length > 0 ? split[split.length - 1] : "") {
-            case "gz": fileStream = new GZIPInputStream(fileStream); break;
-            case "zip": fileStream = new ZipInputStream(fileStream); break;
-        }
-
+        InputStream fileStream = getDecompressionStreams(file);
         Reader decoder = new InputStreamReader(fileStream);
         return new BufferedReader(decoder);
+    }
+
+    /**
+     * Creates a chain of decompression streams.
+     * Supported streams are:
+     * <ul>
+     *     <li>.gz</li>
+     *     <li>.zip</li>
+     *     <li>.tar</li>
+     * </ul>
+     * @param file File to decompress.
+     * @return InputStream decompressing the file.
+     * @throws IOException Thrown during reader creation.
+     */
+    private static InputStream getDecompressionStreams(File file) throws IOException {
+        InputStream fileStream = new FileInputStream(file);
+        String[] split = file.getName().split("\\.");
+        for (int i = split.length - 1; i >= 0; i--) {
+            switch (split[i]) {
+                case "gz": fileStream = new GZIPInputStream(fileStream); break;
+                case "zip": fileStream = new ZipInputStream(fileStream); break;
+                case "tar": fileStream = new TarArchiveInputStream(fileStream); break;
+                default: return fileStream;
+            }
+        }
+
+        return fileStream;
     }
 }
