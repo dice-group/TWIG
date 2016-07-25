@@ -37,7 +37,9 @@ class Twitter7Reader<T> {
 
     private Function<Triple<String, String, String>, Callable<T>> resultParser;
 
-    private final ListeningExecutorService service = MoreExecutors.listeningDecorator(Executors.newCachedThreadPool());
+    private static final int N_THREADS = 32;
+
+    private final ListeningExecutorService service = MoreExecutors.listeningDecorator(Executors.newFixedThreadPool(N_THREADS));
 
     /**
      * Initializes a file reader to given file and sets class variables.
