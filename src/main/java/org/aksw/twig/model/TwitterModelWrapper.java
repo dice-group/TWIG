@@ -4,6 +4,8 @@ import org.apache.commons.codec.binary.Hex;
 import org.apache.jena.datatypes.xsd.XSDDatatype;
 import org.apache.jena.rdf.model.*;
 import org.apache.jena.shared.PrefixMapping;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
@@ -15,6 +17,8 @@ import java.util.Random;
  * Wraps a {@link Model} using TWIG ontology to create RDF-graphs.
  */
 public class TwitterModelWrapper {
+
+    private static final Logger LOGGER = LogManager.getLogger(TwitterModelWrapper.class);
 
     // Prefix mappings
     private static final String FOAF_IRI = "http://xmlns.com/foaf/0.1/";
@@ -114,7 +118,12 @@ public class TwitterModelWrapper {
         MD5.update(twitterAccountName.getBytes());
         MD5.update(randomHashSuffix);
         byte[] hash = MD5.digest();
-        return Hex.encodeHexString(hash);
+        try {
+            return Hex.encodeHexString(hash);
+        } catch (IndexOutOfBoundsException e) {
+            LOGGER.error("Hex calc failed");
+            return null;
+        }
     }
 
     /**
