@@ -25,6 +25,7 @@
             <transformer>
               <mainClass>org.aksw.twig.Main</mainClass>
             </transformer>
+            <transformer />
           </transformers>
         </configuration>
       </plugin>
