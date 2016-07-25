@@ -88,7 +88,7 @@ public class TwitterModelWrapper {
      * @param accountName Name of the twitter account.
      * @return Resource of the twitter account.
      */
-    private Resour  ce getTwitterAccount(String accountName) {
+    private Resource getTwitterAccount(String accountName) {
         return this.model.getResource(createTwitterAccountIri(accountName))
                 .addProperty(RDF_TYPE, OWL_NAMED_INDIVIDUAL)
                 .addProperty(RDF_TYPE, ONLINE_TWITTER_ACCOUNT);
