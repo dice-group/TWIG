@@ -2,6 +2,8 @@ package org.aksw.twig.parsing;
 
 import org.aksw.twig.model.TwitterModelWrapper;
 import org.apache.commons.lang3.tuple.Triple;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -20,6 +22,8 @@ import java.util.regex.Pattern;
  * @author Felix Linker
  */
 class Twitter7BlockParser implements Callable<TwitterModelWrapper> {
+
+    private static final Logger LOGGER = LogManager.getLogger(Twitter7BlockParser.class);
 
     private static final DateTimeFormatter DATE_TIME_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
 
@@ -114,6 +118,7 @@ class Twitter7BlockParser implements Callable<TwitterModelWrapper> {
         // Parse message content
         this.messageContent = this.lineW.trim();
 
+        LOGGER.info("Matching mentions: {}", messageContent);
         Matcher mentionsMatcher = MENTIONS_PATTERN.matcher(this.messageContent);
         while (mentionsMatcher.find()) {
             this.mentions.add(mentionsMatcher.group(1));

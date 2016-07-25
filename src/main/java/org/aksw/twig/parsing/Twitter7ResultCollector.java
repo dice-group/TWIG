@@ -47,8 +47,6 @@ class Twitter7ResultCollector implements FutureCallback<TwitterModelWrapper> {
     @Override
     public synchronized void onSuccess(TwitterModelWrapper result) {
 
-        LOGGER.info("Collected result model.");
-
         this.currentModel.model.add(result.model);
 
         if (this.currentModel.model.size() >= this.modelMaxSize) {
