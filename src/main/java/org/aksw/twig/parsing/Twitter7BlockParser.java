@@ -118,14 +118,13 @@ class Twitter7BlockParser implements Callable<TwitterModelWrapper> {
         // Parse message content
         this.messageContent = this.lineW.trim();
 
-        LOGGER.info("Matching mentions: {}", messageContent);
         try {
             Matcher mentionsMatcher = MENTIONS_PATTERN.matcher(this.messageContent);
             while (mentionsMatcher.find()) {
                 this.mentions.add(mentionsMatcher.group(1));
             }
         } catch (RuntimeException e) {
-            LOGGER.error("Exception occured during mention matching.");
+            LOGGER.error("Exception occurred during mention matching at {}.", messageContent);
             throw e;
         }
 
