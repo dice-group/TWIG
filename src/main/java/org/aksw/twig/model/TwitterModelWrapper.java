@@ -80,7 +80,7 @@ public class TwitterModelWrapper {
 
         twitterAccount.addProperty(SENDS, tweet);
 
-        mentions.stream().forEach(mention -> tweet.addProperty(MENTIONS, getTwitterAccount(mention)));
+        mentions.forEach(mention -> tweet.addProperty(MENTIONS, getTwitterAccount(mention)));
     }
 
     /**
