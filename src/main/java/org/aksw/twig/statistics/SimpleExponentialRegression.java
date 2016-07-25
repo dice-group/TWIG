@@ -3,13 +3,12 @@ package org.aksw.twig.statistics;
 import org.apache.commons.math3.stat.regression.ModelSpecificationException;
 import org.apache.commons.math3.stat.regression.SimpleRegression;
 
-// TODO: implement UpdatingMultipleLinearRegression
 public class SimpleExponentialRegression {
 
     private final SimpleRegression linearRegression = new SimpleRegression();
 
     public void addData(double x, double y) {
-        this.linearRegression.addData(x, Math.log(y));
+        linearRegression.addData(x, Math.log(y));
     }
 
     public void addData(double[][] data) throws ModelSpecificationException {
