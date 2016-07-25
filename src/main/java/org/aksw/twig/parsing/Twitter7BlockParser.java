@@ -116,7 +116,7 @@ class Twitter7BlockParser implements Callable<TwitterModelWrapper> {
         }
 
         // Parse message content
-        this.messageContent = this.lineW.trim();
+        this.messageContent = lineW.trim();
 
         Matcher mentionsMatcher = MENTIONS_PATTERN.matcher(this.messageContent);
         while (mentionsMatcher.find()) {
