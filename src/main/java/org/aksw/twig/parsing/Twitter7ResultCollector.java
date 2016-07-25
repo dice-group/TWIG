@@ -56,7 +56,11 @@ class Twitter7ResultCollector implements FutureCallback<TwitterModelWrapper> {
 
     @Override
     public void onFailure(Throwable t) {
-        LOGGER.error(t.getMessage(), t.getCause());
+        if (t == null) {
+            LOGGER.error("Throwable is null");
+        } else {
+            LOGGER.error(t.getMessage(), t.getCause());
+        }
     }
 
     /**
