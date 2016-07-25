@@ -1,10 +1,11 @@
-*.class
-target/
+notes.txt
 
 # Mobile Tools for Java (J2ME)
 .mtj.tmp/
 
 # Package Files #
+target/
+*.class
 *.jar
 *.war
 *.ear
