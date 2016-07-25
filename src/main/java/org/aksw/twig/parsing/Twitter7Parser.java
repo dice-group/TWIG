@@ -20,7 +20,7 @@ public final class Twitter7Parser implements Runnable {
 
     private static final Logger LOGGER = LogManager.getLogger(Twitter7Parser.class);
 
-    private static final long MODEL_MAX_SIZE = 10000;
+    private static final long MODEL_MAX_SIZE = 1000000;
 
     private File fileToParse;
 
