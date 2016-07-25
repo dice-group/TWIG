@@ -24,6 +24,7 @@ public class MiscTest implements Callable<Void> {
     @Override
     public Void call() throws Exception {
         new MiscTest();
+        System.getProperties().propertyNames();
         return null;
     }
 
