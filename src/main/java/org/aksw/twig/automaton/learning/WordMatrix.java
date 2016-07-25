@@ -67,7 +67,7 @@ public class WordMatrix implements IWordMatrix, Serializable {
         long size = mapping.getLeft();
         return mapping.getRight().entrySet().stream()
                 .collect(Collectors.toMap(
-                        entry -> entry.getKey(),
+                        Map.Entry::getKey,
                         entry -> (double) entry.getValue() / (double) size
                 ));
     }
@@ -116,16 +116,15 @@ public class WordMatrix implements IWordMatrix, Serializable {
         Set<File> filesToRead = parsedArgs.getRight();
 
         WordMatrix matrix = new WordMatrix();
-        filesToRead.stream()
-                .forEach(file -> {
-                    Model fileModel = RDFDataMgr.loadModel(file.getPath(), Lang.TURTLE);
-                    try (QueryExecution execution = QueryExecutionFactory.create(TWITTER_CONTENT_QUERY, fileModel)) {
-                        ResultSet resultSet = execution.execSelect();
-                        while (resultSet.hasNext()) {
-                            matrix.putAll(new TweetSplitter(resultSet.next().get("c").toString()));
-                        }
-                    }
-                });
+        filesToRead.forEach(file -> {
+            Model fileModel = RDFDataMgr.loadModel(file.getPath(), Lang.TURTLE);
+            try (QueryExecution execution = QueryExecutionFactory.create(TWITTER_CONTENT_QUERY, fileModel)) {
+                ResultSet resultSet = execution.execSelect();
+                while (resultSet.hasNext()) {
+                    matrix.putAll(new TweetSplitter(resultSet.next().get("c").toString()));
+                }
+            }
+        });
 
         File writeFile;
         try {
@@ -139,7 +138,6 @@ public class WordMatrix implements IWordMatrix, Serializable {
             outputStream.writeObject(matrix);
         } catch (IOException e) {
             LOGGER.error("Error: exception - {}", e.getMessage());
-            return;
         }
     }
 }

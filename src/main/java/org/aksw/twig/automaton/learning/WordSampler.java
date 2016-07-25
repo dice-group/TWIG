@@ -28,25 +28,24 @@ public class WordSampler {
     }
 
     public WordSampler(final IWordMatrix matrix) {
-        matrix.getPredecessors().stream()
-                .forEach(predecessor -> {
+        matrix.getPredecessors().forEach(predecessor -> {
 
-                    AVLTree<WordChanceMapping> tree = new AVLTree<>();
+            AVLTree<WordChanceMapping> tree = new AVLTree<>();
 
-                    WordChanceMapping[] wordChanceMappings = matrix.getMappings(predecessor).entrySet().stream()
-                            .map(entry -> new WordChanceMapping(entry.getKey(), entry.getValue()))
-                            .toArray(WordChanceMapping[]::new);
-                    Arrays.sort(wordChanceMappings, WordChanceMapping::compareTo);
+            WordChanceMapping[] wordChanceMappings = matrix.getMappings(predecessor).entrySet().stream()
+                    .map(entry -> new WordChanceMapping(entry.getKey(), entry.getValue()))
+                    .toArray(WordChanceMapping[]::new);
+            Arrays.sort(wordChanceMappings, WordChanceMapping::compareTo);
 
-                    double cumulativeChance = 0d;
-                    for (WordChanceMapping mapping: wordChanceMappings) {
-                        mapping.chance += cumulativeChance;
-                        cumulativeChance = mapping.chance;
-                        tree.add(mapping);
-                    }
+            double cumulativeChance = 0d;
+            for (WordChanceMapping mapping: wordChanceMappings) {
+                mapping.chance += cumulativeChance;
+                cumulativeChance = mapping.chance;
+                tree.add(mapping);
+            }
 
-                    sampleMap.put(predecessor, tree);
-                });
+            sampleMap.put(predecessor, tree);
+        });
     }
 
     private static class WordChanceMapping implements Comparable<WordChanceMapping> {

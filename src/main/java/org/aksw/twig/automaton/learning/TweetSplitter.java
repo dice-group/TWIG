@@ -80,11 +80,11 @@ public class TweetSplitter implements Iterable<Pair<String, String>> {
         for (int i = 0; i < tweet.length(); i++) {
             char c = tweet.charAt(i);
 
-            if (!this.ALLOW_CHARACTERS.contains(c)) {
+            if (!ALLOW_CHARACTERS.contains(c)) {
                 continue;
             }
 
-            if (this.WORD_DELIMITERS.contains(c)) {
+            if (WORD_DELIMITERS.contains(c)) {
                 if (!lastCharDelimited) {
                     this.split.add(new ImmutablePair<>(predecessor, successor.toString()));
                     predecessor = successor.toString();
@@ -94,7 +94,7 @@ public class TweetSplitter implements Iterable<Pair<String, String>> {
                 continue;
             }
 
-            if (this.SENTENCE_DELIMITERS.contains(c)) {
+            if (SENTENCE_DELIMITERS.contains(c)) {
                 if (!lastCharDelimited) {
                     this.split.add(new ImmutablePair<>(predecessor, successor.toString()));
                     this.split.add(new ImmutablePair<>(successor.toString(), ""));

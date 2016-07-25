@@ -120,10 +120,10 @@ public class TwitterModelWrapper {
      * @return IRI of the tweet.
      */
     private static String createTweetIri(String twitterAccountName, LocalDateTime messageTime) {
-        StringBuilder builder = new StringBuilder(anonymizeTwitterAccount(twitterAccountName));
-        builder.append('_');
-        builder.append(messageTime.toString().replaceAll(":", "-"));
-        return prefixedIri(builder.toString());
+        String returnValue = anonymizeTwitterAccount(twitterAccountName)
+                .concat("_")
+                .concat(messageTime.toString().replaceAll(":", "-"));
+        return prefixedIri(returnValue);
     }
 
     /**
@@ -132,8 +132,6 @@ public class TwitterModelWrapper {
      * @return Prefixed string.
      */
     private static String prefixedIri(String original) {
-        StringBuilder builder = new StringBuilder(TWIG_IRI);
-        builder.append(original);
-        return builder.toString();
+        return TWIG_IRI.concat(original);
     }
 }

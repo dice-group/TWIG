@@ -87,7 +87,6 @@ public class FileHandler {
                 writeFile.createNewFile();
             } catch (IOException e) {
                 attempt++;
-                continue;
             }
         }
 

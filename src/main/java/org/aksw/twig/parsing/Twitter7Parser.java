@@ -76,7 +76,7 @@ public final class Twitter7Parser implements Runnable {
 
         // Start parsing
         final ExecutorService service = Executors.newCachedThreadPool();
-        filesToParse.stream().forEach(file -> service.execute(new Twitter7Parser(file, outputDirectory)));
+        filesToParse.forEach(file -> service.execute(new Twitter7Parser(file, outputDirectory)));
         service.shutdown();
     }
 }
