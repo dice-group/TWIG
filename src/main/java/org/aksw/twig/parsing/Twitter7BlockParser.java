@@ -29,7 +29,7 @@ class Twitter7BlockParser implements Callable<TwitterModelWrapper> {
 
     private static final String TWITTER_AUTHORITY = "twitter.com";
 
-    private static final Pattern MENTIONS_PATTERN = Pattern.compile("@([^ .]*)");
+    private static final Pattern MENTIONS_PATTERN = Pattern.compile("@([a-zA-Z0-9_]{1,15})");
 
     /** T line of the twitter7 block. */
     private String lineT;
