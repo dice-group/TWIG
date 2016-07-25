@@ -1,13 +1,15 @@
 package org.aksw.twig.model;
 
+import org.apache.commons.codec.binary.Hex;
 import org.apache.jena.datatypes.xsd.XSDDatatype;
 import org.apache.jena.rdf.model.*;
 import org.apache.jena.shared.PrefixMapping;
 
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.time.LocalDateTime;
 import java.util.Collection;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
+import java.util.Random;
 
 /**
  * Wraps a {@link Model} using TWIG ontology to create RDF-graphs.
@@ -43,9 +45,18 @@ public class TwitterModelWrapper {
     private static final Property TWEET_CONTENT = ResourceFactory.createProperty(PREFIX_MAPPING.expandPrefix("twig:tweetContent"));
     private static final Property RDF_TYPE = ResourceFactory.createProperty(PREFIX_MAPPING.expandPrefix("rdf:type"));
 
-    private static long userId = 0;
+    private static byte[] randomHashSuffix = new byte[32];
+    private static MessageDigest MD5;
 
-    private static Map<String, Long> userIdMapping = new ConcurrentHashMap<>();
+    static
+    {
+        new Random().nextBytes(randomHashSuffix);
+        try {
+            MD5 = MessageDigest.getInstance("MD5");
+        } catch (NoSuchAlgorithmException e) {
+            throw new ExceptionInInitializerError();
+        }
+    }
 
     /** The wrapped model. */
     public final Model model = ModelFactory.createDefaultModel();
@@ -100,8 +111,10 @@ public class TwitterModelWrapper {
      * @return Anonymized name.
      */
     private static String anonymizeTwitterAccount(String twitterAccountName) {
-        long id = userIdMapping.computeIfAbsent(twitterAccountName, name -> userId++);
-        return "twitterUser_".concat(Long.toString(id));
+        MD5.update(twitterAccountName.getBytes());
+        MD5.update(randomHashSuffix);
+        byte[] hash = MD5.digest();
+        return Hex.encodeHexString(hash);
     }
 
     /**
