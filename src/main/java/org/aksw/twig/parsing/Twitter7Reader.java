@@ -65,16 +65,16 @@ class Twitter7Reader<T> {
      * @throws IllegalStateException Thrown if reader gets started twice.
      */
     void read() throws IllegalStateException {
-        if (this.service.isShutdown()) {
+        if (service.isShutdown()) {
             throw new IllegalStateException();
         }
 
         try (BufferedReader fileReader = FileHandler.getDecodingReader(this.fileToParse)) {
 
             Triple<String, String, String> twitter7Block;
-            while ((twitter7Block = this.readTwitter7Block(fileReader)) != null) {
-                ListenableFuture<T> fut = service.submit(this.resultParser.apply(twitter7Block));
-                Futures.addCallback(fut, this.callbackSupplier.get());
+            while ((twitter7Block = readTwitter7Block(fileReader)) != null) {
+                ListenableFuture<T> fut = service.submit(resultParser.apply(twitter7Block));
+                Futures.addCallback(fut, callbackSupplier.get());
             }
 
         } catch (IOException e) {
@@ -89,7 +89,7 @@ class Twitter7Reader<T> {
      * @return Returns {@code true} if there is no file reading ongoing.
      */
     boolean isFinished() {
-        return this.service.isTerminated();
+        return service.isTerminated();
     }
 
     /**

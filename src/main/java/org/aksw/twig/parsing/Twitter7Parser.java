@@ -38,11 +38,10 @@ public final class Twitter7Parser implements Runnable {
 
     @Override
     public void run() {
-        String fileName = this.fileToParse.getName();
-        int typeIndex = fileName.lastIndexOf('.');
-        fileName = fileName.substring(0, typeIndex);
+        String fileName = fileToParse.getName();
+        fileName = fileName.substring(0, fileName.lastIndexOf('.'));
 
-        Twitter7ResultCollector collector = new Twitter7ResultCollector(MODEL_MAX_SIZE, this.outputDirectory, fileName);
+        Twitter7ResultCollector collector = new Twitter7ResultCollector(MODEL_MAX_SIZE, outputDirectory, fileName);
         Twitter7Reader<TwitterModelWrapper> reader;
         try {
             reader = new Twitter7Reader<>(fileToParse, () -> collector, Twitter7BlockParser::new);
@@ -56,7 +55,9 @@ public final class Twitter7Parser implements Runnable {
         while (!reader.isFinished()) {
             try {
                 Thread.sleep(10);
-            } catch (InterruptedException e) { }
+            } catch (InterruptedException e) {
+                LOGGER.error(e.getMessage(), e.getCause());
+            }
         }
 
         collector.writeModel();
