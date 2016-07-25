@@ -115,16 +115,18 @@ public class TwitterModelWrapper {
      * @return Anonymized name.
      */
     private static String anonymizeTwitterAccount(String twitterAccountName) {
-        MD5.update(twitterAccountName.getBytes());
-        MD5.update(randomHashSuffix);
-        byte[] hash;
-        try {
-            hash = MD5.digest();
-        } catch (RuntimeException e) {
-            LOGGER.error("Exception during anonymizing {}", twitterAccountName);
-            return null;
+        synchronized (MD5) {
+            MD5.update(twitterAccountName.getBytes());
+            MD5.update(randomHashSuffix);
+            byte[] hash;
+            try {
+                hash = MD5.digest();
+            } catch (RuntimeException e) {
+                LOGGER.error("Exception during anonymizing {}", twitterAccountName);
+                return null;
+            }
+            return Hex.encodeHexString(hash);
         }
-        return Hex.encodeHexString(hash);
     }
 
     /**
