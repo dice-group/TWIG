@@ -56,17 +56,13 @@ class Twitter7ResultCollector implements FutureCallback<TwitterModelWrapper> {
 
     @Override
     public void onFailure(Throwable t) {
-        if (t.getMessage() == null) {
-            StackTraceElement[] stackTraceElements = t.getStackTrace();
-            String stackTrace = "";
-            for (StackTraceElement stackTraceElement: stackTraceElements) {
-                stackTrace = stackTrace.concat(stackTraceElement.toString());
-                stackTrace = stackTrace.concat("\n");
-            }
-            LOGGER.error(stackTrace);
-        } else {
-            LOGGER.error(t.getMessage(), t.getCause());
+        StackTraceElement[] stackTraceElements = t.getStackTrace();
+        String stackTrace = "\n".concat(t.getClass().getName()).concat("\n");
+        for (StackTraceElement stackTraceElement: stackTraceElements) {
+            stackTrace = stackTrace.concat(stackTraceElement.toString());
+            stackTrace = stackTrace.concat("\n");
         }
+        LOGGER.error(stackTrace);
     }
 
     /**
