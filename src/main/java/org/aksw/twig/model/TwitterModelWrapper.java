@@ -21,7 +21,7 @@ public class TwitterModelWrapper {
 
     private static final Logger LOGGER = LogManager.getLogger(TwitterModelWrapper.class);
 
-    public static final String WRITE_LANG = "Turtle";
+    public static final String LANG = "Turtle";
 
     // Prefix mappings
     private static final String FOAF_IRI = "http://xmlns.com/foaf/0.1/";
@@ -169,6 +169,6 @@ public class TwitterModelWrapper {
      * @param writer Writer to write in.
      */
     public void write(Writer writer) {
-        model.write(writer, WRITE_LANG);
+        model.write(writer, LANG);
     }
 }
