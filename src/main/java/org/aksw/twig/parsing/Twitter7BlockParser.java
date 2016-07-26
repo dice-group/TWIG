@@ -91,7 +91,7 @@ class Twitter7BlockParser implements Callable<TwitterModelWrapper> {
 
         // Parse date and time
         try {
-            this.messageDateTime = LocalDateTime.from(DATE_TIME_FORMATTER.parse(this.lineT.trim()));
+            messageDateTime = LocalDateTime.from(DATE_TIME_FORMATTER.parse(this.lineT.trim()));
         } catch (DateTimeException e) {
             throw new Twitter7BlockParseException(Twitter7BlockParseException.Error.DATETIME_MALFORMED);
         }
@@ -124,7 +124,7 @@ class Twitter7BlockParser implements Callable<TwitterModelWrapper> {
         }
 
         TwitterModelWrapper model = new TwitterModelWrapper();
-        model.addTweet(this.twitterUserName, this.messageContent, this.messageDateTime, this.mentions);
+        model.addTweet(twitterUserName, messageContent, messageDateTime, mentions);
 
         return model;
     }

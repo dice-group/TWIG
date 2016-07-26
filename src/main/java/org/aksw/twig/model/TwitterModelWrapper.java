@@ -15,6 +15,7 @@ import java.io.Writer;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.Collection;
 import java.util.Random;
 
@@ -26,6 +27,8 @@ public class TwitterModelWrapper {
     private static final Logger LOGGER = LogManager.getLogger(TwitterModelWrapper.class);
 
     public static final String LANG = "Turtle";
+
+    private static final DateTimeFormatter DATE_TIME_FORMATTER = DateTimeFormatter.ISO_LOCAL_DATE_TIME;
 
     // Prefix mappings
     private static final String FOAF_IRI = "http://xmlns.com/foaf/0.1/";
@@ -97,8 +100,8 @@ public class TwitterModelWrapper {
         Resource tweet = this.model.getResource(createTweetIri(accountName, tweetTime))
                 .addProperty(RDF_TYPE, OWL_NAMED_INDIVIDUAL)
                 .addProperty(RDF_TYPE, TWEET)
-                .addLiteral(TWEET_CONTENT, this.model.createTypedLiteral(anonymizedTweetContent))
-                .addLiteral(TWEET_TIME, this.model.createTypedLiteral(tweetTime.toString(), XSDDatatype.XSDdateTime)); // TODO: add timezone
+                .addLiteral(TWEET_CONTENT, model.createTypedLiteral(anonymizedTweetContent))
+                .addLiteral(TWEET_TIME, model.createTypedLiteral(tweetTime.format(DATE_TIME_FORMATTER), XSDDatatype.XSDdateTime)); // TODO: add timezone
 
         twitterAccount.addProperty(SENDS, tweet);
 
