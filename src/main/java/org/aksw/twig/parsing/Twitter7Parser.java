@@ -31,13 +31,13 @@ import java.util.function.Function;
  *
  * @author Felix Linker
  */
-public class Twitter7Parser implements Runnable {
+public class Twitter7Parser<T> implements Runnable {
 
     private static final Logger LOGGER = LogManager.getLogger(Twitter7Parser.class);
 
     private static final int N_THREADS = 32;
 
-    private Function<Triple<String, String, String>, Callable<Twitter7ModelWrapper>> resultParser;
+    private Function<Triple<String, String, String>, Callable<T>> resultParser;
 
     private final ListeningExecutorService service = MoreExecutors.listeningDecorator(Executors.newFixedThreadPool(N_THREADS));
 
@@ -45,7 +45,7 @@ public class Twitter7Parser implements Runnable {
 
     private final Runnable threadTerminatedListener = this::readTwitter7Block;
 
-    private List<FutureCallback<Twitter7ModelWrapper>> futureCallbacks = new LinkedList<>();
+    private List<FutureCallback<T>> futureCallbacks = new LinkedList<>();
 
     private List<Runnable> parsingFinishedListeners = new LinkedList<>();
 
@@ -62,7 +62,7 @@ public class Twitter7Parser implements Runnable {
      */
     public Twitter7Parser(
             InputStream inputStream,
-            Function<Triple<String, String, String>, Callable<Twitter7ModelWrapper>> resultParser) throws IOException, NullPointerException {
+            Function<Triple<String, String, String>, Callable<T>> resultParser) throws IOException, NullPointerException {
         if (resultParser == null || inputStream == null) {
             throw new NullPointerException();
         }
@@ -70,7 +70,7 @@ public class Twitter7Parser implements Runnable {
         this.fileReader = new BufferedReader(new InputStreamReader(inputStream));
     }
 
-    public void addFutureCallbacks(FutureCallback<Twitter7ModelWrapper> ...callbacks) {
+    public void addFutureCallbacks(FutureCallback<T> ...callbacks) {
         Collections.addAll(futureCallbacks, callbacks);
     }
 
@@ -144,7 +144,7 @@ public class Twitter7Parser implements Runnable {
                     continue; // "recursive" call
                 }
 
-                ListenableFuture<Twitter7ModelWrapper> fut = service.submit(resultParser.apply(triple));
+                ListenableFuture<T> fut = service.submit(resultParser.apply(triple));
                 futureCallbacks.forEach(callback -> Futures.addCallback(fut, callback));
                 fut.addListener(threadTerminatedListener, listenerExecutor);
                 return;
@@ -272,7 +272,7 @@ public class Twitter7Parser implements Runnable {
                 String fileName = file.getName();
                 int nameEndIndex = fileName.indexOf('.');
                 fileName = fileName.substring(0, nameEndIndex == -1 ? fileName.length() : nameEndIndex);
-                Twitter7Parser parser = new Twitter7Parser(inputStream, Twitter7BlockParser::new);
+                Twitter7Parser<Twitter7ModelWrapper> parser = new Twitter7Parser<>(inputStream, Twitter7BlockParser::new);
                 Twitter7ResultCollector resultCollector = new Twitter7ResultCollector(fileName, outputDirectory);
                 parser.addFutureCallbacks(resultCollector);
                 parser.addParsingFinishedResultListeners(resultCollector::writeModel);
