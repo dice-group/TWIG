@@ -28,7 +28,7 @@ public class MessageCounter {
                     "?user rdf:type twig:OnlineTwitterAccount . " +
                     "?msg rdf:type twig:Tweet . " +
                     "?user twig:sends ?msg . " +
-            "}"
+            "} GROUP BY ?user"
     );
 
     private static final int MESSAGE_STEP_SIZE = 100;
@@ -41,6 +41,9 @@ public class MessageCounter {
             resultSet.forEachRemaining(querySolution -> {
                 int messageCount = querySolution.getLiteral("count").getInt();
                 messageCount /= 100;
+                while (messageCounts.size() < messageCount + 1) {
+                    messageCounts.add(0);
+                }
                 messageCounts.set(messageCount, messageCounts.get(messageCount) + 1);
             });
         }
