@@ -87,7 +87,6 @@ public class FileHandler {
                 writeFile.createNewFile();
             } catch (IOException e) {
                 attempt++;
-                continue;
             }
         }
 
@@ -215,7 +214,7 @@ public class FileHandler {
      * @return InputStream decompressing the file.
      * @throws IOException Thrown during reader creation.
      */
-    private static InputStream getDecompressionStreams(File file) throws IOException {
+    public static InputStream getDecompressionStreams(File file) throws IOException {
         InputStream fileStream = new FileInputStream(file);
         String[] split = file.getName().split("\\.");
         for (int i = split.length - 1; i >= 0; i--) {

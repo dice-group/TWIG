@@ -2,7 +2,7 @@ package org.aksw.twig.parsing;
 
 import com.google.common.util.concurrent.FutureCallback;
 import org.aksw.twig.files.FileHandler;
-import org.aksw.twig.model.TwitterModelWrapper;
+import org.aksw.twig.model.Twitter7ModelWrapper;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -10,74 +10,60 @@ import java.io.*;
 import java.util.zip.GZIPOutputStream;
 
 /**
- * This class will handle parsed models. It will do so by collecting results of {@link com.google.common.util.concurrent.ListenableFuture} to which this collector has been added.
- * Results will be merged into one {@link TwitterModelWrapper} that is then printed into a GZip compressed file.
- * Language of printed results will be {@link #WRITE_LANG}.
- * @author Felix Linker
+ * Collects {@link Twitter7ModelWrapper} and merges them into one. After the merged model has a size over {@link #MODEL_MAX_SIZE} it will be printed into a gzip compressed file.
  */
-class Twitter7ResultCollector implements FutureCallback<TwitterModelWrapper> {
+class Twitter7ResultCollector implements FutureCallback<Twitter7ModelWrapper> {
 
     private static final Logger LOGGER = LogManager.getLogger(Twitter7ResultCollector.class);
 
-    public static final String WRITE_LANG = "Turtle";
+    private static final int MODEL_MAX_SIZE = 1000000;
 
-    public static final String FILE_TYPE = ".ttl.gz";
+    private final FileHandler fileHandler;
 
-    private TwitterModelWrapper currentModel = new TwitterModelWrapper();
+    private final Twitter7ModelWrapper currentModel = new Twitter7ModelWrapper();
 
-    private long modelMaxSize;
-
-    private FileHandler fileHandler;
+    private static final String FILE_TYPE = ".ttl.gz";
 
     /**
-     * Creates a new instance and sets class variables.
-     * @param modelMaxSize Max size of a {@link TwitterModelWrapper#model} to contain. If this size is exceeded by a {@link TwitterModelWrapper#model} it will be written into a file.
-     * @param outputDirectory Directory to write results into.
-     * @param fileName Base file name of result files. This filename will be accompanied by an ID and a file type ({@link #FILE_TYPE}).
+     * Constructor setting class variables.
+     * @param fileName Basic file name for model printing.
+     * @param outputDirectory Directory to print files into.
      */
-    Twitter7ResultCollector(long modelMaxSize, File outputDirectory, String fileName) {
-        if (!outputDirectory.isDirectory()) {
-            throw new IllegalArgumentException();
-        }
-
-        this.modelMaxSize = modelMaxSize;
+    Twitter7ResultCollector(String fileName, File outputDirectory) {
         this.fileHandler = new FileHandler(outputDirectory, fileName, FILE_TYPE);
     }
 
     @Override
-    public synchronized void onSuccess(TwitterModelWrapper result) {
+    public void onSuccess(Twitter7ModelWrapper result) {
+        synchronized (currentModel) {
+            currentModel.getModel().add(result.getModel());
 
-        LOGGER.info("Collected result model.");
-
-        this.currentModel.model.add(result.model);
-
-        if (this.currentModel.model.size() >= this.modelMaxSize) {
-            writeModel();
+            if (currentModel.getModel().size() >= MODEL_MAX_SIZE) {
+                writeModel();
+            }
         }
     }
 
     @Override
     public void onFailure(Throwable t) {
-        LOGGER.error(t.getMessage());
+        LOGGER.error(t.getMessage(), t);
     }
 
     /**
      * Writes the current collected model into a file.
      */
-    synchronized void writeModel() {
+    public void writeModel() {
+        synchronized (currentModel) {
+            LOGGER.info("Writing result model {}.", currentModel);
 
-        LOGGER.info("Writing result model {}.", this.currentModel);
-
-        try (FileOutputStream fileOutputStream = new FileOutputStream(this.fileHandler.nextFile())) {
-            try (Writer writer = new OutputStreamWriter(new GZIPOutputStream(fileOutputStream))) {
-                this.currentModel.model.write(writer, WRITE_LANG);
-                writer.flush();
+            try (FileOutputStream fileOutputStream = new FileOutputStream(fileHandler.nextFile())) {
+                try (Writer writer = new OutputStreamWriter(new GZIPOutputStream(fileOutputStream))) {
+                    currentModel.write(writer);
+                    writer.flush();
+                }
+            } catch (IOException e) {
+                LOGGER.error(e.getMessage(), e);
             }
-        } catch (IOException e) {
-            LOGGER.error("Error: exception - {}", e.getMessage());
-            return;
         }
-
-        this.currentModel = new TwitterModelWrapper();
     }
 }

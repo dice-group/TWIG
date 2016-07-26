@@ -4,6 +4,7 @@ import org.apache.commons.math3.distribution.IntegerDistribution;
 import org.apache.commons.math3.exception.NumberIsTooLargeException;
 import org.apache.commons.math3.exception.OutOfRangeException;
 
+import java.io.Serializable;
 import java.util.Random;
 
 /**
@@ -15,7 +16,7 @@ import java.util.Random;
  * </ul>
  * Where {@code lambda} is the characteristic variable of the distribution. All methods supplied by this distribution run in {@code O(1)}.
  */
-public class ExponentialLikeDistribution implements IntegerDistribution {
+public class ExponentialLikeDistribution implements IntegerDistribution, Serializable {
 
     private Random r = new Random();
 

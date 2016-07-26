@@ -1,18 +1,34 @@
 package org.aksw.twig.model;
 
+import org.aksw.twig.files.FileHandler;
+import org.apache.commons.codec.binary.Hex;
 import org.apache.jena.datatypes.xsd.XSDDatatype;
 import org.apache.jena.rdf.model.*;
 import org.apache.jena.shared.PrefixMapping;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.Writer;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.Collection;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
+import java.util.Random;
 
 /**
  * Wraps a {@link Model} using TWIG ontology to create RDF-graphs.
  */
-public class TwitterModelWrapper {
+public class Twitter7ModelWrapper {
+
+    private static final Logger LOGGER = LogManager.getLogger(Twitter7ModelWrapper.class);
+
+    public static final String LANG = "Turtle";
+
+    public static final DateTimeFormatter DATE_TIME_FORMATTER = DateTimeFormatter.ISO_LOCAL_DATE_TIME;
 
     // Prefix mappings
     private static final String FOAF_IRI = "http://xmlns.com/foaf/0.1/";
@@ -43,18 +59,31 @@ public class TwitterModelWrapper {
     private static final Property TWEET_CONTENT = ResourceFactory.createProperty(PREFIX_MAPPING.expandPrefix("twig:tweetContent"));
     private static final Property RDF_TYPE = ResourceFactory.createProperty(PREFIX_MAPPING.expandPrefix("rdf:type"));
 
-    private static long userId = 0;
+    private static byte[] randomHashSuffix = new byte[32];
+    static
+    {
+        new Random().nextBytes(randomHashSuffix);
+    }
 
-    private static Map<String, Long> userIdMapping = new ConcurrentHashMap<>();
+    private MessageDigest MD5;
 
     /** The wrapped model. */
-    public final Model model = ModelFactory.createDefaultModel();
+    private Model model = ModelFactory.createDefaultModel();
+
+    public Model getModel() {
+        return model;
+    }
 
     /**
      * Creates a new instance along with a new {@link Model} to wrap.
      */
-    public TwitterModelWrapper() {
+    public Twitter7ModelWrapper() {
         this.model.setNsPrefixes(PREFIX_MAPPING);
+        try {
+            MD5 = MessageDigest.getInstance("MD5");
+        } catch (NoSuchAlgorithmException e) {
+            throw new ExceptionInInitializerError();
+        }
     }
 
     /**
@@ -75,8 +104,8 @@ public class TwitterModelWrapper {
         Resource tweet = this.model.getResource(createTweetIri(accountName, tweetTime))
                 .addProperty(RDF_TYPE, OWL_NAMED_INDIVIDUAL)
                 .addProperty(RDF_TYPE, TWEET)
-                .addLiteral(TWEET_CONTENT, this.model.createTypedLiteral(anonymizedTweetContent))
-                .addLiteral(TWEET_TIME, this.model.createTypedLiteral(tweetTime.toString(), XSDDatatype.XSDdateTime)); // TODO: add timezone
+                .addLiteral(TWEET_CONTENT, model.createTypedLiteral(anonymizedTweetContent))
+                .addLiteral(TWEET_TIME, model.createTypedLiteral(tweetTime.format(DATE_TIME_FORMATTER), XSDDatatype.XSDdateTime)); // TODO: add timezone
 
         twitterAccount.addProperty(SENDS, tweet);
 
@@ -99,9 +128,17 @@ public class TwitterModelWrapper {
      * @param twitterAccountName User account name.
      * @return Anonymized name.
      */
-    private static String anonymizeTwitterAccount(String twitterAccountName) {
-        long id = userIdMapping.computeIfAbsent(twitterAccountName, name -> userId++);
-        return "twitterUser_".concat(Long.toString(id));
+    private String anonymizeTwitterAccount(String twitterAccountName) {
+        MD5.update(twitterAccountName.getBytes());
+        MD5.update(randomHashSuffix);
+        byte[] hash;
+        try {
+            hash = MD5.digest();
+        } catch (RuntimeException e) {
+            LOGGER.error("Exception during anonymizing {}", twitterAccountName);
+            return null;
+        }
+        return Hex.encodeHexString(hash);
     }
 
     /**
@@ -109,7 +146,7 @@ public class TwitterModelWrapper {
      * @param twitterAccountName Name of the account.
      * @return IRI of the twitter account.
      */
-    private static String createTwitterAccountIri(String twitterAccountName) {
+    private String createTwitterAccountIri(String twitterAccountName) {
         return prefixedIri(anonymizeTwitterAccount(twitterAccountName));
     }
 
@@ -119,11 +156,11 @@ public class TwitterModelWrapper {
      * @param messageTime Date and time of the tweet.
      * @return IRI of the tweet.
      */
-    private static String createTweetIri(String twitterAccountName, LocalDateTime messageTime) {
-        StringBuilder builder = new StringBuilder(anonymizeTwitterAccount(twitterAccountName));
-        builder.append('_');
-        builder.append(messageTime.toString().replaceAll(":", "-"));
-        return prefixedIri(builder.toString());
+    private String createTweetIri(String twitterAccountName, LocalDateTime messageTime) {
+        String returnValue = anonymizeTwitterAccount(twitterAccountName)
+                .concat("_")
+                .concat(messageTime.toString().replaceAll(":", "-"));
+        return prefixedIri(returnValue);
     }
 
     /**
@@ -132,8 +169,30 @@ public class TwitterModelWrapper {
      * @return Prefixed string.
      */
     private static String prefixedIri(String original) {
-        StringBuilder builder = new StringBuilder(TWIG_IRI);
-        builder.append(original);
-        return builder.toString();
+        return TWIG_IRI.concat(original);
+    }
+
+    /**
+     * Writes the model into the given writer and deletes the current one.
+     * <b>No</b> other methods (such as {@link Writer#flush()}) are invoked at the writer.
+     * @param writer Writer to write in.
+     */
+    public void write(Writer writer) {
+        model.write(writer, LANG);
+        model = ModelFactory.createDefaultModel();
+    }
+
+    /**
+     * Reads a TWIG rdf model from a file.
+     * @param file File to read from.
+     * @return Twitter7ModelWrapper
+     * @throws IOException IO error.
+     */
+    public static Twitter7ModelWrapper read(File file) throws IOException {
+        Twitter7ModelWrapper wrapper = new Twitter7ModelWrapper();
+        try (InputStream inputStream = FileHandler.getDecompressionStreams(file)) {
+            wrapper.model.read(inputStream, null, LANG);
+            return wrapper;
+        }
     }
 }

@@ -9,11 +9,15 @@ public class AVLTree<T extends Comparable<T>> implements Collection<T> {
     private int size = 0;
 
     public T findClosest(T toCompare) {
+        if (root == null) {
+            return null;
+        }
+
         AVLNode current = root;
         AVLNode best = null;
         while (true) {
             if (current == null) {
-                return best.val;
+                return best == null ? root.val : best.val;
             }
 
             int comparison = current.val.compareTo(toCompare);
@@ -54,10 +58,7 @@ public class AVLTree<T extends Comparable<T>> implements Collection<T> {
         }
 
         AVLNode node = root.traverse(value, true);
-        if (node == null) {
-            return false;
-        }
-        return node.val.equals(value);
+        return node != null && node.val.equals(value);
     }
 
     @Override
@@ -98,8 +99,6 @@ public class AVLTree<T extends Comparable<T>> implements Collection<T> {
         if (a.length < size) {
             return (V[]) toArray();
         }
-
-        LinkedList<Integer> l = new LinkedList<>();
 
         Iterator<T> iterator = iterator();
         Object[] result = a;
@@ -201,7 +200,7 @@ public class AVLTree<T extends Comparable<T>> implements Collection<T> {
 
     @Override
     public boolean retainAll(final Collection<?> c) {
-        List<T> toRemove = new LinkedList<T>();
+        List<T> toRemove = new LinkedList<>();
         Iterator<T> iterator = new AVLIterator();
         while (iterator.hasNext()) {
             T next = iterator.next();
@@ -210,7 +209,7 @@ public class AVLTree<T extends Comparable<T>> implements Collection<T> {
             }
         }
 
-        toRemove.stream().forEach(this::remove);
+        toRemove.forEach(this::remove);
 
         return !toRemove.isEmpty();
     }

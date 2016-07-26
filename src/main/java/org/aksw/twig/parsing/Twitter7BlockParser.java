@@ -1,7 +1,9 @@
 package org.aksw.twig.parsing;
 
-import org.aksw.twig.model.TwitterModelWrapper;
+import org.aksw.twig.model.Twitter7ModelWrapper;
 import org.apache.commons.lang3.tuple.Triple;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -16,16 +18,18 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /**
- * Parses a {@link TwitterModelWrapper} from a twitter7 block triple.
+ * Parses a {@link Twitter7ModelWrapper} from a twitter7 block triple.
  * @author Felix Linker
  */
-class Twitter7BlockParser implements Callable<TwitterModelWrapper> {
+class Twitter7BlockParser implements Callable<Twitter7ModelWrapper> {
+
+    private static final Logger LOGGER = LogManager.getLogger(Twitter7BlockParser.class);
 
     private static final DateTimeFormatter DATE_TIME_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
 
     private static final String TWITTER_AUTHORITY = "twitter.com";
 
-    private static final Pattern MENTIONS_PATTERN = Pattern.compile("@([^ .]*)");
+    private static final Pattern MENTIONS_PATTERN = Pattern.compile("@([a-zA-Z0-9_]{1,15})");
 
     /** T line of the twitter7 block. */
     private String lineT;
@@ -83,11 +87,11 @@ class Twitter7BlockParser implements Callable<TwitterModelWrapper> {
     }
 
     @Override
-    public TwitterModelWrapper call() throws Twitter7BlockParseException {
+    public Twitter7ModelWrapper call() throws Twitter7BlockParseException {
 
         // Parse date and time
         try {
-            this.messageDateTime = LocalDateTime.from(DATE_TIME_FORMATTER.parse(this.lineT.trim()));
+            messageDateTime = LocalDateTime.from(DATE_TIME_FORMATTER.parse(this.lineT.trim()));
         } catch (DateTimeException e) {
             throw new Twitter7BlockParseException(Twitter7BlockParseException.Error.DATETIME_MALFORMED);
         }
@@ -112,15 +116,15 @@ class Twitter7BlockParser implements Callable<TwitterModelWrapper> {
         }
 
         // Parse message content
-        this.messageContent = this.lineW.trim();
+        this.messageContent = lineW.trim();
 
         Matcher mentionsMatcher = MENTIONS_PATTERN.matcher(this.messageContent);
         while (mentionsMatcher.find()) {
             this.mentions.add(mentionsMatcher.group(1));
         }
 
-        TwitterModelWrapper model = new TwitterModelWrapper();
-        model.addTweet(this.twitterUserName, this.messageContent, this.messageDateTime, this.mentions);
+        Twitter7ModelWrapper model = new Twitter7ModelWrapper();
+        model.addTweet(twitterUserName, messageContent, messageDateTime, mentions);
 
         return model;
     }

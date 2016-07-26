@@ -1,9 +1,7 @@
-package org.aksw.twig.automaton.learning;
+package org.aksw.twig.automaton.tweets;
 
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.Pair;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import org.junit.Assert;
 import org.junit.Test;
 
