@@ -1,8 +1,5 @@
 package org.aksw.twig;
 
-import org.aksw.twig.automaton.messageCount.MessageCounter;
-import org.aksw.twig.automaton.time.TimeCounter;
-import org.aksw.twig.automaton.tweets.WordMatrix;
 import org.aksw.twig.parsing.Twitter7Parser;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
