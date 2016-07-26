@@ -9,6 +9,9 @@ import org.apache.logging.log4j.Logger;
 import java.io.*;
 import java.util.zip.GZIPOutputStream;
 
+/**
+ * Collects {@link Twitter7ModelWrapper} and merges them into one. After the merged model has a size over {@link #MODEL_MAX_SIZE} it will be printed into a gzip compressed file.
+ */
 class Twitter7ResultCollector implements FutureCallback<Twitter7ModelWrapper> {
 
     private static final Logger LOGGER = LogManager.getLogger(Twitter7ResultCollector.class);
@@ -21,6 +24,11 @@ class Twitter7ResultCollector implements FutureCallback<Twitter7ModelWrapper> {
 
     private static final String FILE_TYPE = ".ttl.gz";
 
+    /**
+     * Constructor setting class variables.
+     * @param fileName Basic file name for model printing.
+     * @param outputDirectory Directory to print files into.
+     */
     Twitter7ResultCollector(String fileName, File outputDirectory) {
         this.fileHandler = new FileHandler(outputDirectory, fileName, FILE_TYPE);
     }

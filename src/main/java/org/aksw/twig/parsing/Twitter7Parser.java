@@ -28,6 +28,10 @@ import java.util.function.Function;
  *      U .*[\n]+
  *      W .*[\n]}+}*</li></ul>
  * Blocks that do not match this criteria will be skipped.
+ * Every matching block will be handed to a {@link Callable} that gets specified in constructor.
+ * Every {@link FutureCallback} that has been added by {@link #addFutureCallbacks(FutureCallback[])} will be added as listener to the {@link Callable}.
+ *
+ * @param <T> Data type that will be returned by threaded parsers.
  *
  * @author Felix Linker
  */
@@ -37,7 +41,7 @@ public class Twitter7Parser<T> implements Runnable {
 
     private static final int N_THREADS = 32;
 
-    private Function<Triple<String, String, String>, Callable<T>> resultParser;
+    private Function<Triple<String, String, String>, Callable<T>> resultParserSupplier;
 
     private final ListeningExecutorService service = MoreExecutors.listeningDecorator(Executors.newFixedThreadPool(N_THREADS));
 
@@ -56,24 +60,32 @@ public class Twitter7Parser<T> implements Runnable {
     /**
      * Initializes a file reader to given file and sets class variables.
      * @param inputStream InputStream to read from.
-     * @param resultParser Function to apply  a triple as twitter7 block reading result to a callable parser.
+     * @param resultParserSupplier Function to apply a triple - the twitter7 block reading result - to a callable parser.
      * @throws IOException Can be thrown by errors during reader creation.
-     * @throws NullPointerException Thrown if {@code callBackSupplier} or {@code resultParser} is {@code null}.
+     * @throws NullPointerException Thrown if any argument is {@code null}.
      */
     public Twitter7Parser(
             InputStream inputStream,
-            Function<Triple<String, String, String>, Callable<T>> resultParser) throws IOException, NullPointerException {
-        if (resultParser == null || inputStream == null) {
+            Function<Triple<String, String, String>, Callable<T>> resultParserSupplier) throws IOException, NullPointerException {
+        if (resultParserSupplier == null || inputStream == null) {
             throw new NullPointerException();
         }
-        this.resultParser = resultParser;
+        this.resultParserSupplier = resultParserSupplier;
         this.fileReader = new BufferedReader(new InputStreamReader(inputStream));
     }
 
+    /**
+     * Adds callbacks to the parser. Each {@link FutureCallback} will be added as listener to by the {@code resultParserSupplier} results as explained in {@link Twitter7Parser}.
+     * @param callbacks
+     */
     public void addFutureCallbacks(FutureCallback<T> ...callbacks) {
         Collections.addAll(futureCallbacks, callbacks);
     }
 
+    /**
+     * Each listener will be called as soon if reading of the input stream has finished.
+     * @param listeners Listener to call.
+     */
     public void addParsingFinishedResultListeners(Runnable ...listeners) {
         Collections.addAll(parsingFinishedListeners, listeners);
     }
@@ -144,7 +156,7 @@ public class Twitter7Parser<T> implements Runnable {
                     continue; // "recursive" call
                 }
 
-                ListenableFuture<T> fut = service.submit(resultParser.apply(triple));
+                ListenableFuture<T> fut = service.submit(resultParserSupplier.apply(triple));
                 futureCallbacks.forEach(callback -> Futures.addCallback(fut, callback));
                 fut.addListener(threadTerminatedListener, listenerExecutor);
                 return;
@@ -226,6 +238,9 @@ public class Twitter7Parser<T> implements Runnable {
         }
     }
 
+    /**
+     * Finishes the reading by closing all streams and notifying listeners.
+     */
     private void finish() {
         if (service.isShutdown()) {
             throw new IllegalStateException();

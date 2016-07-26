@@ -174,7 +174,7 @@ public class Twitter7ModelWrapper {
 
     /**
      * Writes the model into the given writer and deletes the current one.
-     * No other methods (such as flush()) are invoked at the writer.
+     * <b>No</b> other methods (such as {@link Writer#flush()}) are invoked at the writer.
      * @param writer Writer to write in.
      */
     public void write(Writer writer) {
@@ -191,7 +191,6 @@ public class Twitter7ModelWrapper {
     public static Twitter7ModelWrapper read(File file) throws IOException {
         Twitter7ModelWrapper wrapper = new Twitter7ModelWrapper();
         try (InputStream inputStream = FileHandler.getDecompressionStreams(file)) {
-            // TODO: is null arg safe?
             wrapper.model.read(inputStream, null, LANG);
             return wrapper;
         }
