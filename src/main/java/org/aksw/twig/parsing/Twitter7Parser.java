@@ -283,14 +283,24 @@ public class Twitter7Parser<T> implements Runnable {
         // Start parsing
         final ExecutorService service = Executors.newFixedThreadPool(filesToParse.size());
         filesToParse.forEach(file -> {
-            try (InputStream inputStream = FileHandler.getDecompressionStreams(file)) {
+            try {
+                InputStream inputStream = FileHandler.getDecompressionStreams(file);
                 String fileName = file.getName();
                 int nameEndIndex = fileName.indexOf('.');
                 fileName = fileName.substring(0, nameEndIndex == -1 ? fileName.length() : nameEndIndex);
                 Twitter7Parser<Twitter7ModelWrapper> parser = new Twitter7Parser<>(inputStream, Twitter7BlockParser::new);
                 Twitter7ResultCollector resultCollector = new Twitter7ResultCollector(fileName, outputDirectory);
                 parser.addFutureCallbacks(resultCollector);
-                parser.addParsingFinishedResultListeners(resultCollector::writeModel);
+                parser.addParsingFinishedResultListeners(
+                        resultCollector::writeModel,
+                        () -> {
+                            try {
+                                inputStream.close();
+                            } catch (IOException e) {
+                                LOGGER.error(e.getMessage(), e);
+                            }
+                        }
+                );
                 service.execute(parser);
             } catch (IOException e) {
                 LOGGER.error(e.getMessage(), e);
