@@ -117,7 +117,7 @@ public class WordMatrix implements IWordMatrix, Serializable {
         filesToRead.forEach(file -> {
             try {
                 TwitterModelWrapper modelWrapper = TwitterModelWrapper.read(file);
-                try (QueryExecution execution = QueryExecutionFactory.create(TWITTER_CONTENT_QUERY, modelWrapper.model)) {
+                try (QueryExecution execution = QueryExecutionFactory.create(TWITTER_CONTENT_QUERY, modelWrapper.getModel())) {
                     ResultSet resultSet = execution.execSelect();
                     while (resultSet.hasNext()) {
                         matrix.putAll(new TweetSplitter(resultSet.next().get("c").toString()));

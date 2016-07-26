@@ -1,22 +1,8 @@
 package org.aksw.twig.parsing;
 
-import com.google.common.util.concurrent.FutureCallback;
-import org.apache.commons.lang3.tuple.Triple;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
-
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileReader;
-import java.io.IOException;
-import java.util.HashSet;
-import java.util.Set;
-import java.util.concurrent.Callable;
-
 public class Twitter7ReaderTest {
 
-    private String compressedSampleDataPath;
+    /*private String compressedSampleDataPath;
     private String sampleDataPath;
     private String brokenSampleDataPath;
     private String emptySampleDataPath;
@@ -31,14 +17,14 @@ public class Twitter7ReaderTest {
         this.emptySampleDataPath = getClass().getClassLoader().getResource("data/sample_empty.txt").getPath();
     }
 
-    /**
+    *//**
      * Tests reading two blocks of twitter7 data.
-     */
+     *//*
     @Test
     public void testBlockReading() {
         File f = new File(sampleDataPath);
         try (BufferedReader fileReader = new BufferedReader(new FileReader(f))) {
-            Twitter7Reader<String> reader = new Twitter7Reader<>(f, Callback::new, Parser::new );
+            Twitter7Parser<String> reader = new Twitter7Parser<>(f, Callback::new, Parser::new );
             Triple<String, String, String> triple = reader.readTwitter7Block(fileReader);
             Assert.assertEquals("       2009-09-30 23:55:53", triple.getLeft());
             Assert.assertEquals("       http://twitter.com/user1", triple.getMiddle());
@@ -53,14 +39,14 @@ public class Twitter7ReaderTest {
         }
     }
 
-    /**
+    *//**
      * Tests skipping broken blocks of twitter7 data.
-     */
+     *//*
     @Test
     public void testBrokenBlockReading() {
         File f = new File(brokenSampleDataPath);
         try (BufferedReader fileReader = new BufferedReader(new FileReader(f))) {
-            Twitter7Reader<String> reader = new Twitter7Reader<>(f, Callback::new, Parser::new );
+            Twitter7Parser<String> reader = new Twitter7Parser<>(f, Callback::new, Parser::new );
             Triple<String, String, String> triple = reader.readTwitter7Block(fileReader);
             Assert.assertEquals("       2009-09-30 23:55:53", triple.getLeft());
             Assert.assertEquals("       http://twitter.com/user7", triple.getMiddle());
@@ -70,14 +56,14 @@ public class Twitter7ReaderTest {
         }
     }
 
-    /**
+    *//**
      * Tests correct termination on empty file.
-     */
+     *//*
     @Test
     public void testEmptyBlockReading() {
         File f = new File(emptySampleDataPath);
         try (BufferedReader fileReader = new BufferedReader(new FileReader(f))) {
-            Twitter7Reader<String> reader = new Twitter7Reader<>(f, Callback::new, Parser::new );
+            Twitter7Parser<String> reader = new Twitter7Parser<>(f, Callback::new, Parser::new );
             Triple<String, String, String> triple = reader.readTwitter7Block(fileReader);
             Assert.assertNull(triple);
 
@@ -96,9 +82,9 @@ public class Twitter7ReaderTest {
         testReading(sampleDataPath);
     }
 
-    /**
+    *//**
      * Tests reading a whole file.
-     */
+     *//*
     private void testReading(String file) {
         allBlocks.add("T       2009-09-30 23:55:53\n" +
                 "U       http://twitter.com/user1\n" +
@@ -123,7 +109,7 @@ public class Twitter7ReaderTest {
                 "W       I'm writing my first twitter!!\n");
 
         try {
-            Twitter7Reader<String> reader = new Twitter7Reader<>(new File(file), Callback::new , Parser::new );
+            Twitter7Parser<String> reader = new Twitter7Parser<>(new File(file), Callback::new , Parser::new );
             reader.read();
             while (!reader.isFinished());
             Assert.assertTrue(allBlocks.isEmpty());
@@ -165,5 +151,5 @@ public class Twitter7ReaderTest {
         public String call() throws Exception {
             return this.result;
         }
-    }
+    }*/
 }

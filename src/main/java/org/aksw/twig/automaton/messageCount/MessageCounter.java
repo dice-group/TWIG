@@ -79,7 +79,7 @@ public class MessageCounter {
         fileArgs.getRight().forEach(file -> {
             try {
                 TwitterModelWrapper modelWrapper = TwitterModelWrapper.read(file);
-                messageCounter.addModel(modelWrapper.model);
+                messageCounter.addModel(modelWrapper.getModel());
             } catch (IOException e) {
                 LOGGER.error(e.getMessage(), e);
             }

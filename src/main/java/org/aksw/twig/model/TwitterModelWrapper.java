@@ -28,7 +28,7 @@ public class TwitterModelWrapper {
 
     public static final String LANG = "Turtle";
 
-    private static final DateTimeFormatter DATE_TIME_FORMATTER = DateTimeFormatter.ISO_LOCAL_DATE_TIME;
+    public static final DateTimeFormatter DATE_TIME_FORMATTER = DateTimeFormatter.ISO_LOCAL_DATE_TIME;
 
     // Prefix mappings
     private static final String FOAF_IRI = "http://xmlns.com/foaf/0.1/";
@@ -60,26 +60,30 @@ public class TwitterModelWrapper {
     private static final Property RDF_TYPE = ResourceFactory.createProperty(PREFIX_MAPPING.expandPrefix("rdf:type"));
 
     private static byte[] randomHashSuffix = new byte[32];
-    private static MessageDigest MD5;
-
     static
     {
         new Random().nextBytes(randomHashSuffix);
-        try {
-            MD5 = MessageDigest.getInstance("MD5");
-        } catch (NoSuchAlgorithmException e) {
-            throw new ExceptionInInitializerError();
-        }
     }
 
+    private MessageDigest MD5;
+
     /** The wrapped model. */
-    public final Model model = ModelFactory.createDefaultModel();
+    private Model model = ModelFactory.createDefaultModel();
+
+    public Model getModel() {
+        return model;
+    }
 
     /**
      * Creates a new instance along with a new {@link Model} to wrap.
      */
     public TwitterModelWrapper() {
         this.model.setNsPrefixes(PREFIX_MAPPING);
+        try {
+            MD5 = MessageDigest.getInstance("MD5");
+        } catch (NoSuchAlgorithmException e) {
+            throw new ExceptionInInitializerError();
+        }
     }
 
     /**
@@ -124,19 +128,17 @@ public class TwitterModelWrapper {
      * @param twitterAccountName User account name.
      * @return Anonymized name.
      */
-    private static String anonymizeTwitterAccount(String twitterAccountName) {
-        synchronized (MD5) {
-            MD5.update(twitterAccountName.getBytes());
-            MD5.update(randomHashSuffix);
-            byte[] hash;
-            try {
-                hash = MD5.digest();
-            } catch (RuntimeException e) {
-                LOGGER.error("Exception during anonymizing {}", twitterAccountName);
-                return null;
-            }
-            return Hex.encodeHexString(hash);
+    private String anonymizeTwitterAccount(String twitterAccountName) {
+        MD5.update(twitterAccountName.getBytes());
+        MD5.update(randomHashSuffix);
+        byte[] hash;
+        try {
+            hash = MD5.digest();
+        } catch (RuntimeException e) {
+            LOGGER.error("Exception during anonymizing {}", twitterAccountName);
+            return null;
         }
+        return Hex.encodeHexString(hash);
     }
 
     /**
@@ -144,7 +146,7 @@ public class TwitterModelWrapper {
      * @param twitterAccountName Name of the account.
      * @return IRI of the twitter account.
      */
-    private static String createTwitterAccountIri(String twitterAccountName) {
+    private String createTwitterAccountIri(String twitterAccountName) {
         return prefixedIri(anonymizeTwitterAccount(twitterAccountName));
     }
 
@@ -154,7 +156,7 @@ public class TwitterModelWrapper {
      * @param messageTime Date and time of the tweet.
      * @return IRI of the tweet.
      */
-    private static String createTweetIri(String twitterAccountName, LocalDateTime messageTime) {
+    private String createTweetIri(String twitterAccountName, LocalDateTime messageTime) {
         String returnValue = anonymizeTwitterAccount(twitterAccountName)
                 .concat("_")
                 .concat(messageTime.toString().replaceAll(":", "-"));
@@ -171,12 +173,13 @@ public class TwitterModelWrapper {
     }
 
     /**
-     * Writes the model into the given writer.
+     * Writes the model into the given writer and deletes the current one.
      * No other methods (such as flush()) are invoked at the writer.
      * @param writer Writer to write in.
      */
     public void write(Writer writer) {
         model.write(writer, LANG);
+        model = ModelFactory.createDefaultModel();
     }
 
     /**
