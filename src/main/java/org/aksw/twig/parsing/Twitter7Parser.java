@@ -2,21 +2,27 @@ package org.aksw.twig.parsing;
 
 import com.google.common.util.concurrent.*;
 import org.aksw.twig.files.FileHandler;
-import org.aksw.twig.model.TwitterModelWrapper;
+import org.aksw.twig.model.Twitter7ModelWrapper;
 import org.apache.commons.lang3.tuple.MutableTriple;
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.commons.lang3.tuple.Triple;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import java.io.*;
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.util.Collections;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Set;
 import java.util.concurrent.Callable;
+import java.util.concurrent.Executor;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.function.Consumer;
 import java.util.function.Function;
-import java.util.zip.GZIPOutputStream;
 
 /**
  * This class reads a file that contains twitter7 data block-wise.
@@ -28,29 +34,27 @@ import java.util.zip.GZIPOutputStream;
  *
  * @author Felix Linker
  */
-public class Twitter7Parser implements FutureCallback<TwitterModelWrapper>, Runnable {
+public class Twitter7Parser implements Runnable {
 
     private static final Logger LOGGER = LogManager.getLogger(Twitter7Parser.class);
 
     private static final int N_THREADS = 32;
 
-    private static final String FILE_TYPE = ".ttl.gz";
-
-    private static final int MODEL_MAX_SIZE = 1000000;
-
-    private Function<Triple<String, String, String>, Callable<TwitterModelWrapper>> resultParser;
+    private Function<Triple<String, String, String>, Callable<Twitter7ModelWrapper>> resultParser;
 
     private final ListeningExecutorService service = MoreExecutors.listeningDecorator(Executors.newFixedThreadPool(N_THREADS));
 
-    private final TwitterModelWrapper currentModel = new TwitterModelWrapper();
+    private final Executor listenerExecutor = MoreExecutors.directExecutor();
 
-    private final FileHandler fileHandler;
+    private final Runnable threadTerminatedListener = this::readTwitter7Block;
+
+    private List<FutureCallback<Twitter7ModelWrapper>> futureCallbacks = new LinkedList<>();
+
+    private List<Runnable> parsingFinishedListeners = new LinkedList<>();
 
     private final BufferedReader fileReader;
 
     private boolean run = false;
-
-    private boolean finished = false;
 
     /**
      * Initializes a file reader to given file and sets class variables.
@@ -62,7 +66,7 @@ public class Twitter7Parser implements FutureCallback<TwitterModelWrapper>, Runn
     public Twitter7Parser(
             File fileToParse,
             File outputDirectory,
-            Function<Triple<String, String, String>, Callable<TwitterModelWrapper>> resultParser) throws IOException, NullPointerException {
+            Function<Triple<String, String, String>, Callable<Twitter7ModelWrapper>> resultParser) throws IOException, NullPointerException {
         if (resultParser == null || fileToParse == null || outputDirectory == null) {
             throw new NullPointerException();
         }
@@ -72,11 +76,15 @@ public class Twitter7Parser implements FutureCallback<TwitterModelWrapper>, Runn
         }
 
         this.resultParser = resultParser;
-        String fileName = fileToParse.getName();
-        int nameEndIndex = fileName.indexOf('.');
-        fileName = fileName.substring(0, nameEndIndex == -1 ? fileName.length() : nameEndIndex);
-        this.fileHandler = new FileHandler(outputDirectory, fileName, FILE_TYPE);
         this.fileReader = new BufferedReader(new InputStreamReader(FileHandler.getDecompressionStreams(fileToParse)));
+    }
+
+    public void addFutureCallbacks(FutureCallback<Twitter7ModelWrapper> ...callbacks) {
+        Collections.addAll(futureCallbacks, callbacks);
+    }
+
+    public void addParsingFinishedResultListeners(Runnable ...listeners) {
+        Collections.addAll(parsingFinishedListeners, listeners);
     }
 
     /**
@@ -90,17 +98,10 @@ public class Twitter7Parser implements FutureCallback<TwitterModelWrapper>, Runn
         }
         run = true;
 
+        // Start the initial threads.
         for (int i = 0; i < N_THREADS; i++) {
             readTwitter7Block();
         }
-    }
-
-    /**
-     * Returns whether the reading of the file has finished or hasn't been started.
-     * @return Returns {@code true} if there is no file reading ongoing.
-     */
-    public boolean isFinished() {
-        return finished;
     }
 
     /**
@@ -152,46 +153,10 @@ public class Twitter7Parser implements FutureCallback<TwitterModelWrapper>, Runn
                     continue; // "recursive" call
                 }
 
-                ListenableFuture<TwitterModelWrapper> fut = service.submit(resultParser.apply(triple));
-                Futures.addCallback(fut, this);
+                ListenableFuture<Twitter7ModelWrapper> fut = service.submit(resultParser.apply(triple));
+                futureCallbacks.forEach(callback -> Futures.addCallback(fut, callback));
+                fut.addListener(threadTerminatedListener, listenerExecutor);
                 return;
-            }
-        }
-    }
-
-    @Override
-    public void onSuccess(TwitterModelWrapper result) {
-        synchronized (currentModel) {
-            currentModel.getModel().add(result.getModel());
-
-            if (currentModel.getModel().size() >= MODEL_MAX_SIZE) {
-                writeModel();
-            }
-        }
-
-        readTwitter7Block();
-    }
-
-    @Override
-    public void onFailure(Throwable t) {
-        LOGGER.error(t.getMessage(), t);
-        readTwitter7Block();
-    }
-
-    /**
-     * Writes the current collected model into a file.
-     */
-    private void writeModel() {
-        synchronized (currentModel) {
-            LOGGER.info("Writing result model {}.", currentModel);
-
-            try (FileOutputStream fileOutputStream = new FileOutputStream(this.fileHandler.nextFile())) {
-                try (Writer writer = new OutputStreamWriter(new GZIPOutputStream(fileOutputStream))) {
-                    currentModel.write(writer);
-                    writer.flush();
-                }
-            } catch (IOException e) {
-                LOGGER.error(e.getMessage(), e);
             }
         }
     }
@@ -294,8 +259,7 @@ public class Twitter7Parser implements FutureCallback<TwitterModelWrapper>, Runn
             }
         }
 
-        writeModel();
-        finished = true;
+        parsingFinishedListeners.forEach(Runnable::run);
     }
 
     /**
@@ -314,7 +278,11 @@ public class Twitter7Parser implements FutureCallback<TwitterModelWrapper>, Runn
         final ExecutorService service = Executors.newFixedThreadPool(filesToParse.size());
         filesToParse.forEach(file -> {
             try {
-                service.execute(new Twitter7Parser(file, outputDirectory, Twitter7BlockParser::new));
+                Twitter7Parser parser = new Twitter7Parser(file, outputDirectory, Twitter7BlockParser::new);
+                Twitter7ResultCollector resultCollector = new Twitter7ResultCollector(file, outputDirectory);
+                parser.addFutureCallbacks(resultCollector);
+                parser.addParsingFinishedResultListeners(resultCollector::writeModel);
+                service.execute(parser);
             } catch (IOException e) {
                 LOGGER.error(e.getMessage(), e);
             }

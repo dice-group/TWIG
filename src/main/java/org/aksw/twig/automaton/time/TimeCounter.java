@@ -1,7 +1,7 @@
 package org.aksw.twig.automaton.time;
 
 import org.aksw.twig.files.FileHandler;
-import org.aksw.twig.model.TwitterModelWrapper;
+import org.aksw.twig.model.Twitter7ModelWrapper;
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.jena.query.Query;
 import org.apache.jena.query.QueryExecution;
@@ -52,11 +52,11 @@ public class TimeCounter {
         TimeCounter counter = new TimeCounter();
         fileArgs.getRight().forEach(file -> {
             try {
-                TwitterModelWrapper modelWrapper = TwitterModelWrapper.read(file);
+                Twitter7ModelWrapper modelWrapper = Twitter7ModelWrapper.read(file);
                 try (QueryExecution queryExecution = QueryExecutionFactory.create(MESSAGE_TIME_QUERY, modelWrapper.getModel())) {
                     queryExecution.execSelect().forEachRemaining(querySolution -> {
                         String timeText = querySolution.getLiteral("time").getString();
-                        LocalDateTime time = LocalDateTime.from(TwitterModelWrapper.DATE_TIME_FORMATTER.parse(timeText));
+                        LocalDateTime time = LocalDateTime.from(Twitter7ModelWrapper.DATE_TIME_FORMATTER.parse(timeText));
                         counter.addTweetTime(time, querySolution.getLiteral("count").getLong());
                     });
                 }

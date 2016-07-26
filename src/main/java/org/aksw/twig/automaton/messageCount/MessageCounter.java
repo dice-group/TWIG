@@ -1,7 +1,7 @@
 package org.aksw.twig.automaton.messageCount;
 
 import org.aksw.twig.files.FileHandler;
-import org.aksw.twig.model.TwitterModelWrapper;
+import org.aksw.twig.model.Twitter7ModelWrapper;
 import org.aksw.twig.statistics.ExponentialLikeDistribution;
 import org.aksw.twig.statistics.SimpleExponentialRegression;
 import org.apache.commons.lang3.tuple.Pair;
@@ -78,7 +78,7 @@ public class MessageCounter {
         MessageCounter messageCounter = new MessageCounter();
         fileArgs.getRight().forEach(file -> {
             try {
-                TwitterModelWrapper modelWrapper = TwitterModelWrapper.read(file);
+                Twitter7ModelWrapper modelWrapper = Twitter7ModelWrapper.read(file);
                 messageCounter.addModel(modelWrapper.getModel());
             } catch (IOException e) {
                 LOGGER.error(e.getMessage(), e);

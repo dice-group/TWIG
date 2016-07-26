@@ -1,7 +1,7 @@
 package org.aksw.twig.automaton.tweets;
 
 import org.aksw.twig.files.FileHandler;
-import org.aksw.twig.model.TwitterModelWrapper;
+import org.aksw.twig.model.Twitter7ModelWrapper;
 import org.apache.commons.lang3.tuple.MutablePair;
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.jena.query.*;
@@ -116,7 +116,7 @@ public class WordMatrix implements IWordMatrix, Serializable {
         WordMatrix matrix = new WordMatrix();
         filesToRead.forEach(file -> {
             try {
-                TwitterModelWrapper modelWrapper = TwitterModelWrapper.read(file);
+                Twitter7ModelWrapper modelWrapper = Twitter7ModelWrapper.read(file);
                 try (QueryExecution execution = QueryExecutionFactory.create(TWITTER_CONTENT_QUERY, modelWrapper.getModel())) {
                     ResultSet resultSet = execution.execSelect();
                     while (resultSet.hasNext()) {

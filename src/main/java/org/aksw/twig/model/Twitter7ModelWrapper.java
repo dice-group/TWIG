@@ -22,9 +22,9 @@ import java.util.Random;
 /**
  * Wraps a {@link Model} using TWIG ontology to create RDF-graphs.
  */
-public class TwitterModelWrapper {
+public class Twitter7ModelWrapper {
 
-    private static final Logger LOGGER = LogManager.getLogger(TwitterModelWrapper.class);
+    private static final Logger LOGGER = LogManager.getLogger(Twitter7ModelWrapper.class);
 
     public static final String LANG = "Turtle";
 
@@ -77,7 +77,7 @@ public class TwitterModelWrapper {
     /**
      * Creates a new instance along with a new {@link Model} to wrap.
      */
-    public TwitterModelWrapper() {
+    public Twitter7ModelWrapper() {
         this.model.setNsPrefixes(PREFIX_MAPPING);
         try {
             MD5 = MessageDigest.getInstance("MD5");
@@ -185,11 +185,11 @@ public class TwitterModelWrapper {
     /**
      * Reads a TWIG rdf model from a file.
      * @param file File to read from.
-     * @return TwitterModelWrapper
+     * @return Twitter7ModelWrapper
      * @throws IOException IO error.
      */
-    public static TwitterModelWrapper read(File file) throws IOException {
-        TwitterModelWrapper wrapper = new TwitterModelWrapper();
+    public static Twitter7ModelWrapper read(File file) throws IOException {
+        Twitter7ModelWrapper wrapper = new Twitter7ModelWrapper();
         try (InputStream inputStream = FileHandler.getDecompressionStreams(file)) {
             // TODO: is null arg safe?
             wrapper.model.read(inputStream, null, LANG);
