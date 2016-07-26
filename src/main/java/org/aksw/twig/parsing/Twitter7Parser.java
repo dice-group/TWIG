@@ -9,10 +9,7 @@ import org.apache.commons.lang3.tuple.Triple;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStreamReader;
+import java.io.*;
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
@@ -58,25 +55,19 @@ public class Twitter7Parser implements Runnable {
 
     /**
      * Initializes a file reader to given file and sets class variables.
-     * @param fileToParse File to parse.
+     * @param inputStream InputStream to read from.
      * @param resultParser Function to apply  a triple as twitter7 block reading result to a callable parser.
      * @throws IOException Can be thrown by errors during reader creation.
      * @throws NullPointerException Thrown if {@code callBackSupplier} or {@code resultParser} is {@code null}.
      */
     public Twitter7Parser(
-            File fileToParse,
-            File outputDirectory,
+            InputStream inputStream,
             Function<Triple<String, String, String>, Callable<Twitter7ModelWrapper>> resultParser) throws IOException, NullPointerException {
-        if (resultParser == null || fileToParse == null || outputDirectory == null) {
+        if (resultParser == null || inputStream == null) {
             throw new NullPointerException();
         }
-
-        if (!outputDirectory.isDirectory()) {
-            throw new IllegalArgumentException();
-        }
-
         this.resultParser = resultParser;
-        this.fileReader = new BufferedReader(new InputStreamReader(FileHandler.getDecompressionStreams(fileToParse)));
+        this.fileReader = new BufferedReader(new InputStreamReader(inputStream));
     }
 
     public void addFutureCallbacks(FutureCallback<Twitter7ModelWrapper> ...callbacks) {
@@ -277,9 +268,12 @@ public class Twitter7Parser implements Runnable {
         // Start parsing
         final ExecutorService service = Executors.newFixedThreadPool(filesToParse.size());
         filesToParse.forEach(file -> {
-            try {
-                Twitter7Parser parser = new Twitter7Parser(file, outputDirectory, Twitter7BlockParser::new);
-                Twitter7ResultCollector resultCollector = new Twitter7ResultCollector(file, outputDirectory);
+            try (InputStream inputStream = FileHandler.getDecompressionStreams(file)) {
+                String fileName = file.getName();
+                int nameEndIndex = fileName.indexOf('.');
+                fileName = fileName.substring(0, nameEndIndex == -1 ? fileName.length() : nameEndIndex);
+                Twitter7Parser parser = new Twitter7Parser(inputStream, Twitter7BlockParser::new);
+                Twitter7ResultCollector resultCollector = new Twitter7ResultCollector(fileName, outputDirectory);
                 parser.addFutureCallbacks(resultCollector);
                 parser.addParsingFinishedResultListeners(resultCollector::writeModel);
                 service.execute(parser);

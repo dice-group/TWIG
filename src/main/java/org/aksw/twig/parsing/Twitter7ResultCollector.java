@@ -21,10 +21,7 @@ class Twitter7ResultCollector implements FutureCallback<Twitter7ModelWrapper> {
 
     private static final String FILE_TYPE = ".ttl.gz";
 
-    Twitter7ResultCollector(File fileToParse, File outputDirectory) {
-        String fileName = fileToParse.getName();
-        int nameEndIndex = fileName.indexOf('.');
-        fileName = fileName.substring(0, nameEndIndex == -1 ? fileName.length() : nameEndIndex);
+    Twitter7ResultCollector(String fileName, File outputDirectory) {
         this.fileHandler = new FileHandler(outputDirectory, fileName, FILE_TYPE);
     }
 
