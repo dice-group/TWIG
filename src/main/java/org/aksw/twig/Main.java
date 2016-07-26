@@ -1,8 +1,5 @@
 package org.aksw.twig;
 
-import org.aksw.twig.automaton.messageCount.MessageCounter;
-import org.aksw.twig.automaton.time.TimeCounter;
-import org.aksw.twig.automaton.tweets.WordMatrix;
 import org.aksw.twig.parsing.Twitter7Parser;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -22,9 +19,6 @@ public class Main {
         switch (args[0]) {
             case "--help": LOGGER.info("Use 'Twitter7Parser arg0 arg1 ...' to parse twitter data."); break; // TODO: alter help
             case "Twitter7Parser": Twitter7Parser.main(Arrays.copyOfRange(args, 1, args.length)); break;
-            case "MessageCounter": MessageCounter.main(Arrays.copyOfRange(args, 1, args.length)); break;
-            case "WordMatrix": WordMatrix.main(Arrays.copyOfRange(args, 1, args.length)); break;
-            case "TimeCounter": TimeCounter.main(Arrays.copyOfRange(args, 1, args.length)); break;
             default: LOGGER.info("No argument recognized. To get an overview please use the argument --help.");
         }
     }
