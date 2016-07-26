@@ -22,9 +22,6 @@ public class Main {
         switch (args[0]) {
             case "--help": LOGGER.info("Use 'Twitter7Parser arg0 arg1 ...' to parse twitter data."); break; // TODO: alter help
             case "Twitter7Parser": Twitter7Parser.main(Arrays.copyOfRange(args, 1, args.length)); break;
-            case "MessageCounter": MessageCounter.main(Arrays.copyOfRange(args, 1, args.length)); break;
-            case "WordMatrix": WordMatrix.main(Arrays.copyOfRange(args, 1, args.length)); break;
-            case "TimeCounter": TimeCounter.main(Arrays.copyOfRange(args, 1, args.length)); break;
             default: LOGGER.info("No argument recognized. To get an overview please use the argument --help.");
         }
     }
