@@ -1,12 +1,10 @@
 package org.aksw.twig.automaton.tweets;
 
 import org.aksw.twig.files.FileHandler;
+import org.aksw.twig.model.TwitterModelWrapper;
 import org.apache.commons.lang3.tuple.MutablePair;
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.jena.query.*;
-import org.apache.jena.rdf.model.Model;
-import org.apache.jena.riot.Lang;
-import org.apache.jena.riot.RDFDataMgr;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -117,12 +115,16 @@ public class WordMatrix implements IWordMatrix, Serializable {
 
         WordMatrix matrix = new WordMatrix();
         filesToRead.forEach(file -> {
-            Model fileModel = RDFDataMgr.loadModel(file.getPath(), Lang.TURTLE);
-            try (QueryExecution execution = QueryExecutionFactory.create(TWITTER_CONTENT_QUERY, fileModel)) {
-                ResultSet resultSet = execution.execSelect();
-                while (resultSet.hasNext()) {
-                    matrix.putAll(new TweetSplitter(resultSet.next().get("c").toString()));
+            try {
+                TwitterModelWrapper modelWrapper = TwitterModelWrapper.read(file);
+                try (QueryExecution execution = QueryExecutionFactory.create(TWITTER_CONTENT_QUERY, modelWrapper.model)) {
+                    ResultSet resultSet = execution.execSelect();
+                    while (resultSet.hasNext()) {
+                        matrix.putAll(new TweetSplitter(resultSet.next().get("c").toString()));
+                    }
                 }
+            } catch (IOException e) {
+                LOGGER.error(e.getMessage(), e);
             }
         });
 

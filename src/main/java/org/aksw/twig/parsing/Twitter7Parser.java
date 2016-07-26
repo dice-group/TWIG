@@ -56,7 +56,7 @@ public final class Twitter7Parser implements Runnable {
             try {
                 Thread.sleep(10);
             } catch (InterruptedException e) {
-                LOGGER.error(e.getMessage(), e.getCause());
+                LOGGER.error(e.getMessage(), e);
             }
         }
 

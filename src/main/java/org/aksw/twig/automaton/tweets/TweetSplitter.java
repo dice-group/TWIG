@@ -14,7 +14,7 @@ import java.util.stream.Stream;
  * If the empty string is succeeded by a word that means the word starts the sentence.
  * If a word is succeeded by the empty string that means the word ends the sentence.
  */
-public class TweetSplitter implements Iterable<Pair<String, String>> {
+class TweetSplitter implements Iterable<Pair<String, String>> {
 
     private static final Set<Character> SENTENCE_DELIMITERS = new HashSet<>();
 

@@ -1,5 +1,6 @@
 package org.aksw.twig.model;
 
+import org.aksw.twig.files.FileHandler;
 import org.apache.commons.codec.binary.Hex;
 import org.apache.jena.datatypes.xsd.XSDDatatype;
 import org.apache.jena.rdf.model.*;
@@ -7,6 +8,9 @@ import org.apache.jena.shared.PrefixMapping;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
 import java.io.Writer;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
@@ -170,5 +174,20 @@ public class TwitterModelWrapper {
      */
     public void write(Writer writer) {
         model.write(writer, LANG);
+    }
+
+    /**
+     * Reads a TWIG rdf model from a file.
+     * @param file File to read from.
+     * @return TwitterModelWrapper
+     * @throws IOException IO error.
+     */
+    public static TwitterModelWrapper read(File file) throws IOException {
+        TwitterModelWrapper wrapper = new TwitterModelWrapper();
+        try (InputStream inputStream = FileHandler.getDecompressionStreams(file)) {
+            // TODO: is null arg safe?
+            wrapper.model.read(inputStream, null, LANG);
+            return wrapper;
+        }
     }
 }
