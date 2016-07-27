@@ -19,6 +19,9 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Stream;
 
+/**
+ * Counts messages per user. Intended to be used on a Twitter7Model as it can be created by {@link Twitter7ModelWrapper}.
+ */
 public class MessageCounter {
 
     private static final Logger LOGGER = LogManager.getLogger(MessageCounter.class);
@@ -27,12 +30,21 @@ public class MessageCounter {
 
     private Map<String, Integer> userMessageCountMap = new HashMap<>();
 
+    /**
+     * Returns all users mapped to their number of messages.
+     * @return Stream to user - message count map.
+     */
     public Stream<Map.Entry<String, Integer>> getUserMessageCountMap() {
         return userMessageCountMap.entrySet().stream();
     }
 
     private ArrayList<Integer> messageCounts;
 
+    /**
+     * Returns an array list with following semantics:
+     * {@code x := arrayList[i]} means that x users have sent a number of messages with: {@link #MESSAGE_STEP_SIZE} {@code * i <= number < }{@link #MESSAGE_STEP_SIZE} {@code * (i + 1)}.
+     * @return Array list with message numbers.
+     */
     public ArrayList<Integer> getMessageCounts() {
         if (messageCounts == null) {
             messageCounts = new ArrayList<>();
@@ -48,6 +60,10 @@ public class MessageCounter {
         return messageCounts;
     }
 
+    /**
+     * Adds all messages in the model to the counter.
+     * @param model Model to add.
+     */
     void addModel(Model model) {
         model.listStatements().forEachRemaining(statement -> {
             if (statement.getPredicate().getLocalName().equals(Twitter7ModelWrapper.SENDS_PROPERTY_NAME)) {
@@ -57,6 +73,11 @@ public class MessageCounter {
         });
     }
 
+    /**
+     * Adds given number of messages to the user.
+     * @param userName User to add to.
+     * @param messages Message number to add.
+     */
     public void addUserMessages(String userName, int messages) {
         messageCounts = null;
 
@@ -67,6 +88,10 @@ public class MessageCounter {
         }
     }
 
+    /**
+     * Creates an exponential like distribution over values of {@link #getMessageCounts()}.
+     * @return Distribution.
+     */
     public ExponentialLikeDistribution getValueDistribution() {
         getMessageCounts(); // Init array list if necessary
         SimpleExponentialRegression regression = new SimpleExponentialRegression();
@@ -77,6 +102,11 @@ public class MessageCounter {
         return ExponentialLikeDistribution.of(regression);
     }
 
+    /**
+     * Creates a message counter distribution as stated in {@link #getValueDistribution()} by adding all given files as {@link Model} and writes it into a file.
+     * Arguments must be formatted as stated in {@link FileHandler#readArgs(String[])}.
+     * @param args Arguments.
+     */
     public static void main(String[] args) {
 
         // File handling

@@ -15,6 +15,9 @@ import java.io.ObjectOutputStream;
 import java.time.LocalDateTime;
 import java.util.Set;
 
+/**
+ * Counts the timestamp of tweets per day. Intended to be used with a Twitter7Model as it can be created by {@link Twitter7ModelWrapper}.
+ */
 public class TimeCounter {
 
     private static final Logger LOGGER = LogManager.getLogger(TimeCounter.class);
@@ -25,14 +28,29 @@ public class TimeCounter {
 
     private long[][] tweetTimes = new long[HOURS][MINUTES];
 
+    /**
+     * Returns a matrix of tweet times with following semantics:
+     * {@code x := matrix[h][m]} means that {@code x} messages have been sent between {@code h:m} o'clock (inclusive) and {@code h:(m+1)} o'clock (exclusive).
+     * @return Matrix with values.
+     */
     public long[][] getTweetTimes() {
         return tweetTimes;
     }
 
+    /**
+     * Returns number of tweets at given time. Equivalent to {@code matrix[hour][minute]} in {@link #getTweetTimes()}.
+     * @param hour Hour.
+     * @param minute Minute.
+     * @return Number of tweets.
+     */
     public long getTweetTimesAt(int hour, int minute) {
         return tweetTimes[hour][minute];
     }
 
+    /**
+     * Adds all timestamps from the model.
+     * @param model Model to add.
+     */
     public void addModel(Model model) {
         model.listStatements().forEachRemaining(statement -> {
             if (statement.getPredicate().getLocalName().equals(Twitter7ModelWrapper.TWEET_TIME_PROPERTY_NAME)) {
@@ -43,10 +61,20 @@ public class TimeCounter {
         });
     }
 
+    /**
+     * Adds {@code count} messages to the given time. Only hours and minutes will be considered.
+     * @param time Time to add to.
+     * @param count Messages to add.
+     */
     public void addTweetTime(LocalDateTime time, long count) {
         tweetTimes[time.getHour()][time.getMinute()] += count;
     }
 
+    /**
+     * Creates a timestamp matrix as stated in {@link #getTweetTimes()} by adding given files as {@link Model} and writes it into a file.
+     * Arguments must be formatted as stated in {@link FileHandler#readArgs(String[])}.
+     * @param args Arguments.
+     */
     public static void main(String[] args) {
 
         Pair<File, Set<File>> fileArgs = FileHandler.readArgs(args);
