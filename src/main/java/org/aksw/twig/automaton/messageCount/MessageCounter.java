@@ -100,6 +100,32 @@ public class MessageCounter implements Serializable {
     }
 
     /**
+     * Merges given {@link MessageCounter} into this.
+     * @param counter {@link MessageCounter} to merge.
+     * @return {@code this}
+     */
+    public MessageCounter merge(MessageCounter counter) {
+        counter.getUserMessageCountMap().forEach(entry -> {
+            String userName = entry.getKey();
+            Integer messageCount = entry.getValue();
+            if (userMessageCountMap.containsKey(userName)) {
+                userMessageCountMap.put(userName, userMessageCountMap.get(userName) + messageCount);
+            } else {
+                userMessageCountMap.put(userName, messageCount);
+            }
+        });
+
+        return this;
+    }
+
+    // TODO: doc
+    public void logResults() {
+        for (int i = 0; i < messageCounts.size(); i++) {
+            LOGGER.info("{} users have sent between {} and {} messages.", messageCounts.get(i), i * MESSAGE_STEP_SIZE, (i + 1) * MESSAGE_STEP_SIZE - 1);
+        }
+    }
+
+    /**
      * Creates a message counter distribution as stated in {@link #getValueDistribution()} and the messages counts as stated in {@link #getMessageCounts()} by adding all given files as {@link Model} and writes it into a file.
      * Arguments must be formatted as stated in {@link FileHandler#readArgs(String[])}.
      * @param args Arguments.
@@ -124,10 +150,7 @@ public class MessageCounter implements Serializable {
             }
         });
 
-        ArrayList<Integer> messageCounts = messageCounter.getMessageCounts();
-        for (int i = 0; i < messageCounts.size(); i++) {
-            LOGGER.info("{} users have sent between {} and {} messages.", messageCounts.get(i), i * MESSAGE_STEP_SIZE, (i + 1) * MESSAGE_STEP_SIZE - 1);
-        }
+        messageCounter.logResults();
 
         if (fileArgs.getLeft() == null) {
             return;
