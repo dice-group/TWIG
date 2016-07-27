@@ -103,7 +103,7 @@ public class MessageCounter {
     }
 
     /**
-     * Creates a message counter distribution as stated in {@link #getValueDistribution()} by adding all given files as {@link Model} and writes it into a file.
+     * Creates a message counter distribution as stated in {@link #getValueDistribution()} and the messages counts as stated in {@link #getMessageCounts()} by adding all given files as {@link Model} and writes it into a file.
      * Arguments must be formatted as stated in {@link FileHandler#readArgs(String[])}.
      * @param args Arguments.
      */
@@ -123,16 +123,25 @@ public class MessageCounter {
             }
         });
 
-        File outputFile;
+        File outputFileDistribution, outputFileData;
         try {
-            outputFile = new FileHandler(fileArgs.getLeft(), "message_count_distr", ".obj").nextFile();
+            outputFileDistribution = new FileHandler(fileArgs.getLeft(), "message_count_distr", ".obj").nextFile();
+            outputFileData = new FileHandler(fileArgs.getLeft(), "message_count", ".obj").nextFile();
         } catch (IOException e) {
             LOGGER.error(e.getMessage(), e);
             return;
         }
 
-        try (ObjectOutputStream objectOutputStream = new ObjectOutputStream(new FileOutputStream(outputFile))) {
+        try (ObjectOutputStream objectOutputStream = new ObjectOutputStream(new FileOutputStream(outputFileDistribution))) {
             objectOutputStream.writeObject(messageCounter.getValueDistribution());
+            objectOutputStream.flush();
+        } catch (IOException e) {
+            LOGGER.error(e.getMessage(), e);
+        }
+
+        try (ObjectOutputStream objectOutputStream = new ObjectOutputStream(new FileOutputStream(outputFileData))) {
+            objectOutputStream.writeObject(messageCounter.getMessageCounts());
+            objectOutputStream.flush();
         } catch (IOException e) {
             LOGGER.error(e.getMessage(), e);
         }
