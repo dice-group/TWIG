@@ -44,6 +44,7 @@ public class MessageCounterHandler implements SuspendSupplier<MessageCounter> {
             filesToParse.remove(fileToParse);
 
             return () -> {
+                LOGGER.info("Parsing file {}", fileToParse.getName());
                 MessageCounter counter = new MessageCounter();
                 counter.addModel(Twitter7ModelWrapper.read(fileToParse).getModel());
                 return counter;
@@ -54,6 +55,7 @@ public class MessageCounterHandler implements SuspendSupplier<MessageCounter> {
     @Override
     public void addResult(MessageCounter result) {
         synchronized (messageCounter) {
+            LOGGER.info("Merging result");
             messageCounter.merge(result);
         }
     }
