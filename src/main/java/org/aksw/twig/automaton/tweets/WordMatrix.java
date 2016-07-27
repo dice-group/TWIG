@@ -4,7 +4,6 @@ import org.aksw.twig.files.FileHandler;
 import org.aksw.twig.model.Twitter7ModelWrapper;
 import org.apache.commons.lang3.tuple.MutablePair;
 import org.apache.commons.lang3.tuple.Pair;
-import org.apache.jena.query.*;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -96,12 +95,6 @@ public class WordMatrix implements IWordMatrix, Serializable {
         return matrix;
     }
 
-    private static final Query TWITTER_CONTENT_QUERY = QueryFactory.create(
-            "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> " +
-            "PREFIX twig: <http://aksw.org/twig#> " +
-            "SELECT ?c WHERE { ?x rdf:type twig:Tweet . ?x twig:tweetContent ?c . }"
-    );
-
     /**
      * Creates a word matrix by reading given TWIG rdf data and writes it into a file.
      * Arguments must be formatted as stated in {@link FileHandler#readArgs(String[])}.
@@ -117,12 +110,12 @@ public class WordMatrix implements IWordMatrix, Serializable {
         filesToRead.forEach(file -> {
             try {
                 Twitter7ModelWrapper modelWrapper = Twitter7ModelWrapper.read(file);
-                try (QueryExecution execution = QueryExecutionFactory.create(TWITTER_CONTENT_QUERY, modelWrapper.getModel())) {
-                    ResultSet resultSet = execution.execSelect();
-                    while (resultSet.hasNext()) {
-                        matrix.putAll(new TweetSplitter(resultSet.next().get("c").toString()));
+                modelWrapper.getModel().listStatements().forEachRemaining(statement -> {
+                    if (statement.getPredicate().getLocalName().equals(Twitter7ModelWrapper.TWEET_CONTENT_PROPERTY_NAME)) {
+                        String tweet = statement.getObject().asLiteral().getString();
+                        matrix.putAll(new TweetSplitter(tweet));
                     }
-                }
+                });
             } catch (IOException e) {
                 LOGGER.error(e.getMessage(), e);
             }
@@ -130,7 +123,7 @@ public class WordMatrix implements IWordMatrix, Serializable {
 
         File writeFile;
         try {
-            writeFile = new FileHandler(outputDirectory, "wordMatrix", ".matrix").nextFile();
+            writeFile = new FileHandler(outputDirectory, "wordMatrix", ".obj").nextFile();
         } catch (IOException e) {
             LOGGER.error("Error: exception - {}", e.getMessage());
             return;

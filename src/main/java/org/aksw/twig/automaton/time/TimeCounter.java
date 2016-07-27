@@ -3,15 +3,15 @@ package org.aksw.twig.automaton.time;
 import org.aksw.twig.files.FileHandler;
 import org.aksw.twig.model.Twitter7ModelWrapper;
 import org.apache.commons.lang3.tuple.Pair;
-import org.apache.jena.query.Query;
-import org.apache.jena.query.QueryExecution;
-import org.apache.jena.query.QueryExecutionFactory;
-import org.apache.jena.query.QueryFactory;
+import org.apache.jena.rdf.model.Literal;
+import org.apache.jena.rdf.model.Model;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.ObjectOutputStream;
 import java.time.LocalDateTime;
 import java.util.Set;
 
@@ -19,59 +19,61 @@ public class TimeCounter {
 
     private static final Logger LOGGER = LogManager.getLogger(TimeCounter.class);
 
-    private static final Query MESSAGE_TIME_QUERY = QueryFactory.create(
-            "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> " +
-            "PREFIX twig: <http://aksw.org/twig#> " +
-            "SELECT ?time (COUNT(?msg) AS ?count) WHERE { " +
-                    "?msg rdf:type twig:Tweet . " +
-                    "?msg twig:tweetTime ?time" +
-            "} GROUP BY ?time"
-    );
+    private static final int HOURS = 24;
 
-    private long[] tweetTimes = new long[24 * 60];
+    private static final int MINUTES = 60;
 
-    public long getTweetTimesAt(int i) {
-        return tweetTimes[i];
+    private long[][] tweetTimes = new long[HOURS][MINUTES];
+
+    public long[][] getTweetTimes() {
+        return tweetTimes;
+    }
+
+    public long getTweetTimesAt(int hour, int minute) {
+        return tweetTimes[hour][minute];
+    }
+
+    public void addModel(Model model) {
+        model.listStatements().forEachRemaining(statement -> {
+            if (statement.getPredicate().getLocalName().equals(Twitter7ModelWrapper.TWEET_TIME_PROPERTY_NAME)) {
+                Literal literal = statement.getObject().asLiteral();
+                LocalDateTime time = LocalDateTime.from(Twitter7ModelWrapper.DATE_TIME_FORMATTER.parse(literal.getString()));
+                addTweetTime(time, 1);
+            }
+        });
     }
 
     public void addTweetTime(LocalDateTime time, long count) {
-        int index = time.getHour() * 60 + time.getMinute();
-        tweetTimes[index] += count;
+        tweetTimes[time.getHour()][time.getMinute()] += count;
     }
 
     public static void main(String[] args) {
 
         Pair<File, Set<File>> fileArgs = FileHandler.readArgs(args);
-        /*File outputFile;
-        try {
-            outputFile = new FileHandler(fileArgs.getLeft(), "time_counter", ".obj").nextFile();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }*/
 
         TimeCounter counter = new TimeCounter();
         fileArgs.getRight().forEach(file -> {
             try {
                 Twitter7ModelWrapper modelWrapper = Twitter7ModelWrapper.read(file);
-                try (QueryExecution queryExecution = QueryExecutionFactory.create(MESSAGE_TIME_QUERY, modelWrapper.getModel())) {
-                    queryExecution.execSelect().forEachRemaining(querySolution -> {
-                        String timeText = querySolution.getLiteral("time").getString();
-                        LocalDateTime time = LocalDateTime.from(Twitter7ModelWrapper.DATE_TIME_FORMATTER.parse(timeText));
-                        counter.addTweetTime(time, querySolution.getLiteral("count").getLong());
-                    });
-                }
+                counter.addModel(modelWrapper.getModel());
             } catch (IOException e) {
                 LOGGER.error(e.getMessage(), e);
-                return;
             }
         });
 
-        for (int i = 0; i < 24; i++) {
-            long hourCount = 0;
-            for (int j = 0; j < 60; j++) {
-                hourCount += counter.getTweetTimesAt(i * 60 + j);
-            }
-            LOGGER.info("{} messages have been sent between {}h and {}h", hourCount, i, (i + 1) % 24);
+        File outputFile;
+        try {
+            outputFile = new FileHandler(fileArgs.getLeft(), "time_counter", ".obj").nextFile();
+        } catch (IOException e) {
+            LOGGER.error(e.getMessage(), e);
+            return;
+        }
+
+        try (ObjectOutputStream objectOutputStream = new ObjectOutputStream(new FileOutputStream(outputFile))) {
+            objectOutputStream.writeObject(counter.getTweetTimes());
+            objectOutputStream.flush();
+        } catch (IOException e) {
+            LOGGER.error(e.getMessage(), e);
         }
     }
 }
