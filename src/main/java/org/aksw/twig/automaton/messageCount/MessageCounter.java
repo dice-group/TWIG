@@ -17,6 +17,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Stream;
 
 public class MessageCounter {
 
@@ -26,30 +27,48 @@ public class MessageCounter {
 
     private Map<String, Integer> userMessageCountMap = new HashMap<>();
 
-    private ArrayList<Integer> messageCounts = new ArrayList<>();
+    public Stream<Map.Entry<String, Integer>> getUserMessageCountMap() {
+        return userMessageCountMap.entrySet().stream();
+    }
+
+    private ArrayList<Integer> messageCounts;
+
+    public ArrayList<Integer> getMessageCounts() {
+        if (messageCounts == null) {
+            messageCounts = new ArrayList<>();
+            userMessageCountMap.values().forEach(count -> {
+                count /= MESSAGE_STEP_SIZE;
+                while (messageCounts.size() <= count) {
+                    messageCounts.add(0);
+                }
+                messageCounts.set(count, messageCounts.get(count) + 1);
+            });
+        }
+
+        return messageCounts;
+    }
 
     void addModel(Model model) {
         model.listStatements().forEachRemaining(statement -> {
             if (statement.getPredicate().getLocalName().equals(Twitter7ModelWrapper.SENDS_PROPERTY_NAME)) {
                 String userName = statement.getSubject().getLocalName();
-                if (!userMessageCountMap.containsKey(userName)) {
-                    userMessageCountMap.put(userName, 1);
-                } else {
-                    userMessageCountMap.put(userName, userMessageCountMap.get(userName) + 1);
-                }
+                addUserMessages(userName, 1);
             }
-        });
-
-        userMessageCountMap.values().forEach(count -> {
-            count /= MESSAGE_STEP_SIZE;
-            while (messageCounts.size() <= count) {
-                messageCounts.add(0);
-            }
-            messageCounts.set(count, messageCounts.get(count) + 1);
         });
     }
 
-    ExponentialLikeDistribution getValueDistribution() {
+    public void addUserMessages(String userName, int messages) {
+        messageCounts = null;
+
+        if (!userMessageCountMap.containsKey(userName)) {
+            userMessageCountMap.put(userName, messages);
+        } else {
+            userMessageCountMap.put(userName, userMessageCountMap.get(userName) + messages);
+        }
+    }
+
+    public ExponentialLikeDistribution getValueDistribution() {
+        getMessageCounts(); // Init array list if necessary
         SimpleExponentialRegression regression = new SimpleExponentialRegression();
         for (int i = 0; i < messageCounts.size(); i++) {
             regression.addData(i, messageCounts.get(i));
