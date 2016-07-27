@@ -49,14 +49,20 @@ public class Twitter7ModelWrapper {
         PREFIX_MAPPING.setNsPrefix(RDF_PREF, RDF_IRI);
     }
 
+    // RDF local names
+    public static final String SENDS_PROPERTY_NAME = "sends";
+    public static final String MENTIONS_PROPERTY_NAME = "mentions";
+    public static final String TWEET_TIME_PROPERTY_NAME = "tweetTime";
+    public static final String TWEET_CONTENT_PROPERTY_NAME = "tweetContent";
+
     // RDF statement parts.
     private static final Resource TWEET = ResourceFactory.createResource(PREFIX_MAPPING.expandPrefix("twig:Tweet"));
     private static final Resource ONLINE_TWITTER_ACCOUNT = ResourceFactory.createResource(PREFIX_MAPPING.expandPrefix("twig:OnlineTwitterAccount"));
     private static final Resource OWL_NAMED_INDIVIDUAL = ResourceFactory.createResource(PREFIX_MAPPING.expandPrefix("owl:NamedIndividual"));
-    private static final Property SENDS = ResourceFactory.createProperty(PREFIX_MAPPING.expandPrefix("twig:sends"));
-    private static final Property MENTIONS = ResourceFactory.createProperty(PREFIX_MAPPING.expandPrefix("twig:mentions"));
-    private static final Property TWEET_TIME = ResourceFactory.createProperty(PREFIX_MAPPING.expandPrefix("twig:tweetTime"));
-    private static final Property TWEET_CONTENT = ResourceFactory.createProperty(PREFIX_MAPPING.expandPrefix("twig:tweetContent"));
+    private static final Property SENDS = ResourceFactory.createProperty(PREFIX_MAPPING.expandPrefix("twig:".concat(SENDS_PROPERTY_NAME)));
+    private static final Property MENTIONS = ResourceFactory.createProperty(PREFIX_MAPPING.expandPrefix("twig:".concat(MENTIONS_PROPERTY_NAME)));
+    private static final Property TWEET_TIME = ResourceFactory.createProperty(PREFIX_MAPPING.expandPrefix("twig:".concat(TWEET_TIME_PROPERTY_NAME)));
+    private static final Property TWEET_CONTENT = ResourceFactory.createProperty(PREFIX_MAPPING.expandPrefix("twig:".concat(TWEET_CONTENT_PROPERTY_NAME)));
     private static final Property RDF_TYPE = ResourceFactory.createProperty(PREFIX_MAPPING.expandPrefix("rdf:type"));
 
     private static byte[] randomHashSuffix = new byte[32];

@@ -101,6 +101,8 @@ public class Twitter7Parser<T> implements Runnable {
         }
         run = true;
 
+        LOGGER.info("Started parsing file");
+
         // Start the initial threads.
         for (int i = 0; i < N_THREADS; i++) {
             readTwitter7Block();
@@ -266,6 +268,8 @@ public class Twitter7Parser<T> implements Runnable {
         }
 
         parsingFinishedListeners.forEach(Runnable::run);
+
+        LOGGER.info("Finished parsing file");
     }
 
     /**
