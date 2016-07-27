@@ -9,10 +9,7 @@ import org.apache.jena.rdf.model.Model;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.ObjectOutputStream;
+import java.io.*;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
@@ -22,7 +19,7 @@ import java.util.stream.Stream;
 /**
  * Counts messages per user. Intended to be used on a Twitter7Model as it can be created by {@link Twitter7ModelWrapper}.
  */
-public class MessageCounter {
+public class MessageCounter implements Serializable {
 
     private static final Logger LOGGER = LogManager.getLogger(MessageCounter.class);
 
@@ -112,6 +109,10 @@ public class MessageCounter {
         // File handling
         Pair<File, Set<File>> fileArgs = FileHandler.readArgs(args);
 
+        if (fileArgs.getLeft() == null) {
+            throw new IllegalArgumentException("No --out argument given.");
+        }
+
         // Message counting
         MessageCounter messageCounter = new MessageCounter();
         fileArgs.getRight().forEach(file -> {
@@ -123,24 +124,25 @@ public class MessageCounter {
             }
         });
 
-        File outputFileDistribution, outputFileData;
+        ArrayList<Integer> messageCounts = messageCounter.getMessageCounts();
+        for (int i = 0; i < messageCounts.size(); i++) {
+            LOGGER.info("{} users have sent between {} and {} messages.", messageCounts.get(i), i * MESSAGE_STEP_SIZE, (i + 1) * MESSAGE_STEP_SIZE - 1);
+        }
+
+        if (fileArgs.getLeft() == null) {
+            return;
+        }
+
+        File outputFile;
         try {
-            outputFileDistribution = new FileHandler(fileArgs.getLeft(), "message_count_distr", ".obj").nextFile();
-            outputFileData = new FileHandler(fileArgs.getLeft(), "message_count", ".obj").nextFile();
+            outputFile = new FileHandler(fileArgs.getLeft(), "message_count", ".obj").nextFile();
         } catch (IOException e) {
             LOGGER.error(e.getMessage(), e);
             return;
         }
 
-        try (ObjectOutputStream objectOutputStream = new ObjectOutputStream(new FileOutputStream(outputFileDistribution))) {
-            objectOutputStream.writeObject(messageCounter.getValueDistribution());
-            objectOutputStream.flush();
-        } catch (IOException e) {
-            LOGGER.error(e.getMessage(), e);
-        }
-
-        try (ObjectOutputStream objectOutputStream = new ObjectOutputStream(new FileOutputStream(outputFileData))) {
-            objectOutputStream.writeObject(messageCounter.getMessageCounts());
+        try (ObjectOutputStream objectOutputStream = new ObjectOutputStream(new FileOutputStream(outputFile))) {
+            objectOutputStream.writeObject(messageCounter);
             objectOutputStream.flush();
         } catch (IOException e) {
             LOGGER.error(e.getMessage(), e);

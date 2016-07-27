@@ -8,17 +8,14 @@ import org.apache.jena.rdf.model.Model;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.ObjectOutputStream;
+import java.io.*;
 import java.time.LocalDateTime;
 import java.util.Set;
 
 /**
  * Counts the timestamp of tweets per day. Intended to be used with a Twitter7Model as it can be created by {@link Twitter7ModelWrapper}.
  */
-public class TimeCounter {
+public class TimeCounter implements Serializable {
 
     private static final Logger LOGGER = LogManager.getLogger(TimeCounter.class);
 
@@ -89,6 +86,18 @@ public class TimeCounter {
             }
         });
 
+        for (int hour = 0; hour < HOURS; hour++) {
+            int hourCount = 0;
+            for (int minute = 0; minute < MINUTES; minute++) {
+                hourCount += counter.getTweetTimesAt(hour, minute);
+            }
+            LOGGER.info("Between {}h and {}h {} messages have been sent.", hour, hour + 1, hourCount);
+        }
+
+        if (fileArgs.getLeft() == null) {
+            return;
+        }
+
         File outputFile;
         try {
             outputFile = new FileHandler(fileArgs.getLeft(), "time_counter", ".obj").nextFile();
@@ -98,7 +107,7 @@ public class TimeCounter {
         }
 
         try (ObjectOutputStream objectOutputStream = new ObjectOutputStream(new FileOutputStream(outputFile))) {
-            objectOutputStream.writeObject(counter.getTweetTimes());
+            objectOutputStream.writeObject(counter);
             objectOutputStream.flush();
         } catch (IOException e) {
             LOGGER.error(e.getMessage(), e);

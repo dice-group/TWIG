@@ -273,7 +273,7 @@ public class Twitter7Parser<T> implements Runnable {
     }
 
     /**
-     * Parses one or more files according to twitter7 format. Arguments must be formatted as stated in {@link FileHandler#readArgs(String[])}.
+     * Parses one or more files according to twitter7 format. Arguments must be formatted as stated in {@link FileHandler#readArgs(String[])} but {@code --out=} argument is mandatory.
      * You should not parse files with the same name from different directories as that could mess up the output.
      * @param args One or more arguments as specified above.
      * @see Twitter7Parser

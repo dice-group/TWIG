@@ -97,7 +97,7 @@ public class WordMatrix implements IWordMatrix, Serializable {
 
     /**
      * Creates a word matrix by reading given TWIG rdf data and writes it into a file.
-     * Arguments must be formatted as stated in {@link FileHandler#readArgs(String[])}.
+     * Arguments must be formatted as stated in {@link FileHandler#readArgs(String[])} but {@code --out=} argument is mandatory.
      * @param args Arguments.
      */
     public static void main(String[] args) {
@@ -105,6 +105,10 @@ public class WordMatrix implements IWordMatrix, Serializable {
         Pair<File, Set<File>> parsedArgs = FileHandler.readArgs(args);
         File outputDirectory = parsedArgs.getLeft();
         Set<File> filesToRead = parsedArgs.getRight();
+
+        if (outputDirectory == null) {
+            throw new IllegalArgumentException("No --out argument given.");
+        }
 
         WordMatrix matrix = new WordMatrix();
         filesToRead.forEach(file -> {
