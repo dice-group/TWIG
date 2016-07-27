@@ -82,5 +82,6 @@ public class MessageCounterHandler implements SuspendSupplier<MessageCounter> {
                 }
             }
         });
+        executor.start();
     }
 }
