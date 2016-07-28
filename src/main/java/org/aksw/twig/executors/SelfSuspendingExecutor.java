@@ -9,6 +9,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.Callable;
 import java.util.concurrent.Executor;
+import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 /**
@@ -40,12 +41,12 @@ public class SelfSuspendingExecutor<T> {
     /**
      * Threads callback listening.
      */
-    private final Executor singleThreadedCallbackExecutor = Executors.newSingleThreadExecutor();
+    private final ExecutorService singleThreadedCallbackExecutor = Executors.newSingleThreadExecutor();
 
     /**
      * Threads callable supplying.
      */
-    private final Executor singleThreadedSelfExecutor = Executors.newSingleThreadExecutor();
+    private final ExecutorService singleThreadedSelfExecutor = Executors.newSingleThreadExecutor();
 
     private final List<Runnable> finishedListeners = new LinkedList<>();
 
@@ -104,7 +105,7 @@ public class SelfSuspendingExecutor<T> {
         started = true;
 
         for (int i = 0; i < nThreads; i++) {
-            singleThreadedSelfExecutor.execute(this::execNext);
+            singleThreadedSelfExecutor.submit(this::execNext);
         }
     }
 
@@ -112,7 +113,7 @@ public class SelfSuspendingExecutor<T> {
      * Finishes the execution by shutting down services, etc.
      */
     private void finish() {
-        if (executorService.isShutdown()) {
+        if (executorService.isShutdown() || singleThreadedCallbackExecutor.isShutdown() || singleThreadedSelfExecutor.isShutdown()) {
             throw new IllegalStateException();
         }
 
@@ -132,6 +133,9 @@ public class SelfSuspendingExecutor<T> {
             });
             finishedListeners.clear();
         }
+
+        singleThreadedSelfExecutor.shutdown();
+        singleThreadedCallbackExecutor.shutdown();
     }
 
     /**

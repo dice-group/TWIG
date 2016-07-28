@@ -11,6 +11,7 @@ public class SelfSuspendingExecutorTest {
 
     private boolean asserted = false;
 
+
     @Test
     public void simpleTest() {
         for (int i = 0; i < 10; i++) {
@@ -27,13 +28,7 @@ public class SelfSuspendingExecutorTest {
         });
         executor.start();
 
-        while (!executor.isFinished()) {
-            try {
-                Thread.sleep(10);
-            } catch (InterruptedException e) {
-                LOGGER.error(e.getMessage(), e);
-            }
-        }
+        blockUntilFinished(executor);
 
         Assert.assertTrue(asserted);
     }
@@ -49,6 +44,8 @@ public class SelfSuspendingExecutorTest {
         SuspendSupplier<Integer> supplier = new EmptySuspendSupplier();
         SelfSuspendingExecutor<Integer> executor = new SelfSuspendingExecutor<>(supplier);
         executor.start();
+
+        blockUntilFinished(executor);
     }
 
     @Test
@@ -59,8 +56,22 @@ public class SelfSuspendingExecutorTest {
     }
 
     private void execOnceSupplyingTest() {
-        SuspendSupplier<Integer> supplier = new OnceSuspendSupplier();
+        OnceSuspendSupplier supplier = new OnceSuspendSupplier();
         SelfSuspendingExecutor<Integer> executor = new SelfSuspendingExecutor<>(supplier);
         executor.start();
+
+        blockUntilFinished(executor);
+
+        Assert.assertEquals(1, supplier.getResult());
+    }
+
+    private static void blockUntilFinished(SelfSuspendingExecutor executor) {
+        while (!executor.isFinished()) {
+            try {
+                Thread.sleep(100);
+            } catch (InterruptedException e) {
+                LOGGER.error(e.getMessage(), e);
+            }
+        }
     }
 }

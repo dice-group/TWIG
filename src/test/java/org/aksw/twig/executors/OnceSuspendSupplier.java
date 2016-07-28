@@ -8,11 +8,17 @@ class OnceSuspendSupplier implements SuspendSupplier<Integer> {
 
     private int result = 0;
 
+    public int getResult() {
+        return result;
+    }
+
     @Override
     public Callable<Integer> next() {
         if (supplied) {
             return null;
         }
+
+        supplied = true;
 
         return () -> 1;
     }
