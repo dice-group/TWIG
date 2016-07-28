@@ -118,7 +118,9 @@ public class MessageCounter implements Serializable {
         return this;
     }
 
-    // TODO: doc
+    /**
+     * Logs the content of the array list as returned by {@link #getMessageCounts()}.
+     */
     public void logResults() {
         getMessageCounts();
         for (int i = 0; i < messageCounts.size(); i++) {
