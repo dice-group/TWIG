@@ -50,4 +50,17 @@ public class SelfSuspendingExecutorTest {
         SelfSuspendingExecutor<Integer> executor = new SelfSuspendingExecutor<>(supplier);
         executor.start();
     }
+
+    @Test
+    public void onceSupplyingTest() {
+        for (int i = 0; i < 10; i++) {
+            execOnceSupplyingTest();
+        }
+    }
+
+    private void execOnceSupplyingTest() {
+        SuspendSupplier<Integer> supplier = new OnceSuspendSupplier();
+        SelfSuspendingExecutor<Integer> executor = new SelfSuspendingExecutor<>(supplier);
+        executor.start();
+    }
 }
