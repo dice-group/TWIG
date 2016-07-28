@@ -160,13 +160,16 @@ public class FileHandler {
         Matcher outDirectoryMatcher = ARG_PREF_OUT.matcher(args[0]);
         File outputDirectory = outDirectoryMatcher.find() ? new File(outDirectoryMatcher.group(1)) : null;
 
+        int argsStartIndex = 1;
         if (outputDirectory != null && !outputDirectory.isDirectory()) {
             throw new IllegalArgumentException("--out argument is no directory");
+        } else if (outputDirectory == null) {
+            argsStartIndex = 0;
         }
 
         // Get all files to parse
         Set<File> filesToParse = new HashSet<>();
-        for (int i = 1; i < args.length; i++) {
+        for (int i = argsStartIndex; i < args.length; i++) {
             Matcher matcher = ARG_PREF_IN.matcher(args[i]);
             if (matcher.find()) {
                 filesToParse.addAll(FileHandler.getFiles(new File(matcher.group(1)), true).collect(Collectors.toList()));

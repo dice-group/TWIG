@@ -120,6 +120,7 @@ public class MessageCounter implements Serializable {
 
     // TODO: doc
     public void logResults() {
+        getMessageCounts();
         for (int i = 0; i < messageCounts.size(); i++) {
             LOGGER.info("{} users have sent between {} and {} messages.", messageCounts.get(i), i * MESSAGE_STEP_SIZE, (i + 1) * MESSAGE_STEP_SIZE - 1);
         }

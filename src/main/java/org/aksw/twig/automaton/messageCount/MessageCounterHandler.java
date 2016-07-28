@@ -35,10 +35,11 @@ public class MessageCounterHandler implements SuspendSupplier<MessageCounter> {
 
     @Override
     public Callable<MessageCounter> next() {
-        if (filesToParse == null || filesToParse.isEmpty()) {
+        if (filesToParse.isEmpty()) {
             return null;
         }
 
+        LOGGER.info("Supplying callable");
         synchronized (filesToParse) {
             File fileToParse = filesToParse.first();
             filesToParse.remove(fileToParse);
@@ -82,6 +83,7 @@ public class MessageCounterHandler implements SuspendSupplier<MessageCounter> {
                 }
             }
         });
+        LOGGER.info("Starting executor");
         executor.start();
     }
 }

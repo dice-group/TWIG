@@ -142,6 +142,7 @@ public class SelfSuspendingExecutor<T> {
             return;
         }
 
+        LOGGER.info("Querying callable");
         Callable<T> task = suspendSupplier.next();
 
         if (task == null) {
@@ -149,6 +150,7 @@ public class SelfSuspendingExecutor<T> {
             return;
         }
 
+        LOGGER.info("Submitting callable");
         ListenableFuture<T> listenableFuture = executorService.submit(task);
         Futures.addCallback(listenableFuture, callback, singleThreadedCallbackExecutor);
         listenableFuture.addListener(this::execNext, singleThreadedSelfExecutor);

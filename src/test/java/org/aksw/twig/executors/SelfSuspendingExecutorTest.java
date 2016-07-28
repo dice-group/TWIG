@@ -12,13 +12,13 @@ public class SelfSuspendingExecutorTest {
     private boolean asserted = false;
 
     @Test
-    public void test() {
-        for (int i = 0; i < 100; i++) {
-            execTest();
+    public void simpleTest() {
+        for (int i = 0; i < 10; i++) {
+            execSimpleTest();
         }
     }
 
-    public void execTest() {
+    private void execSimpleTest() {
         SimpleSuspendSupplier supplier = new SimpleSuspendSupplier();
         SelfSuspendingExecutor<Integer> executor = new SelfSuspendingExecutor<>(supplier);
         executor.addFinishedListener(() -> {
@@ -36,5 +36,18 @@ public class SelfSuspendingExecutorTest {
         }
 
         Assert.assertTrue(asserted);
+    }
+
+    @Test
+    public void emptyTest() {
+        for (int i = 0; i < 10; i++) {
+            execEmptyTest();
+        }
+    }
+
+    private void execEmptyTest() {
+        SuspendSupplier<Integer> supplier = new EmptySuspendSupplier();
+        SelfSuspendingExecutor<Integer> executor = new SelfSuspendingExecutor<>(supplier);
+        executor.start();
     }
 }
