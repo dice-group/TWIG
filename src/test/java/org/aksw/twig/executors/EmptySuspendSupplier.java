@@ -2,7 +2,7 @@ package org.aksw.twig.executors;
 
 import java.util.concurrent.Callable;
 
-public class EmptySuspendSupplier implements SuspendSupplier<Integer> {
+class EmptySuspendSupplier implements SuspendSupplier<Integer> {
 
     @Override
     public Callable<Integer> next() {
