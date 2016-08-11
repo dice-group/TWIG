@@ -23,8 +23,6 @@ public class MessageCounter implements Serializable {
 
     private static final Logger LOGGER = LogManager.getLogger(MessageCounter.class);
 
-    private static final int MESSAGE_STEP_SIZE = 100;
-
     private Map<String, Integer> userMessageCountMap = new HashMap<>();
 
     /**
@@ -39,14 +37,13 @@ public class MessageCounter implements Serializable {
 
     /**
      * Returns an array list with following semantics:
-     * {@code x := arrayList[i]} means that x users have sent a number of messages with: {@link #MESSAGE_STEP_SIZE} {@code * i <= number < }{@link #MESSAGE_STEP_SIZE} {@code * (i + 1)}.
+     * {@code x := arrayList[i]} means that {@code x} users have sent {@code i} messages.
      * @return Array list with message numbers.
      */
     public ArrayList<Integer> getMessageCounts() {
         if (messageCounts == null) {
             messageCounts = new ArrayList<>();
             userMessageCountMap.values().forEach(count -> {
-                count /= MESSAGE_STEP_SIZE;
                 while (messageCounts.size() <= count) {
                     messageCounts.add(0);
                 }
@@ -124,7 +121,7 @@ public class MessageCounter implements Serializable {
     public void logResults() {
         getMessageCounts();
         for (int i = 0; i < messageCounts.size(); i++) {
-            LOGGER.info("{} users have sent between {} and {} messages.", messageCounts.get(i), i * MESSAGE_STEP_SIZE, (i + 1) * MESSAGE_STEP_SIZE - 1);
+            LOGGER.info("{} users have sent between {} messages.", messageCounts.get(i), i);
         }
     }
 

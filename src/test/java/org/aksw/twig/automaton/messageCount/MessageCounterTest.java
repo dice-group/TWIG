@@ -25,6 +25,6 @@ public class MessageCounterTest {
             }
         });
 
-        Assert.assertEquals(new Integer(2), counter.getMessageCounts().get(0));
+        Assert.assertEquals(new Integer(2), counter.getMessageCounts().get(2));
     }
 }
