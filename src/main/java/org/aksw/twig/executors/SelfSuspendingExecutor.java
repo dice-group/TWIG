@@ -58,6 +58,7 @@ public class SelfSuspendingExecutor<T> {
     }
 
     private void execNext() {
+        LOGGER.info("Querying callable");
         Callable<T> callable = suspendSupplier.next();
         if (callable == null) {
             if (!callableSubmittingService.isShutdown()) {
@@ -72,6 +73,8 @@ public class SelfSuspendingExecutor<T> {
         if (executorService.isShutdown()) {
             return;
         }
+
+        LOGGER.info("Finishing");
 
         executorService.shutdown();
 
@@ -99,6 +102,7 @@ public class SelfSuspendingExecutor<T> {
 
     private void runCallable(Callable<T> callable) {
         try {
+            LOGGER.info("Executing callable");
             T result = callable.call();
             suspendSupplier.addResult(result);
         } catch (Exception e) {
