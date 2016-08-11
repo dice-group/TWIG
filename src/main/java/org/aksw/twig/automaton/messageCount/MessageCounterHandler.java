@@ -69,7 +69,14 @@ public class MessageCounterHandler implements SuspendSupplier<MessageCounter> {
     public static void main(String[] args) {
 
         Pair<File, Set<File>> fileArgs = FileHandler.readArgs(args);
-        File outputFile = fileArgs.getLeft();
+        File outputFile;
+        try {
+            outputFile = new FileHandler(fileArgs.getLeft(), "message_count", ".obj").nextFile();
+        } catch (IOException e) {
+            LOGGER.error(e.getMessage(), e);
+            return;
+        }
+
         MessageCounterHandler handler = new MessageCounterHandler(fileArgs.getRight());
         SelfSuspendingExecutor<MessageCounter> executor = new SelfSuspendingExecutor<>(handler);
         executor.addFinishedEventListeners(() -> {
