@@ -70,7 +70,7 @@ public class TimeCounterHandler implements SuspendSupplier<TimeCounter> {
         Pair<File, Set<File>> fileArgs = FileHandler.readArgs(args);
         File outputFile;
         try {
-            outputFile = new FileHandler(fileArgs.getLeft(), "message_count", ".obj").nextFile();
+            outputFile = new FileHandler(fileArgs.getLeft(), "time_count", ".obj").nextFile();
         } catch (IOException e) {
             LOGGER.error(e.getMessage(), e);
             return;
