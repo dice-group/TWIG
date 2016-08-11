@@ -14,6 +14,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
+import java.util.function.Consumer;
 import java.util.stream.Stream;
 
 /**
@@ -58,7 +59,7 @@ public class MessageCounter implements Serializable {
      * Adds all messages in the model to the counter.
      * @param model Model to add.
      */
-    void addModel(Model model) {
+    public void addModel(Model model) {
         model.listStatements().forEachRemaining(statement -> {
             if (statement.getPredicate().getLocalName().equals(Twitter7ModelWrapper.SENDS_PROPERTY_NAME)) {
                 String userName = statement.getSubject().getLocalName();
@@ -101,7 +102,7 @@ public class MessageCounter implements Serializable {
      * @param counter {@link MessageCounter} to merge.
      * @return {@code this}
      */
-    public MessageCounter merge(MessageCounter counter) {
+    public void merge(MessageCounter counter) {
         counter.getUserMessageCountMap().forEach(entry -> {
             String userName = entry.getKey();
             Integer messageCount = entry.getValue();
@@ -111,8 +112,6 @@ public class MessageCounter implements Serializable {
                 userMessageCountMap.put(userName, messageCount);
             }
         });
-
-        return this;
     }
 
     /**

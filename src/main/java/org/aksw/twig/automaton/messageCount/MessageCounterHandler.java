@@ -21,7 +21,7 @@ public class MessageCounterHandler implements SuspendSupplier<MessageCounter> {
 
     private static final Logger LOGGER = LogManager.getLogger(MessageCounterHandler.class);
 
-    private final MessageCounter messageCounter = new MessageCounter();
+    private final MessageCounter mergedResult = new MessageCounter();
 
     private final NavigableSet<File> filesToParse = new TreeSet<>();
 
@@ -55,9 +55,9 @@ public class MessageCounterHandler implements SuspendSupplier<MessageCounter> {
 
     @Override
     public void addResult(MessageCounter result) {
-        synchronized (messageCounter) {
+        synchronized (mergedResult) {
             LOGGER.info("Merging result");
-            messageCounter.merge(result);
+            mergedResult.merge(result);
         }
     }
 
@@ -80,11 +80,9 @@ public class MessageCounterHandler implements SuspendSupplier<MessageCounter> {
         MessageCounterHandler handler = new MessageCounterHandler(fileArgs.getRight());
         SelfSuspendingExecutor<MessageCounter> executor = new SelfSuspendingExecutor<>(handler);
         executor.addFinishedEventListeners(() -> {
-            handler.messageCounter.logResults();
-
             if (outputFile != null) {
                 try (ObjectOutputStream objectOutputStream = new ObjectOutputStream(new FileOutputStream(outputFile))) {
-                    objectOutputStream.writeObject(handler.messageCounter);
+                    objectOutputStream.writeObject(handler.mergedResult);
                 } catch (IOException e) {
                     LOGGER.error(e.getMessage(), e);
                 }

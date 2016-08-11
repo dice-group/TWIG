@@ -11,6 +11,7 @@ import org.apache.logging.log4j.Logger;
 import java.io.*;
 import java.time.LocalDateTime;
 import java.util.Set;
+import java.util.function.Consumer;
 
 /**
  * Counts the timestamp of tweets per day. Intended to be used with a Twitter7Model as it can be created by {@link Twitter7ModelWrapper}.
@@ -65,6 +66,18 @@ public class TimeCounter implements Serializable {
      */
     public void addTweetTime(LocalDateTime time, long count) {
         tweetTimes[time.getHour()][time.getMinute()] += count;
+    }
+
+    /**
+     * Adds all time counts from given {@link TimeCounter} to this.
+     * @param timeCounter Time counter to add from.
+     */
+    public void merge(TimeCounter timeCounter) {
+        for (int h = 0; h < HOURS; h++) {
+            for (int m = 0; m < MINUTES; m++) {
+                tweetTimes[h][m] += timeCounter.tweetTimes[h][m];
+            }
+        }
     }
 
     /**
