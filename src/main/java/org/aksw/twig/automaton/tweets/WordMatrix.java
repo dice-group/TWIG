@@ -20,7 +20,7 @@ public class WordMatrix implements IWordMatrix, Serializable {
 
     private static final long serialVersionUID = 2104488071228760278L;
 
-    private static final Logger LOGGER = LogManager.getLogger(WordMatrix.class);
+    private static transient final Logger LOGGER = LogManager.getLogger(WordMatrix.class);
 
     private Map<String, MutablePair<Long, Map<String, Long>>> matrix = new HashMap<>();
 
