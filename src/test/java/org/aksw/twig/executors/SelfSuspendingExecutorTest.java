@@ -21,7 +21,7 @@ public class SelfSuspendingExecutorTest {
     private void execSimpleTest() {
         SimpleSuspendSupplier supplier = new SimpleSuspendSupplier();
         SelfSuspendingExecutor<Integer> executor = new SelfSuspendingExecutor<>(supplier);
-        executor.addFinishedListener(() -> {
+        executor.addFinishedEventListeners(() -> {
             asserted = true;
             Assert.assertEquals(SimpleSuspendSupplier.EXPECTED_RESULT, supplier.getResult());
         });

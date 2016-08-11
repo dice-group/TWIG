@@ -72,7 +72,7 @@ public class MessageCounterHandler implements SuspendSupplier<MessageCounter> {
         File outputFile = fileArgs.getLeft();
         MessageCounterHandler handler = new MessageCounterHandler(fileArgs.getRight());
         SelfSuspendingExecutor<MessageCounter> executor = new SelfSuspendingExecutor<>(handler);
-        executor.addFinishedListener(() -> {
+        executor.addFinishedEventListeners(() -> {
             handler.messageCounter.logResults();
 
             if (outputFile != null) {

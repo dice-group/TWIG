@@ -39,7 +39,7 @@ class SimpleSuspendSupplier implements SuspendSupplier<Integer> {
     }
 
     @Override
-    public void addResult(Integer result) {
+    public synchronized void addResult(Integer result) {
         this.result++;
     }
 }
