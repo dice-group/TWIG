@@ -22,6 +22,8 @@ import java.util.stream.Stream;
  */
 public class MessageCounter implements Serializable {
 
+    private static final long serialVersionUID = 5741136390921853596L;
+
     private static final Logger LOGGER = LogManager.getLogger(MessageCounter.class);
 
     private Map<String, Integer> userMessageCountMap = new HashMap<>();

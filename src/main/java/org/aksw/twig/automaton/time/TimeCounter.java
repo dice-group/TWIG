@@ -18,6 +18,8 @@ import java.util.function.Consumer;
  */
 public class TimeCounter implements Serializable {
 
+    private static final long serialVersionUID = 4946607680737050029L;
+
     private static final Logger LOGGER = LogManager.getLogger(TimeCounter.class);
 
     private static final int HOURS = 24;
