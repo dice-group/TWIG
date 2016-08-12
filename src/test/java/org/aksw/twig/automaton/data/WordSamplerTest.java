@@ -1,7 +1,5 @@
 package org.aksw.twig.automaton.data;
 
-import org.aksw.twig.automaton.data.WordMatrix;
-import org.aksw.twig.automaton.data.WordSampler;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -14,7 +12,7 @@ public class WordSamplerTest {
     @Test
     public void simpleTest() {
         WordMatrix matrix = new WordMatrix();
-        matrix.put("a", "a", 1);
+        matrix.alterFrequency("a", "a", 1);
         WordSampler sampler = new WordSampler(matrix);
         Assert.assertEquals("a", sampler.sample("a"));
     }
@@ -26,7 +24,7 @@ public class WordSamplerTest {
         String[] successors = new String[] { "a", "b" };
         Map<String, Integer> occurrences = new HashMap<>();
         Arrays.stream(successors).forEach(successor -> {
-            matrix.put(predecessor, successor, 1);
+            matrix.alterFrequency(predecessor, successor, 1);
             occurrences.put(successor, 0);
         });
 

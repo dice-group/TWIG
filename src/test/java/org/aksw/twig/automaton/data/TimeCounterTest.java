@@ -1,6 +1,5 @@
 package org.aksw.twig.automaton.data;
 
-import org.aksw.twig.automaton.data.TimeCounter;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -18,7 +17,7 @@ public class TimeCounterTest {
         counter.addTweetTime(testTimePlusOneSecond, 1);
         counter.addTweetTime(testTimePlusOneMinute, 3);
 
-        Assert.assertEquals(3, counter.getTweetTimesAt(testTime.getHour(), testTime.getMinute()));
-        Assert.assertEquals(3, counter.getTweetTimesAt(testTimePlusOneMinute.getHour(), testTimePlusOneMinute.getMinute()));
+        Assert.assertEquals(3, counter.getTimesCountAt(testTime.getHour(), testTime.getMinute()));
+        Assert.assertEquals(3, counter.getTimesCountAt(testTimePlusOneMinute.getHour(), testTimePlusOneMinute.getMinute()));
     }
 }

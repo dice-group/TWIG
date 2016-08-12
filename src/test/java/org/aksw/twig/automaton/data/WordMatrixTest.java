@@ -1,6 +1,5 @@
 package org.aksw.twig.automaton.data;
 
-import org.aksw.twig.automaton.data.WordMatrix;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -38,8 +37,8 @@ public class WordMatrixTest {
     }
 
     private void prepareMatrix(WordMatrix matrix) {
-        matrix.put("a", "a", 1);
-        matrix.put("a", "b", 1);
+        matrix.alterFrequency("a", "a", 1);
+        matrix.alterFrequency("a", "b", 1);
     }
 
     private void assertMatrix(WordMatrix matrix) {
