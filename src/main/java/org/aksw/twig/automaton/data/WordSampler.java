@@ -1,23 +1,23 @@
 package org.aksw.twig.automaton.data;
 
+import org.aksw.twig.statistics.DiscreteDistribution;
 import org.aksw.twig.structs.AVLTree;
 
 import java.util.*;
 
 public class WordSampler {
 
-    private Map<String, AVLTree<WordChanceMapping>> sampleMap = new HashMap<>();
+    private Map<String, DiscreteDistribution<String>> distributionMap = new HashMap<>();
 
     private Random r = new Random();
 
     public String sample(String predecessor) {
-        AVLTree<WordChanceMapping> tree = sampleMap.get(predecessor);
-        if (tree == null) {
+        DiscreteDistribution<String> distribution = distributionMap.get(predecessor);
+        if (distribution == null) {
             throw new IllegalArgumentException("Predecessor not present");
         }
 
-        WordChanceMapping random = tree.findGreater(new WordChanceMapping("", r.nextDouble()));
-        return random == null ? null : random.word;
+        return distribution.sample(r);
     }
 
     public String sampleTweet() {
@@ -50,21 +50,18 @@ public class WordSampler {
     public WordSampler(final IWordMatrix matrix) {
         matrix.getPredecessors().forEach(predecessor -> {
 
-            AVLTree<WordChanceMapping> tree = new AVLTree<>();
 
             WordChanceMapping[] wordChanceMappings = matrix.getMappings(predecessor).entrySet().stream()
                     .map(entry -> new WordChanceMapping(entry.getKey(), entry.getValue()))
                     .toArray(WordChanceMapping[]::new);
-            Arrays.sort(wordChanceMappings, WordChanceMapping::compareTo);
+            Arrays.sort(wordChanceMappings, WordChanceMapping::compareTo); // Sort successors alphabetically
 
-            double cumulativeChance = 0d;
+            DiscreteDistribution<String> distribution = new DiscreteDistribution<>();
             for (WordChanceMapping mapping: wordChanceMappings) {
-                mapping.chance += cumulativeChance;
-                cumulativeChance = mapping.chance;
-                tree.add(mapping);
+                distribution.addDiscreteEvent(mapping.word, mapping.chance);
             }
 
-            sampleMap.put(predecessor, tree);
+            distributionMap.put(predecessor, distribution);
         });
     }
 
@@ -81,8 +78,7 @@ public class WordSampler {
 
         @Override
         public int compareTo(WordChanceMapping mapping) {
-            double delta = chance - mapping.chance;
-            return delta < 0 ? -1 : (int) Math.ceil(delta);
+            return word.compareTo(mapping.word);
         }
     }
 }
