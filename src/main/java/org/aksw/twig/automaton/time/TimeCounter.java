@@ -2,6 +2,7 @@ package org.aksw.twig.automaton.time;
 
 import org.aksw.twig.files.FileHandler;
 import org.aksw.twig.model.Twitter7ModelWrapper;
+import org.aksw.twig.statistics.DiscreteDistribution;
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.jena.rdf.model.Literal;
 import org.apache.jena.rdf.model.Model;
@@ -10,6 +11,7 @@ import org.apache.logging.log4j.Logger;
 
 import java.io.*;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.Set;
 import java.util.function.Consumer;
 
@@ -80,6 +82,26 @@ public class TimeCounter implements Serializable {
                 tweetTimes[h][m] += timeCounter.tweetTimes[h][m];
             }
         }
+    }
+
+    public DiscreteDistribution<LocalTime> getValueDistribution() {
+        DiscreteDistribution<LocalTime> distribution = new DiscreteDistribution<>();
+
+        double sum = 0;
+        for (int h = 0; h < HOURS; h++) {
+            for (int m = 0; m < MINUTES; m++) {
+                sum += (double) tweetTimes[h][m];
+            }
+        }
+
+        for (int h = 0; h < HOURS; h++) {
+            for (int m = 0; m < MINUTES; m++) {
+                LocalTime time = LocalTime.of(h, m);
+                distribution.addDiscreteEvent(time, (double) tweetTimes[h][m] / sum);
+            }
+        }
+
+        return distribution;
     }
 
     /**
