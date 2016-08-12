@@ -1,4 +1,4 @@
-package org.aksw.twig.automaton.messageCount;
+package org.aksw.twig.automaton.data;
 
 import org.aksw.twig.files.FileHandler;
 import org.aksw.twig.model.Twitter7ModelWrapper;
@@ -14,7 +14,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
-import java.util.function.Consumer;
 import java.util.stream.Stream;
 
 /**
@@ -40,17 +39,17 @@ public class MessageCounter implements Serializable {
 
     /**
      * Returns an array list with following semantics:
-     * {@code x := arrayList[i]} means that {@code x} users have sent {@code i} messages.
+     * {@code x := arrayList[i]} means that {@code x} users have sent {@code i + 1} messages.
      * @return Array list with message numbers.
      */
     public ArrayList<Integer> getMessageCounts() {
         if (messageCounts == null) {
             messageCounts = new ArrayList<>();
             userMessageCountMap.values().forEach(count -> {
-                while (messageCounts.size() <= count) {
+                while (messageCounts.size() <= count - 1) {
                     messageCounts.add(0);
                 }
-                messageCounts.set(count, messageCounts.get(count) + 1);
+                messageCounts.set(count - 1, messageCounts.get(count - 1) + 1);
             });
         }
 

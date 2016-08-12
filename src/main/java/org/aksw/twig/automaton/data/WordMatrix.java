@@ -1,4 +1,4 @@
-package org.aksw.twig.automaton.tweets;
+package org.aksw.twig.automaton.data;
 
 import org.aksw.twig.files.FileHandler;
 import org.aksw.twig.model.Twitter7ModelWrapper;

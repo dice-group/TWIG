@@ -1,5 +1,6 @@
-package org.aksw.twig.automaton.time;
+package org.aksw.twig.automaton.data;
 
+import org.aksw.twig.automaton.data.TimeCounter;
 import org.junit.Assert;
 import org.junit.Test;
 

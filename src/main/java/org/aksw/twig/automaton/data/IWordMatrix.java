@@ -1,4 +1,4 @@
-package org.aksw.twig.automaton.tweets;
+package org.aksw.twig.automaton.data;
 
 import java.io.File;
 import java.io.IOException;

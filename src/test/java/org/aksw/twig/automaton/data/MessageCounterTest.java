@@ -1,5 +1,6 @@
-package org.aksw.twig.automaton.messageCount;
+package org.aksw.twig.automaton.data;
 
+import org.aksw.twig.automaton.data.MessageCounter;
 import org.junit.Assert;
 import org.junit.Test;
 

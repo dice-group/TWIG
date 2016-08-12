@@ -1,5 +1,6 @@
-package org.aksw.twig.automaton.tweets;
+package org.aksw.twig.automaton.data;
 
+import org.aksw.twig.automaton.data.TweetSplitter;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.Pair;
 import org.junit.Assert;

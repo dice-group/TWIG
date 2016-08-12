@@ -1,11 +1,8 @@
-package org.aksw.twig.automaton.tweets;
+package org.aksw.twig.automaton.data;
 
 import org.aksw.twig.structs.AVLTree;
 
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Random;
+import java.util.*;
 
 public class WordSampler {
 
@@ -21,6 +18,29 @@ public class WordSampler {
 
         WordChanceMapping random = tree.findGreater(new WordChanceMapping("", r.nextDouble()));
         return random == null ? null : random.word;
+    }
+
+    public String sampleTweet() {
+        int charactersCount = 0;
+        LinkedList<String> tweet = new LinkedList<>();
+        String currentPredecessor = "";
+
+        while (charactersCount < 140) {
+            String next = sample(currentPredecessor);
+            if (next.equals("")) {
+                break;
+            }
+
+            tweet.add(next);
+            currentPredecessor = next;
+            charactersCount += next.length() + 1;
+        }
+
+        if (charactersCount > 140) {
+            tweet.removeLast();
+        }
+
+        return tweet.stream().reduce("", String::concat);
     }
 
     public void reseed(long seed) {

@@ -1,4 +1,4 @@
-package org.aksw.twig.automaton.time;
+package org.aksw.twig.automaton.data;
 
 import org.aksw.twig.files.FileHandler;
 import org.aksw.twig.model.Twitter7ModelWrapper;
@@ -13,7 +13,6 @@ import java.io.*;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.Set;
-import java.util.function.Consumer;
 
 /**
  * Counts the timestamp of tweets per day. Intended to be used with a Twitter7Model as it can be created by {@link Twitter7ModelWrapper}.

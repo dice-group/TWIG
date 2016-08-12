@@ -1,5 +1,7 @@
-package org.aksw.twig.automaton.tweets;
+package org.aksw.twig.automaton.data;
 
+import org.aksw.twig.automaton.data.WordMatrix;
+import org.aksw.twig.automaton.data.WordSampler;
 import org.junit.Assert;
 import org.junit.Test;
 
