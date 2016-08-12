@@ -47,7 +47,7 @@ public class WordSampler {
         r.setSeed(seed);
     }
 
-    public WordSampler(final IWordMatrix matrix) {
+    public WordSampler(final WordMatrix matrix) {
         matrix.getPredecessors().forEach(predecessor -> {
 
 

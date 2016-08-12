@@ -17,7 +17,8 @@ import java.util.Set;
 import java.util.stream.Stream;
 
 /**
- * Counts messages per user. Intended to be used on a Twitter7Model as it can be created by {@link Twitter7ModelWrapper}.
+ * Counts messages sent by users. Each users will be mapped to their message count.
+ * This frequency distribution can be transformed into a {@link ExponentialLikeDistribution} probability measure.
  */
 public class MessageCounter implements Serializable {
 
@@ -29,7 +30,7 @@ public class MessageCounter implements Serializable {
 
     /**
      * Returns all users mapped to their number of messages.
-     * @return Stream to user - message count map.
+     * @return Stream to user->message count map.
      */
     public Stream<Map.Entry<String, Integer>> getUserMessageCountMap() {
         return userMessageCountMap.entrySet().stream();
@@ -99,7 +100,7 @@ public class MessageCounter implements Serializable {
     }
 
     /**
-     * Merges given {@link MessageCounter} into this.
+     * Merges the message counts of given {@link MessageCounter} into this.
      * @param counter {@link MessageCounter} to merge.
      * @return {@code this}
      */
@@ -113,62 +114,5 @@ public class MessageCounter implements Serializable {
                 userMessageCountMap.put(userName, messageCount);
             }
         });
-    }
-
-    /**
-     * Logs the content of the array list as returned by {@link #getMessageCounts()}.
-     */
-    public void logResults() {
-        getMessageCounts();
-        for (int i = 0; i < messageCounts.size(); i++) {
-            LOGGER.info("{} users have sent between {} messages.", messageCounts.get(i), i);
-        }
-    }
-
-    /**
-     * Creates a message counter distribution as stated in {@link #getValueDistribution()} and the messages counts as stated in {@link #getMessageCounts()} by adding all given files as {@link Model} and writes it into a file.
-     * Arguments must be formatted as stated in {@link FileHandler#readArgs(String[])}.
-     * @param args Arguments.
-     */
-    public static void main(String[] args) {
-
-        // File handling
-        Pair<File, Set<File>> fileArgs = FileHandler.readArgs(args);
-
-        if (fileArgs.getLeft() == null) {
-            throw new IllegalArgumentException("No --out argument given.");
-        }
-
-        // Message counting
-        MessageCounter messageCounter = new MessageCounter();
-        fileArgs.getRight().forEach(file -> {
-            try {
-                Twitter7ModelWrapper modelWrapper = Twitter7ModelWrapper.read(file);
-                messageCounter.addModel(modelWrapper.getModel());
-            } catch (IOException e) {
-                LOGGER.error(e.getMessage(), e);
-            }
-        });
-
-        messageCounter.logResults();
-
-        if (fileArgs.getLeft() == null) {
-            return;
-        }
-
-        File outputFile;
-        try {
-            outputFile = new FileHandler(fileArgs.getLeft(), "message_count", ".obj").nextFile();
-        } catch (IOException e) {
-            LOGGER.error(e.getMessage(), e);
-            return;
-        }
-
-        try (ObjectOutputStream objectOutputStream = new ObjectOutputStream(new FileOutputStream(outputFile))) {
-            objectOutputStream.writeObject(messageCounter);
-            objectOutputStream.flush();
-        } catch (IOException e) {
-            LOGGER.error(e.getMessage(), e);
-        }
     }
 }
