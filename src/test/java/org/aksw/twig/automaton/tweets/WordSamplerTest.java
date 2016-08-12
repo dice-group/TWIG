@@ -12,7 +12,7 @@ public class WordSamplerTest {
     @Test
     public void simpleTest() {
         WordMatrix matrix = new WordMatrix();
-        matrix.put("a", "a");
+        matrix.put("a", "a", 1);
         WordSampler sampler = new WordSampler(matrix);
         Assert.assertEquals("a", sampler.sample("a"));
     }
@@ -24,7 +24,7 @@ public class WordSamplerTest {
         String[] successors = new String[] { "a", "b" };
         Map<String, Integer> occurrences = new HashMap<>();
         Arrays.stream(successors).forEach(successor -> {
-            matrix.put(predecessor, successor);
+            matrix.put(predecessor, successor, 1);
             occurrences.put(successor, 0);
         });
 

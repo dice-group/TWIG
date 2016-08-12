@@ -82,6 +82,7 @@ public class TimeCounterHandler implements SuspendSupplier<TimeCounter> {
             if (outputFile != null) {
                 try (ObjectOutputStream objectOutputStream = new ObjectOutputStream(new FileOutputStream(outputFile))) {
                     objectOutputStream.writeObject(handler.mergedResult);
+                    objectOutputStream.flush();
                 } catch (IOException e) {
                     LOGGER.error(e.getMessage(), e);
                 }

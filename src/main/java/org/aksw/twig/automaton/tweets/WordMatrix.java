@@ -4,6 +4,7 @@ import org.aksw.twig.files.FileHandler;
 import org.aksw.twig.model.Twitter7ModelWrapper;
 import org.apache.commons.lang3.tuple.MutablePair;
 import org.apache.commons.lang3.tuple.Pair;
+import org.apache.jena.rdf.model.Model;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -29,13 +30,13 @@ public class WordMatrix implements IWordMatrix, Serializable {
      * @param predecessor Predecessor to add.
      * @param successor Successor to add.
      */
-    public void put(String predecessor, String successor) {
+    public void put(String predecessor, String successor, long count) {
         MutablePair<Long, Map<String, Long>> mapping = matrix.computeIfAbsent(predecessor, key -> new MutablePair<>(0L, new HashMap<>()));
 
-        mapping.setLeft(mapping.getLeft() + 1);
+        mapping.setLeft(mapping.getLeft() + count);
         Map<String, Long> columns = mapping.getRight();
         Long val = columns.get(successor);
-        columns.put(successor, val == null ? 1 : ++val);
+        columns.put(successor, val == null ? count : val + count);
     }
 
     /**
@@ -43,7 +44,24 @@ public class WordMatrix implements IWordMatrix, Serializable {
      * @param iterable Pairs to add.
      */
     public void putAll(Iterable<Pair<String, String>> iterable) {
-        iterable.forEach(pair -> this.put(pair.getLeft(), pair.getRight()));
+        iterable.forEach(pair -> this.put(pair.getLeft(), pair.getRight(), 1));
+    }
+
+    /**
+     * Merges contents of given {@link WordMatrix} into this.
+     * @param wordMatrix Matrix to merge.
+     */
+    public void merge(WordMatrix wordMatrix) {
+        wordMatrix.matrix.entrySet().forEach(
+                entry -> {
+                    String predecessor = entry.getKey();
+                    entry.getValue().getRight().entrySet().forEach(
+                            mappedEntry -> {
+                                put(predecessor, mappedEntry.getKey(), mappedEntry.getValue());
+                            }
+                    );
+                }
+        );
     }
 
     @Override
@@ -84,6 +102,19 @@ public class WordMatrix implements IWordMatrix, Serializable {
     }
 
     /**
+     * Adds all relevant statements from given model into the matrix.
+     * @param model Model to add statements from.
+     */
+    public void addModel(Model model) {
+        model.listStatements().forEachRemaining(statement -> {
+            if (statement.getPredicate().getLocalName().equals(Twitter7ModelWrapper.TWEET_CONTENT_PROPERTY_NAME)) {
+                String tweet = statement.getObject().asLiteral().getString();
+                putAll(new TweetSplitter(tweet));
+            }
+        });
+    }
+
+    /**
      * Reads a IWordMatrix of a file.
      * @param fileToParse File to parse.
      * @return Word matrix.
@@ -115,13 +146,7 @@ public class WordMatrix implements IWordMatrix, Serializable {
         WordMatrix matrix = new WordMatrix();
         filesToRead.forEach(file -> {
             try {
-                Twitter7ModelWrapper modelWrapper = Twitter7ModelWrapper.read(file);
-                modelWrapper.getModel().listStatements().forEachRemaining(statement -> {
-                    if (statement.getPredicate().getLocalName().equals(Twitter7ModelWrapper.TWEET_CONTENT_PROPERTY_NAME)) {
-                        String tweet = statement.getObject().asLiteral().getString();
-                        matrix.putAll(new TweetSplitter(tweet));
-                    }
-                });
+                matrix.addModel(Twitter7ModelWrapper.read(file).getModel());
             } catch (IOException e) {
                 LOGGER.error(e.getMessage(), e);
             }

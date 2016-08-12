@@ -37,8 +37,8 @@ public class WordMatrixTest {
     }
 
     private void prepareMatrix(WordMatrix matrix) {
-        matrix.put("a", "a");
-        matrix.put("a", "b");
+        matrix.put("a", "a", 1);
+        matrix.put("a", "b", 1);
     }
 
     private void assertMatrix(WordMatrix matrix) {

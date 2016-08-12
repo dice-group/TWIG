@@ -41,8 +41,7 @@ public class MessageCounterHandler implements SuspendSupplier<MessageCounter> {
 
         LOGGER.info("Supplying callable");
         synchronized (filesToParse) {
-            File fileToParse = filesToParse.first();
-            filesToParse.remove(fileToParse);
+            File fileToParse = filesToParse.pollFirst();
 
             return () -> {
                 LOGGER.info("Parsing file {}", fileToParse.getName());
@@ -83,6 +82,7 @@ public class MessageCounterHandler implements SuspendSupplier<MessageCounter> {
             if (outputFile != null) {
                 try (ObjectOutputStream objectOutputStream = new ObjectOutputStream(new FileOutputStream(outputFile))) {
                     objectOutputStream.writeObject(handler.mergedResult);
+                    objectOutputStream.flush();
                 } catch (IOException e) {
                     LOGGER.error(e.getMessage(), e);
                 }
