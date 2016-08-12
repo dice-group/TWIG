@@ -19,7 +19,7 @@ public class WordSampler {
             throw new IllegalArgumentException("Predecessor not present");
         }
 
-        WordChanceMapping random = tree.findClosest(new WordChanceMapping("", r.nextDouble()));
+        WordChanceMapping random = tree.findGreater(new WordChanceMapping("", r.nextDouble()));
         return random == null ? null : random.word;
     }
 
@@ -62,7 +62,7 @@ public class WordSampler {
         @Override
         public int compareTo(WordChanceMapping mapping) {
             double delta = chance - mapping.chance;
-            return delta < 0 ? -1 : (int) delta;
+            return delta < 0 ? -1 : (int) Math.ceil(delta);
         }
     }
 }

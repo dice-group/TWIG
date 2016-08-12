@@ -11,7 +11,7 @@ public class AVLTree<T extends Comparable<T>> implements Collection<T> {
 
     private int size = 0;
 
-    public T findClosest(T toCompare) {
+    public T findGreater(T toCompare) {
         if (root == null) {
             return null;
         }
@@ -25,7 +25,7 @@ public class AVLTree<T extends Comparable<T>> implements Collection<T> {
 
             int comparison = current.val.compareTo(toCompare);
             if (comparison == 0) {
-                return current.val;
+                current = current.gtr;
             } else if (comparison > 0) {
                 best = current;
                 current = current.leq;

@@ -72,13 +72,13 @@ public class AVLTreeTest {
     }
 
     @Test
-    public void findClosestTest() {
+    public void findGreaterTest() {
         Integer[] values = new Integer[] { 1, 2, 3, 4, 5, 6 };
         AVLTree<Integer> tree = new AVLTree<>();
         tree.addAll(Arrays.asList(values));
 
         Integer min = Arrays.stream(values).min((a, b) -> a.compareTo(b)).orElse(null);
         Assert.assertNotEquals(null, min);
-        Assert.assertEquals(min, tree.findClosest(min - 1));
+        Assert.assertEquals(min, tree.findGreater(min - 1));
     }
 }

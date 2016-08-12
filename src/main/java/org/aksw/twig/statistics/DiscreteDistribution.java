@@ -25,7 +25,7 @@ public class DiscreteDistribution<T> {
     }
 
     public T sample(Random r) {
-        ChanceMapping closest = sampleTree.findClosest(new ChanceMapping(r.nextDouble()));
+        ChanceMapping closest = sampleTree.findGreater(new ChanceMapping(r.nextDouble()));
         return closest == null ? null : closest.val;
     }
 
@@ -38,12 +38,19 @@ public class DiscreteDistribution<T> {
         double aggregatedChance;
 
         ChanceMapping(T val, double chance) throws IllegalArgumentException {
+            if (chance == 0) {
+                throw new IllegalArgumentException("Chance must not be 0");
+            }
+
             this.val = val;
             this.chance = chance;
             DiscreteDistribution.this.aggregatedChance += chance;
+
             if (DiscreteDistribution.this.aggregatedChance > 1) {
+                DiscreteDistribution.this.aggregatedChance -= chance;
                 throw new IllegalArgumentException("Aggregated chance was greater than 1");
             }
+
             this.aggregatedChance = DiscreteDistribution.this.aggregatedChance;
         }
 
@@ -54,7 +61,7 @@ public class DiscreteDistribution<T> {
         @Override
         public int compareTo(ChanceMapping mapping) {
             double delta = aggregatedChance - mapping.aggregatedChance;
-            return delta < 0 ? -1 : (int) delta;
+            return delta < 0 ? -1 : (int) Math.ceil(delta);
         }
     }
 }
