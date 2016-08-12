@@ -82,6 +82,7 @@ public class WordMatrixHandler implements SuspendSupplier<WordMatrix> {
                 LOGGER.error(e.getMessage(), e);
             }
         });
-
+        LOGGER.info("Starting executor");
+        executor.start();
     }
 }
