@@ -1,19 +1,16 @@
 package org.aksw.twig.automaton.data;
 
-import org.aksw.twig.files.FileHandler;
 import org.aksw.twig.model.Twitter7ModelWrapper;
 import org.aksw.twig.statistics.ExponentialLikeDistribution;
 import org.aksw.twig.statistics.SimpleExponentialRegression;
-import org.apache.commons.lang3.tuple.Pair;
 import org.apache.jena.rdf.model.Model;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import java.io.*;
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Set;
 import java.util.stream.Stream;
 
 /**

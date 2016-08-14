@@ -1,7 +1,6 @@
 package org.aksw.twig.automaton.data;
 
 import org.aksw.twig.statistics.DiscreteDistribution;
-import org.aksw.twig.structs.AVLTree;
 
 import java.util.*;
 

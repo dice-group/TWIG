@@ -1,18 +1,13 @@
 package org.aksw.twig.automaton.data;
 
-import org.aksw.twig.files.FileHandler;
 import org.aksw.twig.model.Twitter7ModelWrapper;
 import org.aksw.twig.statistics.DiscreteDistribution;
-import org.apache.commons.lang3.tuple.Pair;
 import org.apache.jena.rdf.model.Literal;
 import org.apache.jena.rdf.model.Model;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 
-import java.io.*;
+import java.io.Serializable;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
-import java.util.Set;
 
 /**
  * Holds a frequency distribution of timestamps with hour and minute.
