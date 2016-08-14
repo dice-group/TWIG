@@ -1,10 +1,18 @@
 package org.aksw.twig.automaton.data;
 
 import org.aksw.twig.statistics.DiscreteDistribution;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.ObjectInputStream;
 import java.util.*;
 
 public class WordSampler {
+
+    private static final Logger LOGGER = LogManager.getLogger(WordSampler.class);
 
     private Map<String, DiscreteDistribution<String>> distributionMap = new HashMap<>();
 
@@ -78,6 +86,23 @@ public class WordSampler {
         @Override
         public int compareTo(WordChanceMapping mapping) {
             return word.compareTo(mapping.word);
+        }
+    }
+
+    public static void main(String[] args) {
+        if (args.length < 2) {
+            throw new IllegalArgumentException("Insufficient arguments");
+        }
+
+        int messages = Integer.parseInt(args[1]);
+        try (ObjectInputStream objectInputStream = new ObjectInputStream(new FileInputStream(new File(args[0])))) {
+            WordMatrix matrix = (WordMatrix) objectInputStream.readObject();
+            WordSampler sampler = new WordSampler(matrix);
+            for (int i = 0; i < messages; i++) {
+                LOGGER.info("Message: {}", sampler.sampleTweet());
+            }
+        } catch (IOException | ClassNotFoundException e) {
+            LOGGER.error(e.getMessage(), e);
         }
     }
 }
