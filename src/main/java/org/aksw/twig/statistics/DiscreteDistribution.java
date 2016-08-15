@@ -47,8 +47,9 @@ public class DiscreteDistribution<T> {
             DiscreteDistribution.this.aggregatedChance += chance;
 
             if (DiscreteDistribution.this.aggregatedChance > 1) {
+                String exceptionMessage = "Aggregated chance was greater than 1 was ".concat(Double.toString(DiscreteDistribution.this.aggregatedChance));
                 DiscreteDistribution.this.aggregatedChance -= chance;
-                throw new IllegalArgumentException("Aggregated chance was greater than 1");
+                throw new IllegalArgumentException(exceptionMessage);
             }
 
             this.aggregatedChance = DiscreteDistribution.this.aggregatedChance;

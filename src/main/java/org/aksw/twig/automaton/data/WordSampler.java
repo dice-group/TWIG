@@ -64,7 +64,8 @@ public class WordSampler {
             Arrays.sort(wordChanceMappings, WordChanceMapping::compareTo); // Sort successors alphabetically
 
             DiscreteDistribution<String> distribution = new DiscreteDistribution<>();
-            for (WordChanceMapping mapping: wordChanceMappings) {
+            for (int i = 0; i < wordChanceMappings.length; i++) {
+                WordChanceMapping mapping = wordChanceMappings[i];
                 distribution.addDiscreteEvent(mapping.word, mapping.chance);
             }
 
@@ -97,7 +98,8 @@ public class WordSampler {
         int messages = Integer.parseInt(args[1]);
         try (ObjectInputStream objectInputStream = new ObjectInputStream(new FileInputStream(new File(args[0])))) {
             WordMatrix matrix = (WordMatrix) objectInputStream.readObject();
-            matrix.inspection();
+            matrix.printInspection();
+            matrix.truncateTo(0.001);
             WordSampler sampler = new WordSampler(matrix);
             for (int i = 0; i < messages; i++) {
                 LOGGER.info("Message: {}", sampler.sampleTweet());
