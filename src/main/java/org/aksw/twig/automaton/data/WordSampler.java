@@ -97,6 +97,7 @@ public class WordSampler {
         int messages = Integer.parseInt(args[1]);
         try (ObjectInputStream objectInputStream = new ObjectInputStream(new FileInputStream(new File(args[0])))) {
             WordMatrix matrix = (WordMatrix) objectInputStream.readObject();
+            matrix.inspection();
             WordSampler sampler = new WordSampler(matrix);
             for (int i = 0; i < messages; i++) {
                 LOGGER.info("Message: {}", sampler.sampleTweet());

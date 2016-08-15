@@ -4,11 +4,11 @@ import org.aksw.twig.model.Twitter7ModelWrapper;
 import org.apache.commons.lang3.tuple.MutablePair;
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.jena.rdf.model.Model;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.io.Serializable;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
@@ -32,6 +32,10 @@ import java.util.stream.Collectors;
 public class WordMatrix implements Serializable {
 
     private static final long serialVersionUID = 2104488071228760278L;
+
+    private static final Logger LOGGER = LogManager.getLogger(WordMatrix.class);
+
+    private static final double[] INSPECTION_BOUNDS = new double[]{ 0.5, 0.1, 0.05, 0.01, 0.005, 0.001, 0.0005, 0.0001, 0.00005, 0.00001 };
 
     protected Map<String, MutablePair<Long, Map<String, Long>>> matrix = new HashMap<>();
 
@@ -130,5 +134,29 @@ public class WordMatrix implements Serializable {
                         Map.Entry::getKey,
                         entry -> (double) entry.getValue() / (double) size
                 ));
+    }
+
+    public void inspection() {
+        Map<Double, List<Double>> boundsMap = new HashMap<>(INSPECTION_BOUNDS.length);
+        for (double bound: INSPECTION_BOUNDS) {
+            boundsMap.put(bound, new LinkedList<>());
+        }
+
+        matrix.entrySet().forEach(entry -> {
+            Set<Map.Entry<String, Long>> entries = entry.getValue().getRight().entrySet();
+            final double allEntries = (double) entries.size();
+            final double count = (double) entry.getValue().getLeft();
+            for (double bound: INSPECTION_BOUNDS) {
+                entries = entries.stream().filter(successorEntry -> (double) successorEntry.getValue() / count <= bound).collect(Collectors.toSet());
+                boundsMap.get(bound).add((double) entries.size() / allEntries);
+            }
+        });
+
+        for (double bound: INSPECTION_BOUNDS) {
+            List<Double> inBounds = boundsMap.get(bound);
+            double averageInBounds = inBounds.stream().reduce(0d, (a, b) -> a + b) / (double) inBounds.size();
+
+            LOGGER.info("On average {}% of succeeding words succeed with a chance <= {}.", averageInBounds, bound);
+        }
     }
 }
