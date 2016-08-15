@@ -1,5 +1,6 @@
 package org.aksw.twig.automaton.data;
 
+import org.apache.commons.lang3.tuple.Pair;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -34,6 +35,17 @@ public class WordMatrixTest {
         } catch (IOException | ClassNotFoundException e) {
             Assert.fail(e.getMessage());
         }
+    }
+
+    @Test
+    public void sumTest() {
+        WordMatrix matrix = new WordMatrix();
+        prepareMatrix(matrix);
+        matrix.matrix.entrySet().forEach(entry -> {
+            Pair<Long, Map<String, Long>> value = entry.getValue();
+            Long sum = value.getRight().entrySet().stream().map(Map.Entry::getValue).reduce(0L, (a, b) -> a + b);
+            Assert.assertEquals(value.getLeft(), sum);
+        });
     }
 
     private void prepareMatrix(WordMatrix matrix) {

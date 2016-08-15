@@ -33,7 +33,7 @@ public class WordMatrix implements Serializable {
 
     private static final long serialVersionUID = 2104488071228760278L;
 
-    private Map<String, MutablePair<Long, Map<String, Long>>> matrix = new HashMap<>();
+    protected Map<String, MutablePair<Long, Map<String, Long>>> matrix = new HashMap<>();
 
     /**
      * Alters the frequency distribution: You add {@code count} more occurences of the word {@code predecessor} being followed by {@code successor}.
