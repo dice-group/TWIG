@@ -8,6 +8,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import java.io.Serializable;
+import java.time.Duration;
 import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
 import java.util.*;
@@ -77,7 +78,7 @@ public class MessageCounter implements Serializable {
 
             } else if (statement.getPredicate().getLocalName().equals(Twitter7ModelWrapper.TWEET_TIME_PROPERTY_NAME)) {
                 String tweetId = statement.getSubject().getLocalName();
-                LocalDate tweetDate = LocalDate.from(Twitter7ModelWrapper.DATE_TIME_FORMATTER.parse(statement.getObject().asLiteral().toString()));
+                LocalDate tweetDate = LocalDate.from(Twitter7ModelWrapper.DATE_TIME_FORMATTER.parse(statement.getObject().asLiteral().getString()));
                 messageToDateMapping.put(tweetId, tweetDate);
             }
         });
@@ -117,18 +118,18 @@ public class MessageCounter implements Serializable {
         userMessageDayIntervalMap.put(userName, dayInterval);
     }
 
-    public MessageCounter normalized(int normalPeriod) {
+    public MessageCounter normalized(Duration normalPeriod) {
 
         MessageCounter messageCounter = new MessageCounter();
 
         userMessageDayIntervalMap.entrySet().forEach(dayIntervalEntry -> {
             String userName = dayIntervalEntry.getKey();
-            double days = (double) dayIntervalEntry.getValue() / (double) normalPeriod;
+            double days = (double) dayIntervalEntry.getValue() / (double) normalPeriod.toDays();
 
             int newMessageCount = (int) Math.round(((double) userMessageCountMap.get(userName) / days));
             if (newMessageCount > 0) {
                 messageCounter.setUserMessages(userName, newMessageCount);
-                messageCounter.setUserDayIntervall(userName, normalPeriod);
+                messageCounter.setUserDayIntervall(userName, (int) normalPeriod.toDays());
             } else {
                 LOGGER.info("User {} has 0 messages after normalization.", userName);
             }

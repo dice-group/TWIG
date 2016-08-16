@@ -58,7 +58,7 @@ public class WordSampler {
         return tweet.stream().reduce("", (a, b) -> a.concat(" ").concat(b));
     }
 
-    public void reseed(long seed) {
+    public void reseedRandomGenerator(long seed) {
         r.setSeed(seed);
     }
 

@@ -1,5 +1,6 @@
 package org.aksw.twig.automaton;
 
+import org.aksw.twig.automaton.data.MessageCounter;
 import org.aksw.twig.automaton.data.WordMatrix;
 import org.aksw.twig.automaton.data.WordSampler;
 import org.aksw.twig.statistics.DiscreteDistribution;
@@ -21,7 +22,7 @@ public class Automaton {
 
     private final WordSampler wordSampler;
 
-    private final ExponentialLikeDistribution messageCountDistribution;
+    private final MessageCounter messageCounter;
 
     private final DiscreteDistribution<LocalTime> messageTimeDistribution;
 
@@ -29,19 +30,19 @@ public class Automaton {
 
     private final List<User> users = new LinkedList<>();
 
-    public Automaton(WordMatrix wordMatrix, ExponentialLikeDistribution messageCountDistribution, DiscreteDistribution<LocalTime> messageTimeDistribution) {
+    public Automaton(WordMatrix wordMatrix, MessageCounter messageCounter, DiscreteDistribution<LocalTime> messageTimeDistribution) {
         wordSampler = new WordSampler(wordMatrix);
-        this.messageCountDistribution = messageCountDistribution;
+        this.messageCounter = messageCounter;
         this.messageTimeDistribution = messageTimeDistribution;
     }
 
-    public void simulate(int userCount, Duration simulationTime, LocalDate startDate) {
+    public void simulate(int userCount, Duration simulationTime, LocalDate startDate, long seed) {
 
-        long seed = simulationTime.hashCode() * userCount;
         Random r = new Random(seed);
+        final ExponentialLikeDistribution messageCountDistribution = messageCounter.normalized(simulationTime).getValueDistribution();
         messageCountDistribution.reseedRandomGenerator(seed);
-        wordSampler.reseed(seed);
-        messageTimeDistribution.reseed(seed);
+        wordSampler.reseedRandomGenerator(seed);
+        messageTimeDistribution.reseedRandomGenerator(seed);
         long simulationDays = simulationTime.toDays();
 
         for (int i = 0; i < userCount; i++) {

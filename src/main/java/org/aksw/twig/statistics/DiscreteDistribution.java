@@ -24,7 +24,7 @@ public class DiscreteDistribution<T> {
         sampleTree.add(new ChanceMapping(event, chance));
     }
 
-    public void reseed(long seed) {
+    public void reseedRandomGenerator(long seed) {
         random.setSeed(seed);
     }
 
