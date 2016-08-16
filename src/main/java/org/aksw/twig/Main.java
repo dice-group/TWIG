@@ -11,6 +11,9 @@ import org.apache.logging.log4j.Logger;
 
 import java.util.Arrays;
 
+/**
+ * Class to wrap main classes for the .jar.
+ */
 public class Main {
 
     private static final Logger LOGGER = LogManager.getLogger(Main.class);

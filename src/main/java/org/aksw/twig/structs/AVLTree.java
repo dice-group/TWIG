@@ -5,12 +5,25 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 
+/**
+ * Implementation of an AVL tree.
+ * An AVL tree is roughly the same as a normal binary tree but is guaranteed to run search, insert and delete operations in {@code O(log n)} with {@code n} being the size of the tree.<br>
+ * Note that in this implementation only {@link #contains(Comparable)}, {@link #remove(Comparable)} are guaranteed to run in {@code O(log n)} whereas {@link #contains(Object)}, {@link #remove(Object)} will run in {@code O(n)}.
+ * @see  <a href="https://en.wikipedia.org/wiki/AVL_tree">AVL tree on Wikipedia</a>
+ * @param <T> Type of the tree's elements.
+ */
 public class AVLTree<T extends Comparable<T>> implements Collection<T> {
 
     private AVLNode root;
 
     private int size = 0;
 
+    /**
+     * Finds the first greater element to given one.<br><br>
+     * More formal: Returned value is the minimum by {@link Comparable#compareTo(Object)} comparison of the set: {@code { x in tree | x.compareTo(toCompare) > 0 }}
+     * @param toCompare Element to compare by.
+     * @return Minimal greater element.
+     */
     public T findGreater(T toCompare) {
         if (root == null) {
             return null;
@@ -50,8 +63,8 @@ public class AVLTree<T extends Comparable<T>> implements Collection<T> {
     }
 
     /**
-     * Behaves like {@link Collection#contains(Object)} but is guaranteed to run in {@code O(log n)} with {@code n} being amount of values in this tree.
-     * The default implementation of {@link Collection#contains(Object)} will run in {@code O(n)}.
+     * Same as {@link #contains(Object)} but is guaranteed to run in {@code O(log n)} with {@code n} being amount of values in this tree.
+     * The default implementation of {@link #contains(Object)} will run in {@code O(n)}.
      * @param value Value to check presence of.
      * @return {@code true} if and only if value is present in the tree.
      */
@@ -80,6 +93,12 @@ public class AVLTree<T extends Comparable<T>> implements Collection<T> {
         return false;
     }
 
+    /**
+     * Returns an iterator over all elements of the AVL tree. Iteration will be executed by depth-first search.
+     * Iterator is not safe for concurrent modification and will behave undefined after collection altering.
+     * @see <a href="https://en.wikipedia.org/wiki/Depth-first_search">Depth-first search on Wikipedia</a>
+     * @return Iterator over all elements of the AVL tree.
+     */
     @Override
     public Iterator<T> iterator() {
         return new AVLIterator();
@@ -135,6 +154,12 @@ public class AVLTree<T extends Comparable<T>> implements Collection<T> {
         return true;
     }
 
+    /**
+     * Same as {@link #remove(Object)} but is guaranteed to run in {@code O(log n)} with {@code n} being amount of values in this tree.
+     * The default implementation of {@link #remove(Object)} will run in {@code O(n)}.
+     * @param t Value to remove.
+     * @return {@code true} if and only if value is present in the tree.
+     */
     public boolean remove(final T t) {
         if (root == null || t == null) {
             return false;
@@ -273,6 +298,9 @@ public class AVLTree<T extends Comparable<T>> implements Collection<T> {
         return !thisIterator.hasNext();
     }
 
+    /**
+     * Wrapper class for a node in the AVL tree.
+     */
     private class AVLNode {
 
         private T val;
@@ -292,10 +320,23 @@ public class AVLTree<T extends Comparable<T>> implements Collection<T> {
             this.parent = parent;
         }
 
+        /**
+         * Traverses the AVL tree looking for {@code toFind.val}. Further information at {@link #traverse(Comparable, boolean)}.
+         * @param toFind Element to look for.
+         * @param lookup Traverse parameter.
+         * @return Search result.
+         */
         AVLNode traverse(final AVLNode toFind, final boolean lookup) {
             return traverse(toFind.val, lookup);
         }
 
+        /**
+         * Traverses the AVL tree looking for {@code toFind}. If {@code lookup} is {@code true} a search for an AVL node containing {@code toFind} will be performed.
+         * If {@code lookup} is {@code false} traversal will search for a leaf to insert {@code toFind}.
+         * @param toFind Value to look for.
+         * @param lookup Traverse parameter.
+         * @return Search result.
+         */
         AVLNode traverse(final T toFind, final boolean lookup) {
             for (AVLNode traversed = this;;) {
                 if (lookup && traversed.val.equals(toFind)) {
@@ -313,6 +354,10 @@ public class AVLTree<T extends Comparable<T>> implements Collection<T> {
             }
         }
 
+        /**
+         * Returns the root of the node.
+         * @return Root.
+         */
         AVLNode root() {
             AVLNode node = this;
             while (node.parent != null) {
@@ -321,10 +366,18 @@ public class AVLTree<T extends Comparable<T>> implements Collection<T> {
             return node;
         }
 
+        /**
+         * Adds a value to this AVL node as direct child.
+         * @param value Value to add.
+         */
         void add(final T value) {
             addTree(new AVLNode(value, this));
         }
 
+        /**
+         * Adds a tree to the AVL node as direct child.
+         * @param toAdd Tree to add.
+         */
         void addTree(final AVLNode toAdd) {
             if (val.compareTo(toAdd.val) > 0) {
                 if (leq != null) throw new IllegalStateException();
@@ -338,6 +391,10 @@ public class AVLTree<T extends Comparable<T>> implements Collection<T> {
             checkBalance();
         }
 
+        /**
+         * Removes a direct child from this node.
+         * @param toRemove Child to remove.
+         */
         void remove(final AVLNode toRemove) {
             AVLNode merged = merge(toRemove.gtr, toRemove.leq);
             if (merged != null) {
@@ -353,6 +410,9 @@ public class AVLTree<T extends Comparable<T>> implements Collection<T> {
             }
         }
 
+        /**
+         * Refreshes the {@link #balanceFactor}.
+         */
         void refreshBalance() {
             int gtrHeight = gtr == null ? 0 : gtr.height;
             int leqHeight = leq == null ? 0 : leq.height;
@@ -371,6 +431,9 @@ public class AVLTree<T extends Comparable<T>> implements Collection<T> {
             }
         }
 
+        /**
+         * Performs a rebalance of the sub-tree with this node as root by invocation {@link #rotateLeft()} and/or {@link #rotateRight()}.
+         */
         void rebalance() {
             if (balanceFactor < 0) {
                 if ((leq.gtr == null ? 0 : leq.gtr.height) <= (leq.leq == null ? 0 : leq.leq.height)) {
@@ -389,6 +452,9 @@ public class AVLTree<T extends Comparable<T>> implements Collection<T> {
             }
         }
 
+        /**
+         * Performs a left rotation on the sub-tree with this node as root.
+         */
         void rotateLeft() {
             gtr.parent = parent;
             if (parent != null) {
@@ -414,6 +480,9 @@ public class AVLTree<T extends Comparable<T>> implements Collection<T> {
             }
         }
 
+        /**
+         * Performs a right rotation on the sub-tree with this node as root.
+         */
         void rotateRight() {
             leq.parent = parent;
             if (parent != null) {
@@ -445,10 +514,19 @@ public class AVLTree<T extends Comparable<T>> implements Collection<T> {
         }
     }
 
+    /**
+     * Iterator over all elements of this collection. Executed by depth first search.
+     */
     private class AVLIterator implements Iterator<T> {
 
+        /**
+         * Index of the next node to output in {@link #traverseArray}.
+         */
         private int traverseIndex = -1;
 
+        /**
+         * Saves the path to next output node.
+         */
         private Object[] traverseArray = new Object[height()];
 
         AVLIterator() {
@@ -479,6 +557,9 @@ public class AVLTree<T extends Comparable<T>> implements Collection<T> {
             return output;
         }
 
+        /**
+         * Sets the next node to output in {@link #traverseArray}.
+         */
         private void setNext() {
             // while (true) {...} mimics recursion without filling up the stack
             while (true) {

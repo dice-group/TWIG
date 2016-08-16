@@ -10,12 +10,23 @@ import java.util.NavigableSet;
 import java.util.TreeSet;
 import java.util.concurrent.Callable;
 
+/**
+ * Navigates over a set of files polling {@link Callable} objects by {@link FileReadingSuspendSupplier#getFileProcessor(File)}.
+ * Results of executed callables will be handed to {@link FileReadingSuspendSupplier#addResult(Object)} and should be merged into one result by implementing classes.
+ * The merged result can be queried via {@link FileReadingSuspendSupplier#getMergedResult()}.<br>
+ * Must be executed by a {@link SelfSuspendingExecutor}.
+ * @param <T> Type of parsing results.
+ */
 public abstract class FileReadingSuspendSupplier<T extends Serializable> implements SuspendSupplier<T> {
 
     private static final Logger LOGGER = LogManager.getLogger(FileReadingSuspendSupplier.class);
 
     private final NavigableSet<File> filesToParse = new TreeSet<>();
 
+    /**
+     * Creates a new instance setting class variables.
+     * @param filesToParse
+     */
     public FileReadingSuspendSupplier(Collection<File> filesToParse) {
         this.filesToParse.addAll(filesToParse);
     }
@@ -32,10 +43,27 @@ public abstract class FileReadingSuspendSupplier<T extends Serializable> impleme
         }
     }
 
+    /**
+     * Returns a {@link Callable} parsing given file.
+     * @param file File to parse.
+     * @return Parsing callable.
+     */
     protected abstract Callable<T> getFileProcessor(File file);
 
+    /**
+     * Returns the merged result of the executed callables.
+     * @return Merged result.
+     */
     protected abstract T getMergedResult();
 
+    /**
+     * Creates a {@link SelfSuspendingExecutor} and executes it.
+     * @param fileName File name to serialize merged result.
+     * @param outputDirectory Output directory for merged result.
+     * @param suspendSupplier Suspend supplier to be executed.
+     * @param <T> Type of parsing results.
+     * @throws IllegalArgumentException Thrown if {@code outputDirectory} is {@code null}.
+     */
     protected static <T extends Serializable> void start(String fileName, File outputDirectory, FileReadingSuspendSupplier<T> suspendSupplier) throws IllegalArgumentException {
 
         if (outputDirectory == null) {

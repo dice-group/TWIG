@@ -114,10 +114,38 @@ public class MessageCounter implements Serializable {
         userMessageCountMap.put(userName, messages);
     }
 
+    /**
+     * Returns how many messages have been sent by the user.
+     * @param userName User to check.
+     * @return Message count of the user.
+     */
+    public int getUserMessages(String userName) {
+        return userMessageCountMap.getOrDefault(userName, -1);
+    }
+
+    /**
+     * Sets the amount of days by which the user has sent his tweets.
+     * @param userName User to set.
+     * @param dayInterval Amount of days.
+     */
     public void setUserDayIntervall(String userName, int dayInterval) {
         userMessageDayIntervalMap.put(userName, dayInterval);
     }
 
+    /**
+     * Returns a new message counter which has all users normalized to given time period. Each user will have it's message count modified by:<br>
+     * {@code count = count / userDayInterval * normalPeriod.toDays();}<br><br>
+     * A code example:
+     * <pre>
+     * {@code MessageCounter counter = new MessageCounter();}
+     * {@code counter.setUserMessageCount("user", 10);}
+     * {@code counter.setUserDayInterval("user", 5);}
+     * {@code counter = counter.normalized(Duration.ofDays(1);}
+     * {@code counter.getUserMessages("user"); // will return 2}
+     * </pre>
+     * @param normalPeriod Time period to normalize to.
+     * @return Normalized message counter.
+     */
     public MessageCounter normalized(Duration normalPeriod) {
 
         MessageCounter messageCounter = new MessageCounter();

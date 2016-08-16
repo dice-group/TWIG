@@ -10,6 +10,9 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.util.*;
 
+/**
+ * Transfers a word matrix into multiple {@link DiscreteDistribution} objects in order to be able to supply random words.
+ */
 public class WordSampler {
 
     private static final Logger LOGGER = LogManager.getLogger(WordSampler.class);
@@ -24,6 +27,11 @@ public class WordSampler {
 
     private Random r = new Random();
 
+    /**
+     * Samples a successor to given predecessor.
+     * @param predecessor Predecessor.
+     * @return Random successor.
+     */
     public String sample(String predecessor) {
         DiscreteDistribution<String> distribution = distributionMap.get(predecessor);
         if (distribution == null) {
@@ -33,6 +41,10 @@ public class WordSampler {
         return distribution.sample(r);
     }
 
+    /**
+     * Samples a tweet.
+     * @return Random tweet.
+     */
     public String sampleTweet() {
         String currentPredecessor = sample("");
         int charactersCount = currentPredecessor.length();
@@ -58,10 +70,18 @@ public class WordSampler {
         return tweet.stream().reduce("", (a, b) -> a.concat(" ").concat(b));
     }
 
+    /**
+     * Sets a seed to the internal random number generator by {@link Random#setSeed(long)}.
+     * @param seed Seed.
+     */
     public void reseedRandomGenerator(long seed) {
         r.setSeed(seed);
     }
 
+    /**
+     * Creates a {@link WordSampler} of given {@link WordMatrix}.
+     * @param matrix Matrix to create the sampler of.
+     */
     public WordSampler(final WordMatrix matrix) {
         matrix.getPredecessors().forEach(predecessor -> {
 
@@ -81,6 +101,9 @@ public class WordSampler {
         });
     }
 
+    /**
+     * Wrapper class for a word and it's chance to be a successor.
+     */
     private static class WordChanceMapping implements Comparable<WordChanceMapping> {
 
         private String word;
@@ -98,6 +121,11 @@ public class WordSampler {
         }
     }
 
+    /**
+     * Creates a {@link WordSampler} by parsing a {@link WordMatrix} of file stated in {@code arg[0]}.<br>
+     * Then {@code arg[1]} tweets will be sampled and outputted by {@link Logger#info(String)}.
+     * @param args Arguments.
+     */
     public static void main(String[] args) {
         if (args.length < 2) {
             throw new IllegalArgumentException("Insufficient arguments");

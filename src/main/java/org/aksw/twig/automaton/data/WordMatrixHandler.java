@@ -12,6 +12,10 @@ import java.util.Collection;
 import java.util.Set;
 import java.util.concurrent.Callable;
 
+/**
+ * Creates multiple {@link WordMatrix} objects by parsing files as {@link Twitter7ModelWrapper} and adding them to the matrix.
+ * Parsed objects will then be merged into one result.
+ */
 public class WordMatrixHandler extends FileReadingSuspendSupplier<WordMatrix> {
 
     private static final Logger LOGGER = LogManager.getLogger(WordMatrixHandler.class);
@@ -45,6 +49,12 @@ public class WordMatrixHandler extends FileReadingSuspendSupplier<WordMatrix> {
         return mergedResult;
     }
 
+    /**
+     * Runs a {@link org.aksw.twig.executors.SelfSuspendingExecutor} with a {@link WordMatrixHandler} as {@link org.aksw.twig.executors.SuspendSupplier}.
+     * Arguments must state an output file to serialize the resulting {@link WordMatrix}.
+     * Arguments should state files to parse and must be formatted according to {@link FileHandler#readArgs(String[])}.
+     * @param args Arguments.
+     */
     public static void main(String[] args) {
         Pair<File, Set<File>> fileArgs = FileHandler.readArgs(args);
         WordMatrixHandler handler = new WordMatrixHandler(fileArgs.getRight());
