@@ -1,5 +1,6 @@
 package org.aksw.twig;
 
+import org.aksw.twig.automaton.Automaton;
 import org.aksw.twig.automaton.data.MessageCounterHandler;
 import org.aksw.twig.automaton.data.TimeCounterHandler;
 import org.aksw.twig.automaton.data.WordMatrixHandler;
@@ -27,6 +28,7 @@ public class Main {
             case "WordMatrixHandler": WordMatrixHandler.main(Arrays.copyOfRange(args, 1, args.length)); break;
             case "TimeCounterHandler": TimeCounterHandler.main(Arrays.copyOfRange(args, 1, args.length)); break;
             case "WordSampler": WordSampler.main(Arrays.copyOfRange(args, 1, args.length)); break;
+            case "Automaton": Automaton.main(Arrays.copyOfRange(args, 1, args.length)); break;
             default: LOGGER.info("No argument recognized. To get an overview please use the argument --help.");
         }
     }

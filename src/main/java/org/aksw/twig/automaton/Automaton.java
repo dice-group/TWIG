@@ -1,6 +1,7 @@
 package org.aksw.twig.automaton;
 
 import org.aksw.twig.automaton.data.MessageCounter;
+import org.aksw.twig.automaton.data.TimeCounter;
 import org.aksw.twig.automaton.data.WordMatrix;
 import org.aksw.twig.automaton.data.WordSampler;
 import org.aksw.twig.statistics.DiscreteDistribution;
@@ -8,10 +9,14 @@ import org.aksw.twig.statistics.ExponentialLikeDistribution;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.ObjectInputStream;
 import java.time.Duration;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.time.format.DateTimeFormatter;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Random;
@@ -69,5 +74,44 @@ public class Automaton {
                 }
             }
         }
+    }
+
+    public static void main(String[] args) {
+
+        if (args.length < 7) {
+            throw new IllegalArgumentException("Insufficient arguments supplied");
+        }
+
+        WordMatrix wordMatrix;
+        try (ObjectInputStream stream = new ObjectInputStream(new FileInputStream(args[0]))) {
+            wordMatrix = (WordMatrix) stream.readObject();
+        } catch (IOException | ClassNotFoundException e) {
+            LOGGER.error(e.getMessage(), e);
+            return;
+        }
+
+        MessageCounter messageCounter;
+        try (ObjectInputStream stream = new ObjectInputStream(new FileInputStream(args[1]))) {
+            messageCounter = (MessageCounter) stream.readObject();
+        } catch (IOException | ClassNotFoundException e) {
+            LOGGER.error(e.getMessage(), e);
+            return;
+        }
+
+        TimeCounter timeCounter;
+        try (ObjectInputStream stream = new ObjectInputStream(new FileInputStream(args[2]))) {
+            timeCounter = (TimeCounter) stream.readObject();
+        } catch (IOException | ClassNotFoundException e) {
+            LOGGER.error(e.getMessage(), e);
+            return;
+        }
+
+        int userCount = Integer.parseInt(args[3]);
+        int days = Integer.parseInt(args[4]);
+        LocalDate startDate = LocalDate.from(DateTimeFormatter.ISO_LOCAL_DATE.parse(args[5]));
+        long seed = Long.parseLong(args[6]);
+
+        Automaton automaton = new Automaton(wordMatrix, messageCounter, timeCounter.getValueDistribution());
+        automaton.simulate(userCount, Duration.ofDays(days), startDate, seed);
     }
 }
