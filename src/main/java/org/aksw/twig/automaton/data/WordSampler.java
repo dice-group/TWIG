@@ -14,6 +14,10 @@ public class WordSampler {
 
     private static final Logger LOGGER = LogManager.getLogger(WordSampler.class);
 
+    private static final double TRUNCATE_CHANCE = 0.001;
+
+    private static final double DISTRIBUTION_CHANCE_DELTA = 0.0001;
+
     private Map<String, DiscreteDistribution<String>> distributionMap = new HashMap<>();
 
     private Random r = new Random();
@@ -63,7 +67,7 @@ public class WordSampler {
                     .toArray(WordChanceMapping[]::new);
             Arrays.sort(wordChanceMappings, WordChanceMapping::compareTo); // Sort successors alphabetically
 
-            DiscreteDistribution<String> distribution = new DiscreteDistribution<>(0.0001);
+            DiscreteDistribution<String> distribution = new DiscreteDistribution<>(DISTRIBUTION_CHANCE_DELTA);
             for (int i = 0; i < wordChanceMappings.length; i++) {
                 WordChanceMapping mapping = wordChanceMappings[i];
                 distribution.addDiscreteEvent(mapping.word, mapping.chance);
@@ -99,7 +103,7 @@ public class WordSampler {
         try (ObjectInputStream objectInputStream = new ObjectInputStream(new FileInputStream(new File(args[0])))) {
             WordMatrix matrix = (WordMatrix) objectInputStream.readObject();
             matrix.printInspection();
-            matrix.truncateTo(0.001);
+            matrix.truncateTo(TRUNCATE_CHANCE);
             WordSampler sampler = new WordSampler(matrix);
             for (int i = 0; i < messages; i++) {
                 LOGGER.info("Message: {}", sampler.sampleTweet());
