@@ -10,8 +10,7 @@ public class MessageCounterTest {
         MessageCounter counter = new MessageCounter();
         String userName1 = "a";
         String userName2 = "b";
-        counter.setUserMessages(userName1, 1);
-        counter.setUserMessages(userName1, 1);
+        counter.setUserMessages(userName1, 2);
         counter.setUserMessages(userName2, 2);
 
         counter.getUserMessageCountMap().forEach(entry -> {
