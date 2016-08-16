@@ -1,6 +1,5 @@
 package org.aksw.twig.automaton.data;
 
-import org.aksw.twig.automaton.data.MessageCounter;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -11,9 +10,9 @@ public class MessageCounterTest {
         MessageCounter counter = new MessageCounter();
         String userName1 = "a";
         String userName2 = "b";
-        counter.addUserMessages(userName1, 1);
-        counter.addUserMessages(userName1, 1);
-        counter.addUserMessages(userName2, 2);
+        counter.setUserMessages(userName1, 1);
+        counter.setUserMessages(userName1, 1);
+        counter.setUserMessages(userName2, 2);
 
         counter.getUserMessageCountMap().forEach(entry -> {
             String key = entry.getKey();

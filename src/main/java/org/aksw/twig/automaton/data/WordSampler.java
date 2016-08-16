@@ -18,6 +18,8 @@ public class WordSampler {
 
     private static final double DISTRIBUTION_CHANCE_DELTA = 0.0001;
 
+    private static final int MAX_CHARS = 140;
+
     private Map<String, DiscreteDistribution<String>> distributionMap = new HashMap<>();
 
     private Random r = new Random();
@@ -32,11 +34,13 @@ public class WordSampler {
     }
 
     public String sampleTweet() {
-        int charactersCount = 0;
-        LinkedList<String> tweet = new LinkedList<>();
-        String currentPredecessor = "";
+        String currentPredecessor = sample("");
+        int charactersCount = currentPredecessor.length();
 
-        while (charactersCount < 140) {
+        LinkedList<String> tweet = new LinkedList<>();
+        tweet.add(currentPredecessor);
+
+        while (charactersCount < MAX_CHARS) {
             String next = sample(currentPredecessor);
             if (next.equals("")) {
                 break;
@@ -44,10 +48,10 @@ public class WordSampler {
 
             tweet.add(next);
             currentPredecessor = next;
-            charactersCount += next.length() + 1;
+            charactersCount += next.length() + 1; // + 1 for space character
         }
 
-        if (charactersCount > 140) {
+        if (charactersCount > MAX_CHARS) {
             tweet.removeLast();
         }
 

@@ -8,9 +8,10 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Map;
+import java.time.LocalDate;
+import java.time.temporal.ChronoUnit;
+import java.util.*;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 /**
@@ -19,11 +20,13 @@ import java.util.stream.Stream;
  */
 public class MessageCounter implements Serializable {
 
+    private Map<String, Integer> userMessageCountMap = new HashMap<>();
+
+    private static final Logger LOGGER = LogManager.getLogger(MessageCounter.class);
+
     private static final long serialVersionUID = 5741136390921853596L;
 
-    private static transient final Logger LOGGER = LogManager.getLogger(MessageCounter.class);
-
-    private Map<String, Integer> userMessageCountMap = new HashMap<>();
+    private Map<String, Integer> userMessageDayIntervalMap = new HashMap<>();
 
     /**
      * Returns all users mapped to their number of messages.
@@ -44,10 +47,12 @@ public class MessageCounter implements Serializable {
         if (messageCounts == null) {
             messageCounts = new ArrayList<>();
             userMessageCountMap.values().forEach(count -> {
-                while (messageCounts.size() <= count - 1) {
-                    messageCounts.add(0);
+                if (count != 0) {
+                    while (messageCounts.size() <= count - 1) {
+                        messageCounts.add(0);
+                    }
+                    messageCounts.set(count - 1, messageCounts.get(count - 1) + 1);
                 }
-                messageCounts.set(count - 1, messageCounts.get(count - 1) + 1);
             });
         }
 
@@ -55,15 +60,46 @@ public class MessageCounter implements Serializable {
     }
 
     /**
-     * Adds all messages in the model to the counter.
+     * Adds all messages in the model to the counter. TODO
      * @param model Model to add.
      */
     public void addModel(Model model) {
+
+        Map<String, Set<String>> userToMessagesMapping = new HashMap<>();
+        Map<String, LocalDate> messageToDateMapping = new HashMap<>();
+
         model.listStatements().forEachRemaining(statement -> {
+
             if (statement.getPredicate().getLocalName().equals(Twitter7ModelWrapper.SENDS_PROPERTY_NAME)) {
                 String userName = statement.getSubject().getLocalName();
-                addUserMessages(userName, 1);
+                String tweetId = statement.getObject().asResource().getLocalName();
+                userToMessagesMapping.computeIfAbsent(userName, x -> new HashSet<>()).add(tweetId);
+
+            } else if (statement.getPredicate().getLocalName().equals(Twitter7ModelWrapper.TWEET_TIME_PROPERTY_NAME)) {
+                String tweetId = statement.getSubject().getLocalName();
+                LocalDate tweetDate = LocalDate.from(Twitter7ModelWrapper.DATE_TIME_FORMATTER.parse(statement.getObject().asLiteral().toString()));
+                messageToDateMapping.put(tweetId, tweetDate);
             }
+        });
+
+        userToMessagesMapping.entrySet().forEach(entry -> {
+            String userName = entry.getKey();
+            Set<String> tweets = entry.getValue();
+            setUserMessages(userName, tweets.size());
+
+            Set<LocalDate> dates = tweets.stream()
+                    .map(messageToDateMapping::get)
+                    .collect(Collectors.toSet());
+
+            LocalDate lowest = dates.stream()
+                    .min(LocalDate::compareTo)
+                    .orElse(null);
+
+            LocalDate highest = dates.stream()
+                    .max(LocalDate::compareTo)
+                    .orElse(null);
+
+            setUserDayIntervall(userName, (int) ChronoUnit.DAYS.between(lowest, highest));
         });
     }
 
@@ -72,14 +108,33 @@ public class MessageCounter implements Serializable {
      * @param userName User to add to.
      * @param messages Message number to add.
      */
-    public void addUserMessages(String userName, int messages) {
+    public void setUserMessages(String userName, int messages) {
         messageCounts = null;
+        userMessageCountMap.put(userName, messages);
+    }
 
-        if (!userMessageCountMap.containsKey(userName)) {
-            userMessageCountMap.put(userName, messages);
-        } else {
-            userMessageCountMap.put(userName, userMessageCountMap.get(userName) + messages);
-        }
+    public void setUserDayIntervall(String userName, int dayInterval) {
+        userMessageDayIntervalMap.put(userName, dayInterval);
+    }
+
+    public MessageCounter normalized(int normalPeriod) {
+
+        MessageCounter messageCounter = new MessageCounter();
+
+        userMessageDayIntervalMap.entrySet().forEach(dayIntervalEntry -> {
+            String userName = dayIntervalEntry.getKey();
+            double days = (double) dayIntervalEntry.getValue() / (double) normalPeriod;
+
+            int newMessageCount = (int) Math.round(((double) userMessageCountMap.get(userName) / days));
+            if (newMessageCount > 0) {
+                messageCounter.setUserMessages(userName, newMessageCount);
+                messageCounter.setUserDayIntervall(userName, normalPeriod);
+            } else {
+                LOGGER.info("User {} has 0 messages after normalization.", userName);
+            }
+        });
+
+        return messageCounter;
     }
 
     /**
