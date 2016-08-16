@@ -47,7 +47,7 @@ public class WordSampler {
             tweet.removeLast();
         }
 
-        return tweet.stream().reduce("", String::concat);
+        return tweet.stream().reduce("", (a, b) -> a.concat(" ").concat(b));
     }
 
     public void reseed(long seed) {
@@ -63,7 +63,7 @@ public class WordSampler {
                     .toArray(WordChanceMapping[]::new);
             Arrays.sort(wordChanceMappings, WordChanceMapping::compareTo); // Sort successors alphabetically
 
-            DiscreteDistribution<String> distribution = new DiscreteDistribution<>();
+            DiscreteDistribution<String> distribution = new DiscreteDistribution<>(0.0001);
             for (int i = 0; i < wordChanceMappings.length; i++) {
                 WordChanceMapping mapping = wordChanceMappings[i];
                 distribution.addDiscreteEvent(mapping.word, mapping.chance);

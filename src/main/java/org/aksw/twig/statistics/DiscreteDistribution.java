@@ -10,6 +10,14 @@ public class DiscreteDistribution<T> {
 
     private double aggregatedChance;
 
+    private double aggregatedChanceDelta;
+
+    public DiscreteDistribution() {}
+
+    public DiscreteDistribution(double aggregatedChanceDelta) {
+        this.aggregatedChanceDelta = aggregatedChanceDelta;
+    }
+
     private final AVLTree<ChanceMapping> sampleTree = new AVLTree<>();
 
     public void addDiscreteEvent(T event, double chance) throws IllegalArgumentException {
@@ -35,7 +43,7 @@ public class DiscreteDistribution<T> {
 
         double chance;
 
-        double aggregatedChance;
+        double aggregatedChanceToThis;
 
         ChanceMapping(T val, double chance) throws IllegalArgumentException {
             if (chance == 0) {
@@ -44,25 +52,24 @@ public class DiscreteDistribution<T> {
 
             this.val = val;
             this.chance = chance;
-            DiscreteDistribution.this.aggregatedChance += chance;
+            aggregatedChance += chance;
 
-            if (DiscreteDistribution.this.aggregatedChance > 1) {
-                String exceptionMessage = "Aggregated chance was greater than 1 was ".concat(Double.toString(DiscreteDistribution.this.aggregatedChance));
-                DiscreteDistribution.this.aggregatedChance -= chance;
+            if (aggregatedChance > 1 + aggregatedChanceDelta) {
+                String exceptionMessage = "Aggregated chance was greater than (1 + delta) was ".concat(Double.toString(DiscreteDistribution.this.aggregatedChance));
+                aggregatedChance -= chance;
                 throw new IllegalArgumentException(exceptionMessage);
             }
 
-            this.aggregatedChance = DiscreteDistribution.this.aggregatedChance;
+            aggregatedChanceToThis = aggregatedChance;
         }
 
         ChanceMapping(double chance) {
-            aggregatedChance = chance;
+            aggregatedChanceToThis = chance;
         }
 
         @Override
         public int compareTo(ChanceMapping mapping) {
-            double delta = aggregatedChance - mapping.aggregatedChance;
-            return delta < 0 ? -1 : (int) Math.ceil(delta);
+            return Double.compare(aggregatedChanceToThis, mapping.aggregatedChanceToThis);
         }
     }
 }
