@@ -2,7 +2,7 @@ package org.aksw.twig.parsing;
 
 import com.google.common.util.concurrent.*;
 import org.aksw.twig.files.FileHandler;
-import org.aksw.twig.model.Twitter7ModelWrapper;
+import org.aksw.twig.model.TWIGModelWrapper;
 import org.apache.commons.lang3.tuple.MutableTriple;
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.commons.lang3.tuple.Triple;
@@ -292,7 +292,7 @@ public class Twitter7Parser<T> implements Runnable {
                 String fileName = file.getName();
                 int nameEndIndex = fileName.indexOf('.');
                 fileName = fileName.substring(0, nameEndIndex == -1 ? fileName.length() : nameEndIndex);
-                Twitter7Parser<Twitter7ModelWrapper> parser = new Twitter7Parser<>(inputStream, Twitter7BlockParser::new);
+                Twitter7Parser<TWIGModelWrapper> parser = new Twitter7Parser<>(inputStream, Twitter7BlockParser::new);
                 Twitter7ResultCollector resultCollector = new Twitter7ResultCollector(fileName, outputDirectory);
                 parser.addFutureCallbacks(resultCollector);
                 parser.addParsingFinishedResultListeners(

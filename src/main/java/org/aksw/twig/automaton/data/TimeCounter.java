@@ -1,6 +1,6 @@
 package org.aksw.twig.automaton.data;
 
-import org.aksw.twig.model.Twitter7ModelWrapper;
+import org.aksw.twig.model.TWIGModelWrapper;
 import org.aksw.twig.statistics.DiscreteDistribution;
 import org.apache.jena.rdf.model.Literal;
 import org.apache.jena.rdf.model.Model;
@@ -47,9 +47,9 @@ public class TimeCounter implements Serializable {
      */
     public void addModel(Model model) {
         model.listStatements().forEachRemaining(statement -> {
-            if (statement.getPredicate().getLocalName().equals(Twitter7ModelWrapper.TWEET_TIME_PROPERTY_NAME)) {
+            if (statement.getPredicate().getLocalName().equals(TWIGModelWrapper.TWEET_TIME_PROPERTY_NAME)) {
                 Literal literal = statement.getObject().asLiteral();
-                LocalDateTime time = LocalDateTime.from(Twitter7ModelWrapper.DATE_TIME_FORMATTER.parse(literal.getString()));
+                LocalDateTime time = LocalDateTime.from(TWIGModelWrapper.DATE_TIME_FORMATTER.parse(literal.getString()));
                 addTimestamps(time, 1);
             }
         });

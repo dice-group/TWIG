@@ -2,7 +2,7 @@ package org.aksw.twig.automaton.data;
 
 import org.aksw.twig.executors.FileReadingSuspendSupplier;
 import org.aksw.twig.files.FileHandler;
-import org.aksw.twig.model.Twitter7ModelWrapper;
+import org.aksw.twig.model.TWIGModelWrapper;
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -13,7 +13,7 @@ import java.util.Set;
 import java.util.concurrent.Callable;
 
 /**
- * Creates multiple {@link WordMatrix} objects by parsing files as {@link Twitter7ModelWrapper} and adding them to the matrix.
+ * Creates multiple {@link WordMatrix} objects by parsing files as {@link TWIGModelWrapper} and adding them to the matrix.
  * Parsed objects will then be merged into one result.
  */
 public class WordMatrixHandler extends FileReadingSuspendSupplier<WordMatrix> {
@@ -31,7 +31,7 @@ public class WordMatrixHandler extends FileReadingSuspendSupplier<WordMatrix> {
         return () -> {
             LOGGER.info("Parsing file {}", file.getName());
             WordMatrix matrix = new WordMatrix();
-            matrix.addModel(Twitter7ModelWrapper.read(file).getModel());
+            matrix.addModel(TWIGModelWrapper.read(file).getModel());
             return matrix;
         };
     }

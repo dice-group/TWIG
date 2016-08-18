@@ -1,6 +1,6 @@
 package org.aksw.twig.parsing;
 
-import org.aksw.twig.model.Twitter7ModelWrapper;
+import org.aksw.twig.model.TWIGModelWrapper;
 import org.apache.commons.lang3.tuple.Triple;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -18,10 +18,10 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /**
- * Parses a {@link Twitter7ModelWrapper} from a twitter7 block triple.
+ * Parses a {@link TWIGModelWrapper} from a twitter7 block triple.
  * @author Felix Linker
  */
-class Twitter7BlockParser implements Callable<Twitter7ModelWrapper> {
+class Twitter7BlockParser implements Callable<TWIGModelWrapper> {
 
     private static final Logger LOGGER = LogManager.getLogger(Twitter7BlockParser.class);
 
@@ -87,7 +87,7 @@ class Twitter7BlockParser implements Callable<Twitter7ModelWrapper> {
     }
 
     @Override
-    public Twitter7ModelWrapper call() throws Twitter7BlockParseException {
+    public TWIGModelWrapper call() throws Twitter7BlockParseException {
 
         // Parse date and time
         try {
@@ -123,7 +123,7 @@ class Twitter7BlockParser implements Callable<Twitter7ModelWrapper> {
             this.mentions.add(mentionsMatcher.group(1));
         }
 
-        Twitter7ModelWrapper model = new Twitter7ModelWrapper();
+        TWIGModelWrapper model = new TWIGModelWrapper();
         model.addTweet(twitterUserName, messageContent, messageDateTime, mentions);
 
         return model;

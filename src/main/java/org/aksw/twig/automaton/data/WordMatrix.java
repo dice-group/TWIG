@@ -1,6 +1,6 @@
 package org.aksw.twig.automaton.data;
 
-import org.aksw.twig.model.Twitter7ModelWrapper;
+import org.aksw.twig.model.TWIGModelWrapper;
 import org.apache.commons.lang3.tuple.MutablePair;
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.jena.rdf.model.Model;
@@ -64,13 +64,13 @@ public class WordMatrix implements Serializable {
     }
 
     /**
-     * Iterates over given {@link Model} looking for statements with {@link Twitter7ModelWrapper#TWEET_CONTENT_PROPERTY_NAME} predicate.
+     * Iterates over given {@link Model} looking for statements with {@link TWIGModelWrapper#TWEET_CONTENT_PROPERTY_NAME} predicate.
      * Once a sufficient statement is found all words from the literal will be added to the frequency distribution.
      * @param model Model to add statements from.
      */
     public void addModel(Model model) {
         model.listStatements().forEachRemaining(statement -> {
-            if (statement.getPredicate().getLocalName().equals(Twitter7ModelWrapper.TWEET_CONTENT_PROPERTY_NAME)) {
+            if (statement.getPredicate().getLocalName().equals(TWIGModelWrapper.TWEET_CONTENT_PROPERTY_NAME)) {
                 String tweet = statement.getObject().asLiteral().getString();
                 putAll(new TweetSplitter(tweet));
             }

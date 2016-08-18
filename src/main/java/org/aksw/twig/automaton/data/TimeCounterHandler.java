@@ -2,7 +2,7 @@ package org.aksw.twig.automaton.data;
 
 import org.aksw.twig.executors.FileReadingSuspendSupplier;
 import org.aksw.twig.files.FileHandler;
-import org.aksw.twig.model.Twitter7ModelWrapper;
+import org.aksw.twig.model.TWIGModelWrapper;
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -13,7 +13,7 @@ import java.util.Set;
 import java.util.concurrent.Callable;
 
 /**
- * Creates multiple {@link TimeCounter} objects by parsing files as {@link Twitter7ModelWrapper} and adding them to a time counter.
+ * Creates multiple {@link TimeCounter} objects by parsing files as {@link TWIGModelWrapper} and adding them to a time counter.
  * Parsed objects will then be merged into one result.
  */
 public class TimeCounterHandler extends FileReadingSuspendSupplier<TimeCounter> {
@@ -35,7 +35,7 @@ public class TimeCounterHandler extends FileReadingSuspendSupplier<TimeCounter> 
         return () -> {
             LOGGER.info("Parsing file {}", file.getName());
             TimeCounter counter = new TimeCounter();
-            counter.addModel(Twitter7ModelWrapper.read(file).getModel());
+            counter.addModel(TWIGModelWrapper.read(file).getModel());
             return counter;
         };
     }

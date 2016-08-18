@@ -1,6 +1,6 @@
 package org.aksw.twig.automaton.data;
 
-import org.aksw.twig.model.Twitter7ModelWrapper;
+import org.aksw.twig.model.TWIGModelWrapper;
 import org.aksw.twig.statistics.ExponentialLikeDistribution;
 import org.aksw.twig.statistics.SimpleExponentialRegression;
 import org.apache.jena.rdf.model.Model;
@@ -71,14 +71,14 @@ public class MessageCounter implements Serializable {
 
         model.listStatements().forEachRemaining(statement -> {
 
-            if (statement.getPredicate().getLocalName().equals(Twitter7ModelWrapper.SENDS_PROPERTY_NAME)) {
+            if (statement.getPredicate().getLocalName().equals(TWIGModelWrapper.SENDS_PROPERTY_NAME)) {
                 String userName = statement.getSubject().getLocalName();
                 String tweetId = statement.getObject().asResource().getLocalName();
                 userToMessagesMapping.computeIfAbsent(userName, x -> new HashSet<>()).add(tweetId);
 
-            } else if (statement.getPredicate().getLocalName().equals(Twitter7ModelWrapper.TWEET_TIME_PROPERTY_NAME)) {
+            } else if (statement.getPredicate().getLocalName().equals(TWIGModelWrapper.TWEET_TIME_PROPERTY_NAME)) {
                 String tweetId = statement.getSubject().getLocalName();
-                LocalDate tweetDate = LocalDate.from(Twitter7ModelWrapper.DATE_TIME_FORMATTER.parse(statement.getObject().asLiteral().getString()));
+                LocalDate tweetDate = LocalDate.from(TWIGModelWrapper.DATE_TIME_FORMATTER.parse(statement.getObject().asLiteral().getString()));
                 messageToDateMapping.put(tweetId, tweetDate);
             }
         });
