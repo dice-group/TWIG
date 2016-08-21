@@ -17,6 +17,8 @@ public class TimeCounter implements Serializable {
 
     private static final long serialVersionUID = 4946607680737050029L;
 
+    private static final double DISTRIBUTION_CHANCE_DELTA = 0.0001;
+
     private static final int HOURS = 24;
 
     private static final int MINUTES = 60;
@@ -82,7 +84,7 @@ public class TimeCounter implements Serializable {
      * @return Discrete distribution.
      */
     public DiscreteDistribution<LocalTime> getValueDistribution() {
-        DiscreteTreeDistribution<LocalTime> distribution = new DiscreteTreeDistribution<>();
+        DiscreteTreeDistribution<LocalTime> distribution = new DiscreteTreeDistribution<>(DISTRIBUTION_CHANCE_DELTA);
 
         double sum = 0;
         for (int h = 0; h < HOURS; h++) {
@@ -93,8 +95,10 @@ public class TimeCounter implements Serializable {
 
         for (int h = 0; h < HOURS; h++) {
             for (int m = 0; m < MINUTES; m++) {
-                LocalTime time = LocalTime.of(h, m);
-                distribution.addDiscreteEvent(time, (double) tweetTimes[h][m] / sum);
+                if (tweetTimes[h][m] > 0) {
+                    LocalTime time = LocalTime.of(h, m);
+                    distribution.addDiscreteEvent(time, (double) tweetTimes[h][m] / sum);
+                }
             }
         }
 

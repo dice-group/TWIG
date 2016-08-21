@@ -1,14 +1,13 @@
 package org.aksw.twig.automaton;
 
 import org.aksw.twig.automaton.data.*;
+import org.aksw.twig.files.FileHandler;
 import org.aksw.twig.model.TWIGModelWrapper;
 import org.aksw.twig.statistics.DiscreteDistribution;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.ObjectInputStream;
+import java.io.*;
 import java.time.Duration;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -66,7 +65,7 @@ public class Automaton {
 
     public static void main(String[] args) {
 
-        if (args.length < 7) {
+        if (args.length < 8) {
             throw new IllegalArgumentException("Insufficient arguments supplied");
         }
 
@@ -99,7 +98,18 @@ public class Automaton {
         LocalDate startDate = LocalDate.from(DateTimeFormatter.ISO_LOCAL_DATE.parse(args[5]));
         long seed = Long.parseLong(args[6]);
 
+        File f = new File(args[7]);
+        if (!f.isDirectory()) {
+            throw new IllegalArgumentException("Supplied file must be a directory");
+        }
+
         Automaton automaton = new Automaton(new WordSampler(wordMatrix), messageCounter.normalized(Duration.ofDays(TWEET_NUMBER_NORMALIZATION)).getValueDistribution(), timeCounter.getValueDistribution());
-        automaton.simulate(userCount, Duration.ofDays(days), startDate, seed);
+        TWIGModelWrapper modelWrapper = automaton.simulate(userCount, Duration.ofDays(days), startDate, seed);
+
+        try (FileWriter writer = new FileWriter(new FileHandler(f, "generated_twig_model", ".ttl").nextFile())) {
+            modelWrapper.write(writer);
+        } catch (IOException e) {
+            LOGGER.error(e.getMessage(), e);
+        }
     }
 }
