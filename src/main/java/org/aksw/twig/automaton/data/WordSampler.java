@@ -44,7 +44,13 @@ public class WordSampler implements SamplingWordPredecessorSuccessorDistribution
      */
     @Override
     public SamplingDiscreteDistribution<String> getSuccessorDistribution(String predecessor) {
-        return distributionMap.get(predecessor);
+        SamplingDiscreteDistribution<String> returnValue = distributionMap.get(predecessor);
+
+        if (returnValue == null) {
+            return EMPTY_WORD_SAMPLER;
+        }
+
+        return returnValue;
     }
 
     /**
@@ -122,6 +128,24 @@ public class WordSampler implements SamplingWordPredecessorSuccessorDistribution
         @Override
         public int compareTo(WordChanceMapping mapping) {
             return word.compareTo(mapping.word);
+        }
+    }
+
+    private static final EmptyWordSampler EMPTY_WORD_SAMPLER = new EmptyWordSampler();
+
+    private static class EmptyWordSampler implements SamplingDiscreteDistribution<String> {
+
+        @Override
+        public void reseedRandomGenerator(long seed) {}
+
+        @Override
+        public String sample() {
+            return "";
+        }
+
+        @Override
+        public String sample(Random r) {
+            return "";
         }
     }
 
