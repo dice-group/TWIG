@@ -2,7 +2,7 @@ package org.aksw.twig.statistics;
 
 import java.util.Random;
 
-public interface DiscreteDistribution<T> {
+public interface SamplingDiscreteDistribution<T> {
 
     void reseedRandomGenerator(long seed);
 

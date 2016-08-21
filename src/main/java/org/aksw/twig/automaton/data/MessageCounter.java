@@ -1,7 +1,7 @@
 package org.aksw.twig.automaton.data;
 
 import org.aksw.twig.model.TWIGModelWrapper;
-import org.aksw.twig.statistics.DiscreteDistribution;
+import org.aksw.twig.statistics.SamplingDiscreteDistribution;
 import org.aksw.twig.statistics.ExponentialLikeDistribution;
 import org.aksw.twig.statistics.SimpleExponentialRegression;
 import org.apache.jena.rdf.model.Model;
@@ -171,7 +171,7 @@ public class MessageCounter implements Serializable {
      * Creates an exponential like distribution over values of {@link #getMessageCounts()}.
      * @return Distribution.
      */
-    public DiscreteDistribution<Integer> getValueDistribution() {
+    public SamplingDiscreteDistribution<Integer> getValueDistribution() {
         getMessageCounts(); // Init array list if necessary
         SimpleExponentialRegression regression = new SimpleExponentialRegression();
         for (int i = 0; i < messageCounts.size(); i++) {

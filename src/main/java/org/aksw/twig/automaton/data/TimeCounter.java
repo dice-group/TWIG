@@ -1,8 +1,8 @@
 package org.aksw.twig.automaton.data;
 
 import org.aksw.twig.model.TWIGModelWrapper;
-import org.aksw.twig.statistics.DiscreteDistribution;
-import org.aksw.twig.statistics.DiscreteTreeDistribution;
+import org.aksw.twig.statistics.SamplingDiscreteDistribution;
+import org.aksw.twig.statistics.SamplingDiscreteTreeDistribution;
 import org.apache.jena.rdf.model.Literal;
 import org.apache.jena.rdf.model.Model;
 
@@ -83,8 +83,8 @@ public class TimeCounter implements Serializable {
      * Creates a discrete distribution frequency measure by the timestamp counts as frequency distribution.
      * @return Discrete distribution.
      */
-    public DiscreteDistribution<LocalTime> getValueDistribution() {
-        DiscreteTreeDistribution<LocalTime> distribution = new DiscreteTreeDistribution<>(DISTRIBUTION_CHANCE_DELTA);
+    public SamplingDiscreteDistribution<LocalTime> getValueDistribution() {
+        SamplingDiscreteTreeDistribution<LocalTime> distribution = new SamplingDiscreteTreeDistribution<>(DISTRIBUTION_CHANCE_DELTA);
 
         double sum = 0;
         for (int h = 0; h < HOURS; h++) {

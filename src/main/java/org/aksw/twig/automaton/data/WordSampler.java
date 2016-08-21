@@ -1,7 +1,7 @@
 package org.aksw.twig.automaton.data;
 
-import org.aksw.twig.statistics.DiscreteDistribution;
-import org.aksw.twig.statistics.DiscreteTreeDistribution;
+import org.aksw.twig.statistics.SamplingDiscreteDistribution;
+import org.aksw.twig.statistics.SamplingDiscreteTreeDistribution;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -12,9 +12,9 @@ import java.io.ObjectInputStream;
 import java.util.*;
 
 /**
- * Transfers a word matrix into multiple {@link DiscreteTreeDistribution} objects in order to be able to supply random words.
+ * Transfers a word matrix into multiple {@link SamplingDiscreteTreeDistribution} objects in order to be able to supply random words.
  */
-public class WordSampler implements WordPredecessorSuccessorDistribution {
+public class WordSampler implements SamplingWordPredecessorSuccessorDistribution {
 
     private static final Logger LOGGER = LogManager.getLogger(WordSampler.class);
 
@@ -24,7 +24,7 @@ public class WordSampler implements WordPredecessorSuccessorDistribution {
 
     private static final int MAX_CHARS = 140;
 
-    private Map<String, DiscreteTreeDistribution<String>> distributionMap = new HashMap<>();
+    private Map<String, SamplingDiscreteTreeDistribution<String>> distributionMap = new HashMap<>();
 
     private Random r = new Random();
 
@@ -43,7 +43,7 @@ public class WordSampler implements WordPredecessorSuccessorDistribution {
      * @return Random successor.
      */
     @Override
-    public DiscreteDistribution<String> getSuccessorDistribution(String predecessor) {
+    public SamplingDiscreteDistribution<String> getSuccessorDistribution(String predecessor) {
         return distributionMap.get(predecessor);
     }
 
@@ -95,7 +95,7 @@ public class WordSampler implements WordPredecessorSuccessorDistribution {
                     .toArray(WordChanceMapping[]::new);
             Arrays.sort(wordChanceMappings, WordChanceMapping::compareTo); // Sort successors alphabetically
 
-            DiscreteTreeDistribution<String> distribution = new DiscreteTreeDistribution<>(DISTRIBUTION_CHANCE_DELTA);
+            SamplingDiscreteTreeDistribution<String> distribution = new SamplingDiscreteTreeDistribution<>(DISTRIBUTION_CHANCE_DELTA);
             for (int i = 0; i < wordChanceMappings.length; i++) {
                 WordChanceMapping mapping = wordChanceMappings[i];
                 distribution.addDiscreteEvent(mapping.word, mapping.chance);

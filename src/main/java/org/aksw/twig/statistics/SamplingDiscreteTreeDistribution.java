@@ -4,7 +4,7 @@ import org.aksw.twig.structs.AVLTree;
 
 import java.util.Random;
 
-public class DiscreteTreeDistribution<T> implements DiscreteDistribution<T> {
+public class SamplingDiscreteTreeDistribution<T> implements SamplingDiscreteDistribution<T> {
 
     private final Random random = new Random();
 
@@ -12,9 +12,9 @@ public class DiscreteTreeDistribution<T> implements DiscreteDistribution<T> {
 
     private double aggregatedChanceDelta;
 
-    public DiscreteTreeDistribution() {}
+    public SamplingDiscreteTreeDistribution() {}
 
-    public DiscreteTreeDistribution(double aggregatedChanceDelta) {
+    public SamplingDiscreteTreeDistribution(double aggregatedChanceDelta) {
         this.aggregatedChanceDelta = aggregatedChanceDelta;
     }
 
@@ -58,7 +58,7 @@ public class DiscreteTreeDistribution<T> implements DiscreteDistribution<T> {
             aggregatedChance += chance;
 
             if (aggregatedChance > 1 + aggregatedChanceDelta) {
-                String exceptionMessage = "Aggregated chance was greater than (1 + delta) was ".concat(Double.toString(DiscreteTreeDistribution.this.aggregatedChance));
+                String exceptionMessage = "Aggregated chance was greater than (1 + delta) was ".concat(Double.toString(SamplingDiscreteTreeDistribution.this.aggregatedChance));
                 aggregatedChance -= chance;
                 throw new IllegalArgumentException(exceptionMessage);
             }

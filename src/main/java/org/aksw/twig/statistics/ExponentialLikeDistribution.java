@@ -14,7 +14,7 @@ import java.util.Random;
  * </ul>
  * Where {@code lambda} is the characteristic variable of the distribution. All methods supplied by this distribution run in {@code O(1)}.
  */
-public class ExponentialLikeDistribution implements DiscreteDistribution<Integer>, Serializable {
+public class ExponentialLikeDistribution implements SamplingDiscreteDistribution<Integer>, Serializable {
 
     private Random r = new Random();
 

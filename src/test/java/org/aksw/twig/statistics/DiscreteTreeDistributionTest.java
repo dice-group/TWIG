@@ -9,13 +9,13 @@ public class DiscreteTreeDistributionTest {
 
     @Test
     public void emptyTest() {
-        DiscreteTreeDistribution<Integer> distribution = new DiscreteTreeDistribution<>();
+        SamplingDiscreteTreeDistribution<Integer> distribution = new SamplingDiscreteTreeDistribution<>();
         Assert.assertNull(distribution.sample());
     }
 
     @Test
     public void simpleTest() {
-        DiscreteTreeDistribution<Integer> distribution = new DiscreteTreeDistribution<>();
+        SamplingDiscreteTreeDistribution<Integer> distribution = new SamplingDiscreteTreeDistribution<>();
         distribution.addDiscreteEvent(1, 0.25); // will be aggregated 0.25
         distribution.addDiscreteEvent(2, 0.25); // will be aggregated 0.5
         distribution.addDiscreteEvent(3, 0.25); // will be aggregated 0.75
