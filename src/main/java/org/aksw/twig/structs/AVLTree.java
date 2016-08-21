@@ -48,6 +48,23 @@ public class AVLTree<T extends Comparable<T>> implements Collection<T> {
         }
     }
 
+    /**
+     * Returns the greatest element in the tree or {@code null} if the tree is empty.
+     * @return Greatest element in the tree.
+     */
+    public T getGreatest() {
+        if (root == null) {
+            return null;
+        }
+
+        AVLNode greatest = root;
+        while (greatest.gtr != null) {
+            greatest = greatest.gtr;
+        }
+
+        return greatest.val;
+    }
+
     @Override
     public int size() {
         return size;

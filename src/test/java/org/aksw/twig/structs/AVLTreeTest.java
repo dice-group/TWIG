@@ -4,8 +4,10 @@ import org.junit.Assert;
 import org.junit.Test;
 
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class AVLTreeTest {
 
@@ -80,5 +82,20 @@ public class AVLTreeTest {
         Integer min = Arrays.stream(values).min((a, b) -> a.compareTo(b)).orElse(null);
         Assert.assertNotEquals(null, min);
         Assert.assertEquals(min, tree.findGreater(min - 1));
+    }
+
+    @Test
+    public void findGreatestTest() {
+        Integer[] values = new Integer[] { 0, 1, 2, 3, 4, 5, 6, 7, 9 };
+        List<Integer> valuesList = Arrays.stream(values).collect(Collectors.toList());
+
+        for (int i = 0; i < 10; i++) {
+            Collections.shuffle(valuesList);
+
+            AVLTree<Integer> tree = new AVLTree<>();
+            tree.addAll(valuesList);
+
+            Assert.assertEquals(valuesList.stream().max(Integer::compare).orElse(null), tree.getGreatest());
+        }
     }
 }
