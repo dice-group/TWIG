@@ -4,6 +4,7 @@ import org.aksw.twig.automaton.data.MessageCounter;
 import org.aksw.twig.automaton.data.TimeCounter;
 import org.aksw.twig.automaton.data.WordMatrix;
 import org.aksw.twig.automaton.data.WordSampler;
+import org.aksw.twig.model.TWIGModelWrapper;
 import org.aksw.twig.statistics.DiscreteDistribution;
 import org.aksw.twig.statistics.ExponentialLikeDistribution;
 import org.apache.logging.log4j.LogManager;
@@ -17,63 +18,54 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
-import java.util.LinkedList;
-import java.util.List;
+import java.util.Collections;
 import java.util.Random;
 
 public class Automaton {
 
     private static final Logger LOGGER = LogManager.getLogger();
 
+    private static final int SECONDS = 60;
+
+    private static final int TWEET_NUMBER_NORMALIZATION = 30;
+
     private final WordSampler wordSampler;
 
-    private final MessageCounter messageCounter;
+    private final ExponentialLikeDistribution tweetNumberDistribution;
 
-    private final DiscreteDistribution<LocalTime> messageTimeDistribution;
+    private final DiscreteDistribution<LocalTime> tweetTimeDistribution;
 
-    private final UserFactory userFactory = new UserFactory();
-
-    private final List<User> users = new LinkedList<>();
-
-    public Automaton(WordMatrix wordMatrix, MessageCounter messageCounter, DiscreteDistribution<LocalTime> messageTimeDistribution) {
-        wordSampler = new WordSampler(wordMatrix);
-        this.messageCounter = messageCounter;
-        this.messageTimeDistribution = messageTimeDistribution;
+    public Automaton(WordSampler wordSampler, ExponentialLikeDistribution tweetNumberDistribution, DiscreteDistribution<LocalTime> tweetTimeDistribution) {
+        this.wordSampler = wordSampler;
+        this.tweetNumberDistribution = tweetNumberDistribution;
+        this.tweetTimeDistribution = tweetTimeDistribution;
     }
 
-    public void simulate(int userCount, Duration simulationTime, LocalDate startDate, long seed) {
+    public TWIGModelWrapper simulate(int userCount, Duration simulationTime, LocalDate startDate, long seed) {
 
         Random r = new Random(seed);
-        final ExponentialLikeDistribution messageCountDistribution = messageCounter.normalized(simulationTime).getValueDistribution();
-        messageCountDistribution.reseedRandomGenerator(seed);
+
         wordSampler.reseedRandomGenerator(seed);
-        messageTimeDistribution.reseedRandomGenerator(seed);
-        long simulationDays = simulationTime.toDays();
+        tweetNumberDistribution.reseedRandomGenerator(seed);
+        tweetTimeDistribution.reseedRandomGenerator(seed);
+        int simulationDays = (int) simulationTime.toDays();
+
+        TWIGModelWrapper resultModel = new TWIGModelWrapper();
 
         for (int i = 0; i < userCount; i++) {
-            User user = userFactory.newUser(messageCountDistribution.sample());
-            user.setDays(simulationDays);
-            users.add(user);
-        }
+            User user = new User(tweetNumberDistribution.sample());
+            user.setNameOfRandom(r);
 
-        for (long d = 0; d < simulationDays; d++) {
-            for (User user: users) {
-                int messagesToSend = user.nextDay();
-                for (int m = 0; m < messagesToSend; m++) {
-                    LocalTime messageTime = messageTimeDistribution.sample();
-                    messageTime = messageTime.withSecond((int) Math.ceil(r.nextDouble() * 60));
-                    String tweet = wordSampler.sampleTweet();
-                    LOGGER.info(
-                            "T  {}\n" +
-                            "U  {}\n" +
-                            "W  {}\n",
-                            LocalDateTime.of(startDate.plusDays(d), messageTime).toString(),
-                            user.getName(),
-                            tweet
-                    );
-                }
+            for (int d = 0; d < simulationDays; d++) {
+                int tweetDay = r.nextInt(simulationDays);
+                LocalDateTime tweetTime = LocalDateTime.of(startDate.plusDays(tweetDay), tweetTimeDistribution.sample().withSecond(r.nextInt(SECONDS))); // TODO: there can be collisions
+                String tweetContent = wordSampler.sampleTweet();
+
+                resultModel.addTweetNoAnonymization(user.getNameAsHexString(), tweetContent, tweetTime, Collections.emptyList()); // TODO: use mentions
             }
         }
+
+        return resultModel;
     }
 
     public static void main(String[] args) {
@@ -111,7 +103,7 @@ public class Automaton {
         LocalDate startDate = LocalDate.from(DateTimeFormatter.ISO_LOCAL_DATE.parse(args[5]));
         long seed = Long.parseLong(args[6]);
 
-        Automaton automaton = new Automaton(wordMatrix, messageCounter, timeCounter.getValueDistribution());
+        Automaton automaton = new Automaton(new WordSampler(wordMatrix), messageCounter.normalized(Duration.ofDays(TWEET_NUMBER_NORMALIZATION)).getValueDistribution(), timeCounter.getValueDistribution());
         automaton.simulate(userCount, Duration.ofDays(days), startDate, seed);
     }
 }

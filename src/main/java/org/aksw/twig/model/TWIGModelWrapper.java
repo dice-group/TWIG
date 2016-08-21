@@ -17,7 +17,9 @@ import java.security.NoSuchAlgorithmException;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.Random;
+import java.util.Set;
 
 /**
  * Wraps a {@link Model} using TWIG ontology to create RDF-graphs.
@@ -100,17 +102,31 @@ public class TWIGModelWrapper {
      * @param mentions All mentioned account names of the tweet.
      */
     public void addTweet(String accountName, String tweetContent, LocalDateTime tweetTime, Collection<String> mentions) {
-        Resource twitterAccount = getTwitterAccount(accountName);
-
+        Set<String> anonymizedMentions = new HashSet<>();
         String anonymizedTweetContent = tweetContent;
         for (String mention: mentions) {
-            anonymizedTweetContent = anonymizedTweetContent.replaceAll(mention, anonymizeTwitterAccount(mention));
+            String anonymizedMention = anonymizeTwitterAccount(mention);
+            anonymizedMentions.add(anonymizedMention);
+            anonymizedTweetContent = anonymizedTweetContent.replaceAll(mention, anonymizedMention);
         }
+
+        addTweetNoAnonymization(anonymizeTwitterAccount(accountName), anonymizedTweetContent, tweetTime, anonymizedMentions);
+    }
+
+    /**
+     * Same as {@link #addTweet(String, String, LocalDateTime, Collection)} but with no username anonymization. Useful for already anonymized data.
+     * @param accountName See original documentation.
+     * @param tweetContent See original documentation.
+     * @param tweetTime See original documentation.
+     * @param mentions See original documentation.
+     */
+    public void addTweetNoAnonymization(String accountName, String tweetContent, LocalDateTime tweetTime, Collection<String> mentions) {
+        Resource twitterAccount = getTwitterAccount(accountName);
 
         Resource tweet = this.model.getResource(createTweetIri(accountName, tweetTime))
                 .addProperty(RDF_TYPE, OWL_NAMED_INDIVIDUAL)
                 .addProperty(RDF_TYPE, TWEET)
-                .addLiteral(TWEET_CONTENT, model.createTypedLiteral(anonymizedTweetContent))
+                .addLiteral(TWEET_CONTENT, model.createTypedLiteral(tweetContent))
                 .addLiteral(TWEET_TIME, model.createTypedLiteral(tweetTime.format(DATE_TIME_FORMATTER), XSDDatatype.XSDdateTime)); // TODO: add timezone
 
         twitterAccount.addProperty(SENDS, tweet);
@@ -153,7 +169,7 @@ public class TWIGModelWrapper {
      * @return IRI of the twitter account.
      */
     private String createTwitterAccountIri(String twitterAccountName) {
-        return prefixedIri(anonymizeTwitterAccount(twitterAccountName));
+        return prefixedIri(twitterAccountName);
     }
 
     /**
@@ -163,7 +179,7 @@ public class TWIGModelWrapper {
      * @return IRI of the tweet.
      */
     private String createTweetIri(String twitterAccountName, LocalDateTime messageTime) {
-        String returnValue = anonymizeTwitterAccount(twitterAccountName)
+        String returnValue = twitterAccountName
                 .concat("_")
                 .concat(messageTime.toString().replaceAll(":", "-"));
         return prefixedIri(returnValue);

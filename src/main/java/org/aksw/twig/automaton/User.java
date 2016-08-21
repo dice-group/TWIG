@@ -1,32 +1,40 @@
 package org.aksw.twig.automaton;
 
+import org.apache.commons.codec.binary.Hex;
+
+import java.util.Arrays;
+import java.util.Random;
+
 public class User {
 
-    private String name;
+    private static final int NAME_LENGTH = 16;
+
+    private byte[] name = new byte[NAME_LENGTH];
 
     private int messageCount;
 
-    private double messagesPerDay;
-
-    private double messageCounter;
-
-    public User(int messageCount, String name) {
+    public User(int messageCount) {
         this.messageCount = messageCount;
-        this.name = name;
+
     }
 
-    public void setDays(long days) {
-        messagesPerDay = (double) messageCount / (double) days;
+    public int getMessageCount() {
+        return messageCount;
     }
 
-    public int nextDay() {
-        messageCounter += messagesPerDay;
-        int ret = (int) Math.ceil(messageCounter);
-        messageCounter -= ret;
-        return ret;
+    public void setName(final byte[] name) {
+        if (name.length < NAME_LENGTH) {
+            throw new IllegalArgumentException("name is too short");
+        }
+
+        this.name = Arrays.copyOf(name, NAME_LENGTH);
     }
 
-    public String getName() {
-        return name;
+    public void setNameOfRandom(final Random r) {
+        r.nextBytes(name); // TODO: there can be collisions
+    }
+
+    public String getNameAsHexString() {
+        return Hex.encodeHexString(name);
     }
 }
