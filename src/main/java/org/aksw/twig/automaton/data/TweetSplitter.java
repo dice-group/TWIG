@@ -16,50 +16,28 @@ import java.util.stream.Stream;
  */
 class TweetSplitter implements Iterable<Pair<String, String>> {
 
-    private static final Set<Character> SENTENCE_DELIMITERS = new HashSet<>();
+    private static final String SENTENCE_DELIMITING_REGEX = "[!?.]+";
 
-    private static final Set<Character> WORD_DELIMITERS = new HashSet<>();
+    private static final String WORD_DELIMITING_REGEX = "[ -,]+";
 
-    private static final String ALLOWED_CHARACTERS = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789'@#";
-
-    private static final Set<Character> ALLOW_CHARACTERS = new HashSet<>();
-
-    static
-    {
-        SENTENCE_DELIMITERS.add('.');
-        SENTENCE_DELIMITERS.add('!');
-        SENTENCE_DELIMITERS.add('?');
-        WORD_DELIMITERS.add(' ');
-        WORD_DELIMITERS.add(',');
-        WORD_DELIMITERS.add('-');
-        ALLOW_CHARACTERS.addAll(SENTENCE_DELIMITERS);
-        ALLOW_CHARACTERS.addAll(WORD_DELIMITERS);
-        for (int i = 0; i < ALLOWED_CHARACTERS.length(); i++) {
-            ALLOW_CHARACTERS.add(ALLOWED_CHARACTERS.charAt(i));
-        }
-    }
-
-    /**
-     * Basic constructor with no further functionality.
-     */
-    public TweetSplitter() {}
+    private static final String UNWANTED_SEQUENCES = "[^a-zA-Z0-9#'@ -,?!.]+";
 
     /**
      * Creates a new instance and splits given tweet.
      * @param tweet Tweet to split.
      */
     public TweetSplitter(String tweet) {
-        splitTweet(tweet);
+        splitTweet(tweet.replaceAll(UNWANTED_SEQUENCES, ""));
     }
 
-    private List<Pair<String, String>> split;
+    private final List<Pair<String, String>> split = new LinkedList<>();
 
     /**
      * Returns a stream to all pairs of predecessors and successors.
      * @return Stream to pairs of predecessors and successors. If no tweet was split the stream will be empty.
      */
     public Stream<Pair<String, String>> getSplit() {
-        return this.split == null ? Stream.empty() : this.split.stream();
+        return this.split.stream();
     }
 
     @Override
@@ -70,45 +48,26 @@ class TweetSplitter implements Iterable<Pair<String, String>> {
     /**
      * Splits all words in the tweet.
      * @param tweet Tweet to split words in.
-     * @return Stream to split words.
      */
-    public Stream<Pair<String, String>> splitTweet(String tweet) {
-        this.split = new LinkedList<>();
-        boolean lastCharDelimited = false;
-        String predecessor = "";
-        StringBuilder successor = new StringBuilder();
-        for (int i = 0; i < tweet.length(); i++) {
-            char c = tweet.charAt(i);
+    private void splitTweet(String tweet) {
+        String[] sentences = tweet.split(SENTENCE_DELIMITING_REGEX);
+        for (String sentence: sentences) {
+            sentence = sentence.trim();
+            String[] words = sentence.split(WORD_DELIMITING_REGEX);
 
-            if (!ALLOW_CHARACTERS.contains(c)) {
-                continue;
-            }
-
-            if (WORD_DELIMITERS.contains(c)) {
-                if (!lastCharDelimited) {
-                    this.split.add(new ImmutablePair<>(predecessor, successor.toString()));
-                    predecessor = successor.toString();
-                    successor = new StringBuilder();
+            String lastWord = "";
+            for (String word: words) {
+                if (word.equals("")) {
+                    continue;
                 }
-                lastCharDelimited = true;
-                continue;
+
+                split.add(new ImmutablePair<>(lastWord, word));
+                lastWord = word;
             }
 
-            if (SENTENCE_DELIMITERS.contains(c)) {
-                if (!lastCharDelimited) {
-                    this.split.add(new ImmutablePair<>(predecessor, successor.toString()));
-                    this.split.add(new ImmutablePair<>(successor.toString(), ""));
-                    predecessor = "";
-                    successor = new StringBuilder();
-                }
-                lastCharDelimited = true;
-                continue;
+            if (!lastWord.equals("")) {
+                split.add(new ImmutablePair<>(lastWord, ""));
             }
-
-            lastCharDelimited = false;
-            successor.append(c);
         }
-
-        return getSplit();
     }
 }
