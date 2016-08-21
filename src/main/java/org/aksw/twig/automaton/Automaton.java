@@ -1,12 +1,8 @@
 package org.aksw.twig.automaton;
 
-import org.aksw.twig.automaton.data.MessageCounter;
-import org.aksw.twig.automaton.data.TimeCounter;
-import org.aksw.twig.automaton.data.WordMatrix;
-import org.aksw.twig.automaton.data.WordSampler;
+import org.aksw.twig.automaton.data.*;
 import org.aksw.twig.model.TWIGModelWrapper;
 import org.aksw.twig.statistics.DiscreteDistribution;
-import org.aksw.twig.statistics.ExponentialLikeDistribution;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -29,14 +25,14 @@ public class Automaton {
 
     private static final int TWEET_NUMBER_NORMALIZATION = 30;
 
-    private final WordSampler wordSampler;
+    private final WordPredecessorSuccessorDistribution wordPredecessorSuccessorDistribution;
 
-    private final ExponentialLikeDistribution tweetNumberDistribution;
+    private final DiscreteDistribution<Integer> tweetNumberDistribution;
 
     private final DiscreteDistribution<LocalTime> tweetTimeDistribution;
 
-    public Automaton(WordSampler wordSampler, ExponentialLikeDistribution tweetNumberDistribution, DiscreteDistribution<LocalTime> tweetTimeDistribution) {
-        this.wordSampler = wordSampler;
+    public Automaton(WordPredecessorSuccessorDistribution wordPredecessorSuccessorDistribution, DiscreteDistribution<Integer> tweetNumberDistribution, DiscreteDistribution<LocalTime> tweetTimeDistribution) {
+        this.wordPredecessorSuccessorDistribution = wordPredecessorSuccessorDistribution;
         this.tweetNumberDistribution = tweetNumberDistribution;
         this.tweetTimeDistribution = tweetTimeDistribution;
     }
@@ -45,7 +41,7 @@ public class Automaton {
 
         Random r = new Random(seed);
 
-        wordSampler.reseedRandomGenerator(seed);
+        wordPredecessorSuccessorDistribution.reseedRandomGenerator(seed);
         tweetNumberDistribution.reseedRandomGenerator(seed);
         tweetTimeDistribution.reseedRandomGenerator(seed);
         int simulationDays = (int) simulationTime.toDays();
@@ -59,7 +55,7 @@ public class Automaton {
             for (int d = 0; d < simulationDays; d++) {
                 int tweetDay = r.nextInt(simulationDays);
                 LocalDateTime tweetTime = LocalDateTime.of(startDate.plusDays(tweetDay), tweetTimeDistribution.sample().withSecond(r.nextInt(SECONDS))); // TODO: there can be collisions
-                String tweetContent = wordSampler.sampleTweet();
+                String tweetContent = wordPredecessorSuccessorDistribution.sample();
 
                 resultModel.addTweetNoAnonymization(user.getNameAsHexString(), tweetContent, tweetTime, Collections.emptyList()); // TODO: use mentions
             }

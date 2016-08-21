@@ -1,6 +1,7 @@
 package org.aksw.twig.automaton.data;
 
 import org.aksw.twig.statistics.DiscreteDistribution;
+import org.aksw.twig.statistics.DiscreteTreeDistribution;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -11,9 +12,9 @@ import java.io.ObjectInputStream;
 import java.util.*;
 
 /**
- * Transfers a word matrix into multiple {@link DiscreteDistribution} objects in order to be able to supply random words.
+ * Transfers a word matrix into multiple {@link DiscreteTreeDistribution} objects in order to be able to supply random words.
  */
-public class WordSampler {
+public class WordSampler implements WordPredecessorSuccessorDistribution {
 
     private static final Logger LOGGER = LogManager.getLogger(WordSampler.class);
 
@@ -23,37 +24,48 @@ public class WordSampler {
 
     private static final int MAX_CHARS = 140;
 
-    private Map<String, DiscreteDistribution<String>> distributionMap = new HashMap<>();
+    private Map<String, DiscreteTreeDistribution<String>> distributionMap = new HashMap<>();
 
     private Random r = new Random();
+
+    /**
+     * Sets a seed to the internal random number generator by {@link Random#setSeed(long)}.
+     * @param seed Seed.
+     */
+    @Override
+    public void reseedRandomGenerator(long seed) {
+        r.setSeed(seed);
+    }
 
     /**
      * Samples a successor to given predecessor.
      * @param predecessor Predecessor.
      * @return Random successor.
      */
-    public String sample(String predecessor) {
-        DiscreteDistribution<String> distribution = distributionMap.get(predecessor);
-        if (distribution == null) {
-            throw new IllegalArgumentException("Predecessor not present");
-        }
-
-        return distribution.sample(r);
+    @Override
+    public DiscreteDistribution<String> getSuccessorDistribution(String predecessor) {
+        return distributionMap.get(predecessor);
     }
 
     /**
      * Samples a tweet.
      * @return Random tweet.
      */
-    public String sampleTweet() {
-        String currentPredecessor = sample("");
+    @Override
+    public String sample() {
+        return sample(r);
+    }
+
+    @Override
+    public String sample(Random randomSource) {
+        String currentPredecessor = getSuccessorDistribution("").sample(randomSource);
         int charactersCount = currentPredecessor.length();
 
         LinkedList<String> tweet = new LinkedList<>();
         tweet.add(currentPredecessor);
 
         while (charactersCount < MAX_CHARS) {
-            String next = sample(currentPredecessor);
+            String next = getSuccessorDistribution(currentPredecessor).sample(randomSource);
             if (next.equals("")) {
                 break;
             }
@@ -71,14 +83,6 @@ public class WordSampler {
     }
 
     /**
-     * Sets a seed to the internal random number generator by {@link Random#setSeed(long)}.
-     * @param seed Seed.
-     */
-    public void reseedRandomGenerator(long seed) {
-        r.setSeed(seed);
-    }
-
-    /**
      * Creates a {@link WordSampler} of given {@link WordMatrix}.
      * @param matrix Matrix to create the sampler of.
      */
@@ -91,7 +95,7 @@ public class WordSampler {
                     .toArray(WordChanceMapping[]::new);
             Arrays.sort(wordChanceMappings, WordChanceMapping::compareTo); // Sort successors alphabetically
 
-            DiscreteDistribution<String> distribution = new DiscreteDistribution<>(DISTRIBUTION_CHANCE_DELTA);
+            DiscreteTreeDistribution<String> distribution = new DiscreteTreeDistribution<>(DISTRIBUTION_CHANCE_DELTA);
             for (int i = 0; i < wordChanceMappings.length; i++) {
                 WordChanceMapping mapping = wordChanceMappings[i];
                 distribution.addDiscreteEvent(mapping.word, mapping.chance);
@@ -138,7 +142,7 @@ public class WordSampler {
             matrix.truncateTo(TRUNCATE_CHANCE);
             WordSampler sampler = new WordSampler(matrix);
             for (int i = 0; i < messages; i++) {
-                LOGGER.info("Message: {}", sampler.sampleTweet());
+                LOGGER.info("Message: {}", sampler.sample());
             }
         } catch (IOException | ClassNotFoundException e) {
             LOGGER.error(e.getMessage(), e);

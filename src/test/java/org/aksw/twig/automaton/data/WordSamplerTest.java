@@ -14,7 +14,7 @@ public class WordSamplerTest {
         WordMatrix matrix = new WordMatrix();
         matrix.alterFrequency("a", "a", 1);
         WordSampler sampler = new WordSampler(matrix);
-        Assert.assertEquals("a", sampler.sample("a"));
+        Assert.assertEquals("a", sampler.getSuccessorDistribution("a").sample());
     }
 
     @Test
@@ -30,7 +30,7 @@ public class WordSamplerTest {
 
         WordSampler sampler = new WordSampler(matrix);
         for (int i = 0; i < 10000; i++) {
-            String sample = sampler.sample(predecessor);
+            String sample = sampler.getSuccessorDistribution(predecessor).sample();
             occurrences.put(sample, occurrences.get(sample) + 1);
         }
 

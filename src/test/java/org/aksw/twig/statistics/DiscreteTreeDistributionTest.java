@@ -5,17 +5,17 @@ import org.junit.Test;
 
 import java.util.Random;
 
-public class DiscreteDistributionTest {
+public class DiscreteTreeDistributionTest {
 
     @Test
     public void emptyTest() {
-        DiscreteDistribution<Integer> distribution = new DiscreteDistribution<>();
+        DiscreteTreeDistribution<Integer> distribution = new DiscreteTreeDistribution<>();
         Assert.assertNull(distribution.sample());
     }
 
     @Test
     public void simpleTest() {
-        DiscreteDistribution<Integer> distribution = new DiscreteDistribution<>();
+        DiscreteTreeDistribution<Integer> distribution = new DiscreteTreeDistribution<>();
         distribution.addDiscreteEvent(1, 0.25); // will be aggregated 0.25
         distribution.addDiscreteEvent(2, 0.25); // will be aggregated 0.5
         distribution.addDiscreteEvent(3, 0.25); // will be aggregated 0.75

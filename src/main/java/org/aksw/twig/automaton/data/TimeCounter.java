@@ -2,6 +2,7 @@ package org.aksw.twig.automaton.data;
 
 import org.aksw.twig.model.TWIGModelWrapper;
 import org.aksw.twig.statistics.DiscreteDistribution;
+import org.aksw.twig.statistics.DiscreteTreeDistribution;
 import org.apache.jena.rdf.model.Literal;
 import org.apache.jena.rdf.model.Model;
 
@@ -81,7 +82,7 @@ public class TimeCounter implements Serializable {
      * @return Discrete distribution.
      */
     public DiscreteDistribution<LocalTime> getValueDistribution() {
-        DiscreteDistribution<LocalTime> distribution = new DiscreteDistribution<>();
+        DiscreteTreeDistribution<LocalTime> distribution = new DiscreteTreeDistribution<>();
 
         double sum = 0;
         for (int h = 0; h < HOURS; h++) {
