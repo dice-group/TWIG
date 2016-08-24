@@ -16,6 +16,9 @@ import java.time.format.DateTimeFormatter;
 import java.util.Collections;
 import java.util.Random;
 
+/**
+ * Generates a a TWIG model in a {@link TWIGModelWrapper} by using data analysis results from other TWIG models. The generated TWIG model will include random users and tweets.
+ */
 public class Automaton {
 
     private static final Logger LOGGER = LogManager.getLogger();
@@ -30,12 +33,26 @@ public class Automaton {
 
     private final SamplingDiscreteDistribution<LocalTime> tweetTimeDistribution;
 
+    /**
+     * Creates a new instance setting class variables.
+     * @param samplingWordPredecessorSuccessorDistribution Word predecessor-successor distribution will sample tweets.
+     * @param tweetNumberDistribution Tweet number distribution will sample number of tweets per user.
+     * @param tweetTimeDistribution Tweet time distribution will sample timestamps of tweets during the day.
+     */
     public Automaton(SamplingWordPredecessorSuccessorDistribution samplingWordPredecessorSuccessorDistribution, SamplingDiscreteDistribution<Integer> tweetNumberDistribution, SamplingDiscreteDistribution<LocalTime> tweetTimeDistribution) {
         this.samplingWordPredecessorSuccessorDistribution = samplingWordPredecessorSuccessorDistribution;
         this.tweetNumberDistribution = tweetNumberDistribution;
         this.tweetTimeDistribution = tweetTimeDistribution;
     }
 
+    /**
+     * Generates a TWIG model by using distributions specified in constructor {@link #Automaton(SamplingWordPredecessorSuccessorDistribution, SamplingDiscreteDistribution, SamplingDiscreteDistribution)}.
+     * @param userCount Users to simulate.
+     * @param simulationTime Period of time to simulate. Duration will be converted to days.
+     * @param startDate Starting date of the simulation period.
+     * @param seed Seed for the random number generator.
+     * @return TWIG model containing users and tweets.
+     */
     public TWIGModelWrapper simulate(int userCount, Duration simulationTime, LocalDate startDate, long seed) {
 
         Random r = new Random(seed);
@@ -63,6 +80,20 @@ public class Automaton {
         return resultModel;
     }
 
+    /**
+     * Executes {@link #simulate(int, Duration, LocalDate, long)} with following arguments:
+     * <li>
+     *     <ul>{@code arg[0]} must state a path to a serialized {@link WordMatrix}</ul>
+     *     <ul>{@code arg[1]} must state a path to a serialized {@link MessageCounter}</ul>
+     *     <ul>{@code arg[2]} must state a path to a serialized {@link MessageCounter}</ul>
+     *     <ul>{@code arg[3]} must state an integer value for {@code userCount}</ul>
+     *     <ul>{@code arg[4]} must state an integer value for {@code simulationTime}</ul>
+     *     <ul>{@code arg[5]} must state a date in format {@link DateTimeFormatter#ISO_LOCAL_DATE} as {@code startDate}</ul>
+     *     <ul>{@code arg[6]} must state a long value for {@code seed}</ul>
+     *     <ul>{@code arg[7]} must state a directory in which the resulting file {@code generated_twig_model_XXX.ttl} will be created with {@code _XXX} being a generic suffix</ul>
+     * </li>
+     * @param args Arguments as specified above.
+     */
     public static void main(String[] args) {
 
         if (args.length < 8) {

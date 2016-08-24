@@ -32,14 +32,31 @@ public class ExponentialLikeDistribution implements SamplingDiscreteDistribution
         multiplier = (1 - expLambda);
     }
 
+    /**
+     * Returns the probability {@code P(X = x)}.
+     * @param x Event to get the probability for.
+     * @return Probability {@code P(X = x)}.
+     */
     double probability(int x) {
         return multiplier * Math.exp(-lambda * x);
     }
 
+    /**
+     * Returns the probability of {@code P(X <= x)}.
+     * @param x Upper bound of events to get the accumulated probability for.
+     * @return Probability {@code P(X <= x)}.
+     */
     double cumulativeProbability(int x) {
         return 1 - Math.exp(-lambda * (x + 1));
     }
 
+    /**
+     * Returns the probability of {@code P(x0 <= X <= x1)}.
+     * @param x0 Lower bound of events to get the accumulated probability for.
+     * @param x1 Upper bound of events to get the accumulated probability for.
+     * @return Probability of {@code P(x0 <= X <= x1)}.
+     * @throws NumberIsTooLargeException Thrown iff {@code x0 > x1}.
+     */
     double cumulativeProbability(int x0, int x1) throws NumberIsTooLargeException {
         if (x0 > x1) {
             throw new NumberIsTooLargeException(x0, x1, true);

@@ -133,6 +133,9 @@ public class WordSampler implements SamplingWordPredecessorSuccessorDistribution
 
     private static final EmptyWordSampler EMPTY_WORD_SAMPLER = new EmptyWordSampler();
 
+    /**
+     * Is used as return value if there is no distribution for a predecessor.
+     */
     private static class EmptyWordSampler implements SamplingDiscreteDistribution<String> {
 
         @Override
