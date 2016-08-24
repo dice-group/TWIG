@@ -65,9 +65,10 @@ public class Automaton {
         TWIGModelWrapper resultModel = new TWIGModelWrapper();
 
         for (int i = 0; i < userCount; i++) {
-            User user = new User(tweetNumberDistribution.sample());
+            User user = new User();
             user.setNameOfRandom(r);
 
+            int tweetCount = tweetNumberDistribution.sample();
             for (int d = 0; d < simulationDays; d++) {
                 int tweetDay = r.nextInt(simulationDays);
                 LocalDateTime tweetTime = LocalDateTime.of(startDate.plusDays(tweetDay), tweetTimeDistribution.sample().withSecond(r.nextInt(SECONDS))); // TODO: there can be collisions
