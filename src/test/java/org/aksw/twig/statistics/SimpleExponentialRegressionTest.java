@@ -9,6 +9,8 @@ public class SimpleExponentialRegressionTest {
 
     private double deviation = 0.001;
 
+    private static final int DATA_SET_SIZE = 1000;
+
     @Test
     public void restoreFunctionTest() {
         double alpha = 2;
@@ -16,13 +18,22 @@ public class SimpleExponentialRegressionTest {
 
         ExpFunction f = new ExpFunction(alpha, beta);
 
-        SimpleExponentialRegression regression = new SimpleExponentialRegression();
-        for (int i = 0; i < 1000; i++) {
-            regression.addData(i, f.apply((double) i));
+        SimpleExponentialRegression regression1 = new SimpleExponentialRegression();
+        SimpleExponentialRegression regression2 = new SimpleExponentialRegression();
+        double[][] data = new double[DATA_SET_SIZE][];
+        for (int i = 0; i < DATA_SET_SIZE; i++) {
+            double fValue = f.apply((double) i);
+            regression1.addData(i, fValue);
+            data[i] = new double[2];
+            data[i][0] = i;
+            data[i][1] = fValue;
         }
+        regression2.addData(data);
 
-        Assert.assertEquals(f.alpha, regression.getAlpha(), this.deviation);
-        Assert.assertEquals(f.beta, regression.getBeta(), this.deviation);
+        Assert.assertEquals(f.alpha, regression1.getAlpha(), this.deviation);
+        Assert.assertEquals(f.beta, regression1.getBeta(), this.deviation);
+        Assert.assertEquals(f.alpha, regression2.getAlpha(), this.deviation);
+        Assert.assertEquals(f.beta, regression2.getBeta(), this.deviation);
     }
 
     private class ExpFunction implements Function<Double, Double> {

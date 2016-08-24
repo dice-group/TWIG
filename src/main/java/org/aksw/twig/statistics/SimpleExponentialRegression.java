@@ -29,6 +29,7 @@ public class SimpleExponentialRegression {
         double[][] logarithmized = new double[data.length][];
         for (int i = 0; i < data.length; i++) {
             logarithmized[i] = new double[data[i].length];
+            logarithmized[i][0] = data[i][0];
             for (int j = 1; j < data[i].length; j++) {
                 logarithmized[i][j] = Math.log(data[i][j]);
             }
