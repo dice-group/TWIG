@@ -2,7 +2,7 @@ package org.aksw.twig.parsing;
 
 import com.google.common.util.concurrent.FutureCallback;
 import org.aksw.twig.files.FileHandler;
-import org.aksw.twig.model.Twitter7ModelWrapper;
+import org.aksw.twig.model.TWIGModelWrapper;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -10,9 +10,9 @@ import java.io.*;
 import java.util.zip.GZIPOutputStream;
 
 /**
- * Collects {@link Twitter7ModelWrapper} and merges them into one. After the merged model has a size over {@link #MODEL_MAX_SIZE} it will be printed into a gzip compressed file.
+ * Collects {@link TWIGModelWrapper} and merges them into one. After the merged model has a size over {@link #MODEL_MAX_SIZE} it will be printed into a gzip compressed file.
  */
-class Twitter7ResultCollector implements FutureCallback<Twitter7ModelWrapper> {
+class Twitter7ResultCollector implements FutureCallback<TWIGModelWrapper> {
 
     private static final Logger LOGGER = LogManager.getLogger(Twitter7ResultCollector.class);
 
@@ -20,7 +20,7 @@ class Twitter7ResultCollector implements FutureCallback<Twitter7ModelWrapper> {
 
     private final FileHandler fileHandler;
 
-    private final Twitter7ModelWrapper currentModel = new Twitter7ModelWrapper();
+    private final TWIGModelWrapper currentModel = new TWIGModelWrapper();
 
     private static final String FILE_TYPE = ".ttl.gz";
 
@@ -34,7 +34,7 @@ class Twitter7ResultCollector implements FutureCallback<Twitter7ModelWrapper> {
     }
 
     @Override
-    public void onSuccess(Twitter7ModelWrapper result) {
+    public void onSuccess(TWIGModelWrapper result) {
         synchronized (currentModel) {
             currentModel.getModel().add(result.getModel());
 

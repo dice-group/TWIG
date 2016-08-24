@@ -1,8 +1,6 @@
 package org.aksw.twig.statistics;
 
-import org.apache.commons.math3.distribution.IntegerDistribution;
 import org.apache.commons.math3.exception.NumberIsTooLargeException;
-import org.apache.commons.math3.exception.OutOfRangeException;
 
 import java.io.Serializable;
 import java.util.Random;
@@ -16,7 +14,7 @@ import java.util.Random;
  * </ul>
  * Where {@code lambda} is the characteristic variable of the distribution. All methods supplied by this distribution run in {@code O(1)}.
  */
-public class ExponentialLikeDistribution implements IntegerDistribution, Serializable {
+public class ExponentialLikeDistribution implements SamplingDiscreteDistribution<Integer>, Serializable {
 
     private Random r = new Random();
 
@@ -24,39 +22,44 @@ public class ExponentialLikeDistribution implements IntegerDistribution, Seriali
 
     private double lambda;
 
-    private double expLambda;
-
-    private double mean;
-
     /**
      * Creates a new exponential like distribution with given lambda.
      * @param lambdaArg Characteristic variable to the distribution.
      */
     public ExponentialLikeDistribution(double lambdaArg) {
         lambda = lambdaArg;
-        expLambda = Math.exp(-lambda);
+        double expLambda = Math.exp(-lambda);
         multiplier = (1 - expLambda);
-        mean = multiplier * expLambda / Math.pow(expLambda - 1, 2);
     }
 
-    @Override
-    public double probability(int x) {
+    /**
+     * Returns the probability {@code P(X = x)}.
+     * @param x Event to get the probability for.
+     * @return Probability {@code P(X = x)}.
+     */
+    double probability(int x) {
         return multiplier * Math.exp(-lambda * x);
     }
 
-    @Override
-    public double cumulativeProbability(int x) {
+    /**
+     * Returns the probability of {@code P(X <= x)}.
+     * @param x Upper bound of events to get the accumulated probability for.
+     * @return Probability {@code P(X <= x)}.
+     */
+    double cumulativeProbability(int x) {
         return 1 - Math.exp(-lambda * (x + 1));
     }
 
-    @Override
-    public double cumulativeProbability(int x0, int x1) throws NumberIsTooLargeException {
+    /**
+     * Returns the probability of {@code P(x0 <= X <= x1)}.
+     * @param x0 Lower bound of events to get the accumulated probability for.
+     * @param x1 Upper bound of events to get the accumulated probability for.
+     * @return Probability of {@code P(x0 <= X <= x1)}.
+     * @throws NumberIsTooLargeException Thrown iff {@code x0 > x1}.
+     */
+    double cumulativeProbability(int x0, int x1) throws NumberIsTooLargeException {
         if (x0 > x1) {
             throw new NumberIsTooLargeException(x0, x1, true);
-        }
-
-        if (x0 < getSupportLowerBound() - 1 || x1 + 1 > getSupportUpperBound()) {
-            throw new IllegalArgumentException("Arguments out of bounds");
         }
 
         if (x0 == -1) {
@@ -67,56 +70,23 @@ public class ExponentialLikeDistribution implements IntegerDistribution, Seriali
     }
 
     @Override
-    public int inverseCumulativeProbability(double p) throws OutOfRangeException {
-        if (p == 0d) {
-            return 0;
-        }
-
-        return (int) Math.ceil(- Math.log(1 - p) / lambda);
-    }
-
-    @Override
-    public double getNumericalMean() {
-        return mean;
-    }
-
-    /**
-     * This method is currently unsupported.
-     * @return None.
-     */
-    @Override
-    public double getNumericalVariance() {
-        throw new UnsupportedOperationException("Method not implemented yet"); // TODO
-    }
-
-    @Override
-    public int getSupportLowerBound() {
-        return 0;
-    }
-
-    @Override
-    public int getSupportUpperBound() {
-        return Integer.MAX_VALUE;
-    }
-
-    @Override
-    public boolean isSupportConnected() {
-        return true;
-    }
-
-    @Override
     public void reseedRandomGenerator(long seed) {
         r.setSeed(seed);
     }
 
     @Override
-    public int sample() {
+    public Integer sample() {
+        return sample(r);
+    }
+
+    @Override
+    public Integer sample(Random randomSource) {
         int lowerK = 0;
         int upperK = Integer.MAX_VALUE - 1;
         int pivot = upperK / 2;
 
         while (true) {
-            if (r.nextDouble() < cumulativeProbability(lowerK - 1, pivot) / cumulativeProbability(lowerK - 1, upperK)) {
+            if (randomSource.nextDouble() < cumulativeProbability(lowerK - 1, pivot) / cumulativeProbability(lowerK - 1, upperK)) {
                 upperK = pivot;
             } else {
                 lowerK = pivot + 1;
@@ -129,16 +99,6 @@ public class ExponentialLikeDistribution implements IntegerDistribution, Seriali
         }
     }
 
-    @Override
-    public int[] sample(int sampleSize) {
-        int[] randoms = new int[sampleSize];
-        for (int i = 0; i < sampleSize; i++) {
-            randoms[i] = sample();
-        }
-
-        return randoms;
-    }
-
     /**
      * Creates an exponential like distribution by taking the given exponential regression as frequency distribution.
      * @param regression Frequency distribution.
@@ -146,7 +106,7 @@ public class ExponentialLikeDistribution implements IntegerDistribution, Seriali
      */
     public static ExponentialLikeDistribution of(SimpleExponentialRegression regression) {
         if (regression.getBeta() >= 0) {
-            throw new IllegalArgumentException("The regressions beta must be < 0.");
+            throw new IllegalArgumentException("The regression's beta must be < 0.");
         }
 
         return new ExponentialLikeDistribution(regression.getBeta());

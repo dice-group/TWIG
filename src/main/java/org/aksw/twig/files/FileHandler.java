@@ -139,7 +139,7 @@ public class FileHandler {
 
     /**
      * Reads an output directory and a set of read files from a string array.
-     * Following argument must be stated first:
+     * If present at all following argument must be stated first:
      * <ul>
      *     <li>{@code --out=DIRECTORY} defines output directory.</li>
      * </ul>
@@ -153,20 +153,23 @@ public class FileHandler {
      * @return Pair of output directory (left value) and set of read files (right value).
      */
     public static Pair<File, Set<File>> readArgs(String[] args) throws IllegalArgumentException {
-        if (args.length < 2) {
+        if (args.length < 1) {
             throw new IllegalArgumentException("Too few arguments given.");
         }
 
         Matcher outDirectoryMatcher = ARG_PREF_OUT.matcher(args[0]);
         File outputDirectory = outDirectoryMatcher.find() ? new File(outDirectoryMatcher.group(1)) : null;
 
-        if (outputDirectory == null || !outputDirectory.isDirectory()) {
-            throw new IllegalArgumentException("No --out argument given.");
+        int argsStartIndex = 1;
+        if (outputDirectory != null && !outputDirectory.isDirectory()) {
+            throw new IllegalArgumentException("--out argument is no directory");
+        } else if (outputDirectory == null) {
+            argsStartIndex = 0;
         }
 
         // Get all files to parse
         Set<File> filesToParse = new HashSet<>();
-        for (int i = 1; i < args.length; i++) {
+        for (int i = argsStartIndex; i < args.length; i++) {
             Matcher matcher = ARG_PREF_IN.matcher(args[i]);
             if (matcher.find()) {
                 filesToParse.addAll(FileHandler.getFiles(new File(matcher.group(1)), true).collect(Collectors.toList()));

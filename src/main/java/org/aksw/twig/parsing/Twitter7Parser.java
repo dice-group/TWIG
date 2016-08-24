@@ -2,7 +2,7 @@ package org.aksw.twig.parsing;
 
 import com.google.common.util.concurrent.*;
 import org.aksw.twig.files.FileHandler;
-import org.aksw.twig.model.Twitter7ModelWrapper;
+import org.aksw.twig.model.TWIGModelWrapper;
 import org.apache.commons.lang3.tuple.MutableTriple;
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.commons.lang3.tuple.Triple;
@@ -100,6 +100,8 @@ public class Twitter7Parser<T> implements Runnable {
             throw new IllegalStateException();
         }
         run = true;
+
+        LOGGER.info("Started parsing file");
 
         // Start the initial threads.
         for (int i = 0; i < N_THREADS; i++) {
@@ -266,10 +268,12 @@ public class Twitter7Parser<T> implements Runnable {
         }
 
         parsingFinishedListeners.forEach(Runnable::run);
+
+        LOGGER.info("Finished parsing file");
     }
 
     /**
-     * Parses one or more files according to twitter7 format. Arguments must be formatted as stated in {@link FileHandler#readArgs(String[])}.
+     * Parses one or more files according to twitter7 format. Arguments must be formatted as stated in {@link FileHandler#readArgs(String[])} but {@code --out=} argument is mandatory.
      * You should not parse files with the same name from different directories as that could mess up the output.
      * @param args One or more arguments as specified above.
      * @see Twitter7Parser
@@ -288,7 +292,7 @@ public class Twitter7Parser<T> implements Runnable {
                 String fileName = file.getName();
                 int nameEndIndex = fileName.indexOf('.');
                 fileName = fileName.substring(0, nameEndIndex == -1 ? fileName.length() : nameEndIndex);
-                Twitter7Parser<Twitter7ModelWrapper> parser = new Twitter7Parser<>(inputStream, Twitter7BlockParser::new);
+                Twitter7Parser<TWIGModelWrapper> parser = new Twitter7Parser<>(inputStream, Twitter7BlockParser::new);
                 Twitter7ResultCollector resultCollector = new Twitter7ResultCollector(fileName, outputDirectory);
                 parser.addFutureCallbacks(resultCollector);
                 parser.addParsingFinishedResultListeners(

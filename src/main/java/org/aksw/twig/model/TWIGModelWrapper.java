@@ -17,14 +17,16 @@ import java.security.NoSuchAlgorithmException;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.Random;
+import java.util.Set;
 
 /**
  * Wraps a {@link Model} using TWIG ontology to create RDF-graphs.
  */
-public class Twitter7ModelWrapper {
+public class TWIGModelWrapper {
 
-    private static final Logger LOGGER = LogManager.getLogger(Twitter7ModelWrapper.class);
+    private static final Logger LOGGER = LogManager.getLogger(TWIGModelWrapper.class);
 
     public static final String LANG = "Turtle";
 
@@ -49,14 +51,20 @@ public class Twitter7ModelWrapper {
         PREFIX_MAPPING.setNsPrefix(RDF_PREF, RDF_IRI);
     }
 
+    // RDF local names
+    public static final String SENDS_PROPERTY_NAME = "sends";
+    public static final String MENTIONS_PROPERTY_NAME = "mentions";
+    public static final String TWEET_TIME_PROPERTY_NAME = "tweetTime";
+    public static final String TWEET_CONTENT_PROPERTY_NAME = "tweetContent";
+
     // RDF statement parts.
     private static final Resource TWEET = ResourceFactory.createResource(PREFIX_MAPPING.expandPrefix("twig:Tweet"));
     private static final Resource ONLINE_TWITTER_ACCOUNT = ResourceFactory.createResource(PREFIX_MAPPING.expandPrefix("twig:OnlineTwitterAccount"));
     private static final Resource OWL_NAMED_INDIVIDUAL = ResourceFactory.createResource(PREFIX_MAPPING.expandPrefix("owl:NamedIndividual"));
-    private static final Property SENDS = ResourceFactory.createProperty(PREFIX_MAPPING.expandPrefix("twig:sends"));
-    private static final Property MENTIONS = ResourceFactory.createProperty(PREFIX_MAPPING.expandPrefix("twig:mentions"));
-    private static final Property TWEET_TIME = ResourceFactory.createProperty(PREFIX_MAPPING.expandPrefix("twig:tweetTime"));
-    private static final Property TWEET_CONTENT = ResourceFactory.createProperty(PREFIX_MAPPING.expandPrefix("twig:tweetContent"));
+    private static final Property SENDS = ResourceFactory.createProperty(PREFIX_MAPPING.expandPrefix("twig:".concat(SENDS_PROPERTY_NAME)));
+    private static final Property MENTIONS = ResourceFactory.createProperty(PREFIX_MAPPING.expandPrefix("twig:".concat(MENTIONS_PROPERTY_NAME)));
+    private static final Property TWEET_TIME = ResourceFactory.createProperty(PREFIX_MAPPING.expandPrefix("twig:".concat(TWEET_TIME_PROPERTY_NAME)));
+    private static final Property TWEET_CONTENT = ResourceFactory.createProperty(PREFIX_MAPPING.expandPrefix("twig:".concat(TWEET_CONTENT_PROPERTY_NAME)));
     private static final Property RDF_TYPE = ResourceFactory.createProperty(PREFIX_MAPPING.expandPrefix("rdf:type"));
 
     private static byte[] randomHashSuffix = new byte[32];
@@ -77,7 +85,7 @@ public class Twitter7ModelWrapper {
     /**
      * Creates a new instance along with a new {@link Model} to wrap.
      */
-    public Twitter7ModelWrapper() {
+    public TWIGModelWrapper() {
         this.model.setNsPrefixes(PREFIX_MAPPING);
         try {
             MD5 = MessageDigest.getInstance("MD5");
@@ -94,17 +102,31 @@ public class Twitter7ModelWrapper {
      * @param mentions All mentioned account names of the tweet.
      */
     public void addTweet(String accountName, String tweetContent, LocalDateTime tweetTime, Collection<String> mentions) {
-        Resource twitterAccount = getTwitterAccount(accountName);
-
+        Set<String> anonymizedMentions = new HashSet<>();
         String anonymizedTweetContent = tweetContent;
         for (String mention: mentions) {
-            anonymizedTweetContent = anonymizedTweetContent.replaceAll(mention, anonymizeTwitterAccount(mention));
+            String anonymizedMention = anonymizeTwitterAccount(mention);
+            anonymizedMentions.add(anonymizedMention);
+            anonymizedTweetContent = anonymizedTweetContent.replaceAll(mention, anonymizedMention);
         }
+
+        addTweetNoAnonymization(anonymizeTwitterAccount(accountName), anonymizedTweetContent, tweetTime, anonymizedMentions);
+    }
+
+    /**
+     * Same as {@link #addTweet(String, String, LocalDateTime, Collection)} but with no username anonymization. Useful for already anonymized data.
+     * @param accountName See original documentation.
+     * @param tweetContent See original documentation.
+     * @param tweetTime See original documentation.
+     * @param mentions See original documentation.
+     */
+    public void addTweetNoAnonymization(String accountName, String tweetContent, LocalDateTime tweetTime, Collection<String> mentions) {
+        Resource twitterAccount = getTwitterAccount(accountName);
 
         Resource tweet = this.model.getResource(createTweetIri(accountName, tweetTime))
                 .addProperty(RDF_TYPE, OWL_NAMED_INDIVIDUAL)
                 .addProperty(RDF_TYPE, TWEET)
-                .addLiteral(TWEET_CONTENT, model.createTypedLiteral(anonymizedTweetContent))
+                .addLiteral(TWEET_CONTENT, model.createTypedLiteral(tweetContent))
                 .addLiteral(TWEET_TIME, model.createTypedLiteral(tweetTime.format(DATE_TIME_FORMATTER), XSDDatatype.XSDdateTime)); // TODO: add timezone
 
         twitterAccount.addProperty(SENDS, tweet);
@@ -147,7 +169,7 @@ public class Twitter7ModelWrapper {
      * @return IRI of the twitter account.
      */
     private String createTwitterAccountIri(String twitterAccountName) {
-        return prefixedIri(anonymizeTwitterAccount(twitterAccountName));
+        return prefixedIri(twitterAccountName);
     }
 
     /**
@@ -157,7 +179,7 @@ public class Twitter7ModelWrapper {
      * @return IRI of the tweet.
      */
     private String createTweetIri(String twitterAccountName, LocalDateTime messageTime) {
-        String returnValue = anonymizeTwitterAccount(twitterAccountName)
+        String returnValue = twitterAccountName
                 .concat("_")
                 .concat(messageTime.toString().replaceAll(":", "-"));
         return prefixedIri(returnValue);
@@ -185,11 +207,11 @@ public class Twitter7ModelWrapper {
     /**
      * Reads a TWIG rdf model from a file.
      * @param file File to read from.
-     * @return Twitter7ModelWrapper
+     * @return TWIGModelWrapper
      * @throws IOException IO error.
      */
-    public static Twitter7ModelWrapper read(File file) throws IOException {
-        Twitter7ModelWrapper wrapper = new Twitter7ModelWrapper();
+    public static TWIGModelWrapper read(File file) throws IOException {
+        TWIGModelWrapper wrapper = new TWIGModelWrapper();
         try (InputStream inputStream = FileHandler.getDecompressionStreams(file)) {
             wrapper.model.read(inputStream, null, LANG);
             return wrapper;
