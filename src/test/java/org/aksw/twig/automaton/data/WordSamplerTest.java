@@ -6,6 +6,7 @@ import org.junit.Test;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Random;
 
 public class WordSamplerTest {
 
@@ -35,5 +36,25 @@ public class WordSamplerTest {
         }
 
         Assert.assertEquals(1d, (double) occurrences.get("a") / (double) occurrences.get("b"), 0.1);
+    }
+
+    @Test
+    public void tweetLengthTest() {
+        WordMatrix matrix = new WordMatrix();
+        matrix.alterFrequency("a", "a", 10);
+        matrix.alterFrequency("a", "", 1);
+        matrix.alterFrequency("", "a", 1);
+        WordSampler sampler = new WordSampler(matrix);
+
+        String tweet = sampler.sample(new TestRandom());
+        Assert.assertTrue(140 >= tweet.length());
+    }
+
+    private class TestRandom extends Random {
+
+        @Override
+        public double nextDouble() {
+            return 0.6;
+        }
     }
 }

@@ -85,7 +85,7 @@ public class WordSampler implements SamplingWordPredecessorSuccessorDistribution
             tweet.removeLast();
         }
 
-        return tweet.stream().reduce("", (a, b) -> a.concat(" ").concat(b));
+        return tweet.stream().reduce("", (a, b) -> a.concat(" ").concat(b)).trim();
     }
 
     /**
