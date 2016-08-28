@@ -66,7 +66,6 @@ public class Automaton {
 
         for (int i = 0; i < userCount; i++) {
             User user = new User();
-            user.setNameOfRandom(r);
 
             int tweetCount = tweetNumberDistribution.sample();
             for (int d = 0; d < simulationDays; d++) {
