@@ -14,7 +14,9 @@ import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.Random;
+import java.util.Set;
 
 /**
  * Generates a a TWIG model in a {@link TWIGModelWrapper} by using data analysis results from other TWIG models. The generated TWIG model will include random users and tweets.
@@ -66,14 +68,19 @@ public class Automaton {
 
         for (int i = 0; i < userCount; i++) {
             User user = new User();
+            Set<LocalDateTime> timeStamps = new HashSet<>();
 
             int tweetCount = tweetNumberDistribution.sample();
-            for (int d = 0; d < simulationDays; d++) {
-                int tweetDay = r.nextInt(simulationDays);
-                LocalDateTime tweetTime = LocalDateTime.of(startDate.plusDays(tweetDay), tweetTimeDistribution.sample().withSecond(r.nextInt(SECONDS))); // TODO: there can be collisions
+            for (int d = 0; d < tweetCount; d++) {
+                LocalDateTime tweetTime = LocalDateTime.of(startDate.plusDays(r.nextInt(simulationDays)), tweetTimeDistribution.sample().withSecond(r.nextInt(SECONDS)));
+                while (timeStamps.contains(tweetTime)) {
+                    tweetTime = LocalDateTime.of(startDate.plusDays(r.nextInt(simulationDays)), tweetTimeDistribution.sample().withSecond(r.nextInt(SECONDS)));
+                }
+                timeStamps.add(tweetTime);
+
                 String tweetContent = samplingWordPredecessorSuccessorDistribution.sample();
 
-                resultModel.addTweetNoAnonymization(user.getNameAsHexString(), tweetContent, tweetTime, Collections.emptyList()); // TODO: use mentions
+                resultModel.addTweetNoAnonymization(user.getNameAsHexString(), tweetContent, tweetTime, Collections.emptyList());
             }
         }
 
