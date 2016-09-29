@@ -7,10 +7,11 @@ import java.util.Random;
 
 /**
  * This class implements a discrete distribution using an exponential function for calculating probabilities.
- * The sample space consists of all natural numbers including 0. The probability mass function and cumulative probability function are defined as:
+ * The sample space consists of all natural numbers including 0. The probability mass function and cumulative probability function are defined as:<br>
+ * Be lambda a negative real number.
  * <ul>
- *     <li>{@code p(x) = (1 - e^(-lambda)) * e^(-lambda * x)}</li>
- *     <li>{@code P(X <= x) = sum from 0 to x: p(x) = 1 - e^(-lambda * (x + 1))}</li>
+ *     <li>{@code p(x) = (1 - e^(lambda)) * e^(lambda * x)}</li>
+ *     <li>{@code P(X <= x) = sum from 0 to x: p(x) = 1 - e^(lambda * (x + 1))}</li>
  * </ul>
  * Where {@code lambda} is the characteristic variable of the distribution. All methods supplied by this distribution run in {@code O(1)}.
  */
@@ -24,12 +25,16 @@ public class ExponentialLikeDistribution implements SamplingDiscreteDistribution
 
     /**
      * Creates a new exponential like distribution with given lambda.
-     * @param lambdaArg Characteristic variable to the distribution.
+     * @param lambdaArg Characteristic variable to the distribution. Must be negative.
      */
     public ExponentialLikeDistribution(double lambdaArg) {
+        if (lambdaArg >= 0) {
+            throw new IllegalArgumentException("lambdaArg must be < 0");
+        }
+
         lambda = lambdaArg;
-        double expLambda = Math.exp(-lambda);
-        multiplier = (1 - expLambda);
+        double expLambda = Math.exp(lambda);
+        multiplier = (1d - expLambda);
     }
 
     /**
@@ -38,7 +43,7 @@ public class ExponentialLikeDistribution implements SamplingDiscreteDistribution
      * @return Probability {@code P(X = x)}.
      */
     double probability(int x) {
-        return multiplier * Math.exp(-lambda * x);
+        return multiplier * Math.exp(lambda * x);
     }
 
     /**
@@ -47,7 +52,7 @@ public class ExponentialLikeDistribution implements SamplingDiscreteDistribution
      * @return Probability {@code P(X <= x)}.
      */
     double cumulativeProbability(int x) {
-        return 1 - Math.exp(-lambda * (x + 1));
+        return 1 - Math.exp(lambda * (x + 1));
     }
 
     /**

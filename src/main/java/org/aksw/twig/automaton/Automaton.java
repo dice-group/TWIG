@@ -29,6 +29,14 @@ public class Automaton {
 
     private static final int TWEET_NUMBER_NORMALIZATION = 30;
 
+    private static final String FILE_NAME = "generated_twig_model";
+
+    private static final String FILE_ENDING = ".ttl";
+
+    private static final int MODEL_MAX_SIZE = 1000000;
+
+    private final FileHandler resultStoreFileHandler;
+
     private final SamplingWordPredecessorSuccessorDistribution samplingWordPredecessorSuccessorDistribution;
 
     private final SamplingDiscreteDistribution<Integer> tweetNumberDistribution;
@@ -40,8 +48,14 @@ public class Automaton {
      * @param samplingWordPredecessorSuccessorDistribution Word predecessor-successor distribution will sample tweets.
      * @param tweetNumberDistribution Tweet number distribution will sample number of tweets per user.
      * @param tweetTimeDistribution Tweet time distribution will sample timestamps of tweets during the day.
+     * @param resultStoreLocation Folder to store resulting models in.
      */
-    public Automaton(SamplingWordPredecessorSuccessorDistribution samplingWordPredecessorSuccessorDistribution, SamplingDiscreteDistribution<Integer> tweetNumberDistribution, SamplingDiscreteDistribution<LocalTime> tweetTimeDistribution) {
+    public Automaton(SamplingWordPredecessorSuccessorDistribution samplingWordPredecessorSuccessorDistribution, SamplingDiscreteDistribution<Integer> tweetNumberDistribution, SamplingDiscreteDistribution<LocalTime> tweetTimeDistribution, File resultStoreLocation) {
+        if (!resultStoreLocation.isDirectory()) {
+            throw new IllegalArgumentException("resultStoreLocation is no directory");
+        }
+
+        this.resultStoreFileHandler = new FileHandler(resultStoreLocation, FILE_NAME, FILE_ENDING);
         this.samplingWordPredecessorSuccessorDistribution = samplingWordPredecessorSuccessorDistribution;
         this.tweetNumberDistribution = tweetNumberDistribution;
         this.tweetTimeDistribution = tweetTimeDistribution;
@@ -55,7 +69,9 @@ public class Automaton {
      * @param seed Seed for the random number generator.
      * @return TWIG model containing users and tweets.
      */
-    public TWIGModelWrapper simulate(int userCount, Duration simulationTime, LocalDate startDate, long seed) {
+    public void simulate(int userCount, Duration simulationTime, LocalDate startDate, long seed) {
+
+        LOGGER.info("Starting simulation with {} users over {} days.", userCount, simulationTime.toDays());
 
         Random r = new Random(seed);
 
@@ -71,6 +87,7 @@ public class Automaton {
             Set<LocalDateTime> timeStamps = new HashSet<>();
 
             int tweetCount = tweetNumberDistribution.sample();
+            LOGGER.info("User {} tweets {} times.", user.getNameAsHexString(), tweetCount);
             for (int d = 0; d < tweetCount; d++) {
                 LocalDateTime tweetTime = LocalDateTime.of(startDate.plusDays(r.nextInt(simulationDays)), tweetTimeDistribution.sample().withSecond(r.nextInt(SECONDS)));
                 while (timeStamps.contains(tweetTime)) {
@@ -82,9 +99,22 @@ public class Automaton {
 
                 resultModel.addTweetNoAnonymization(user.getNameAsHexString(), tweetContent, tweetTime, Collections.emptyList());
             }
+
+            if (resultModel.getModel().size() > MODEL_MAX_SIZE) {
+                LOGGER.info("Printing result model");
+                try (FileWriter writer = new FileWriter(resultStoreFileHandler.nextFile())) {
+                    resultModel.write(writer);
+                } catch (IOException e) {
+                    LOGGER.error(e.getMessage(), e);
+                }
+            }
         }
 
-        return resultModel;
+        try (FileWriter writer = new FileWriter(resultStoreFileHandler.nextFile())) {
+            resultModel.write(writer);
+        } catch (IOException e) {
+            LOGGER.error(e.getMessage(), e);
+        }
     }
 
     /**
@@ -141,13 +171,7 @@ public class Automaton {
             throw new IllegalArgumentException("Supplied file must be a directory");
         }
 
-        Automaton automaton = new Automaton(new WordSampler(wordMatrix), messageCounter.normalized(Duration.ofDays(TWEET_NUMBER_NORMALIZATION)).getValueDistribution(), timeCounter.getValueDistribution());
-        TWIGModelWrapper modelWrapper = automaton.simulate(userCount, Duration.ofDays(days), startDate, seed);
-
-        try (FileWriter writer = new FileWriter(new FileHandler(f, "generated_twig_model", ".ttl").nextFile())) {
-            modelWrapper.write(writer);
-        } catch (IOException e) {
-            LOGGER.error(e.getMessage(), e);
-        }
+        Automaton automaton = new Automaton(new WordSampler(wordMatrix), messageCounter.normalized(Duration.ofDays(TWEET_NUMBER_NORMALIZATION)).getValueDistribution(), timeCounter.getValueDistribution(), f);
+        automaton.simulate(userCount, Duration.ofDays(days), startDate, seed);
     }
 }

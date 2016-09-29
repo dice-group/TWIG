@@ -175,6 +175,10 @@ public class MessageCounter implements Serializable {
         getMessageCounts(); // Init array list if necessary
         SimpleExponentialRegression regression = new SimpleExponentialRegression();
         for (int i = 0; i < messageCounts.size(); i++) {
+            if (messageCounts.get(i) == 0.0) {
+                continue;
+            }
+
             regression.addData(i, messageCounts.get(i));
         }
 
