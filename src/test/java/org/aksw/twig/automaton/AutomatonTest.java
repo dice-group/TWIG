@@ -8,7 +8,6 @@ import org.aksw.twig.statistics.SamplingDiscreteDistribution;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.junit.Assert;
-import org.junit.Test;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -22,7 +21,7 @@ public class AutomatonTest {
 
     private static final Logger LOGGER = LogManager.getLogger(AutomatonTest.class);
 
-    @Test
+//    @Test
     public void AutomatonTest() {
 
         MessageCounter messageCounter;
