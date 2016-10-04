@@ -7,7 +7,7 @@ public class ExponentialLikeDistributionTest {
 
     @Test
     public void sampleTest() {
-        double lambda = Math.random();
+        double lambda = Math.random() * -1d - 0.01;
         long seed = (long) (Long.MAX_VALUE * Math.random());
         ExponentialLikeDistribution d1 = new ExponentialLikeDistribution(lambda);
         d1.reseedRandomGenerator(seed);
@@ -28,7 +28,7 @@ public class ExponentialLikeDistributionTest {
 
     @Test
     public void probabilityTest() {
-        ExponentialLikeDistribution d = new ExponentialLikeDistribution(Math.random());
+        ExponentialLikeDistribution d = new ExponentialLikeDistribution(Math.random() * -1d - 0.01);
         Assert.assertEquals(1.0, d.cumulativeProbability(-1, Integer.MAX_VALUE - 1), 0.0);
 
         int x0 = 0;
