@@ -62,7 +62,7 @@ public class Automaton {
     }
 
     /**
-     * Generates a TWIG model by using distributions specified in constructor {@link #Automaton(SamplingWordPredecessorSuccessorDistribution, SamplingDiscreteDistribution, SamplingDiscreteDistribution)}.
+     * Generates a TWIG model by using distributions specified in constructor {@link #Automaton(SamplingWordPredecessorSuccessorDistribution, SamplingDiscreteDistribution, SamplingDiscreteDistribution, File)} )}.
      * @param userCount Users to simulate.
      * @param simulationTime Period of time to simulate. Duration will be converted to days.
      * @param startDate Starting date of the simulation period.
