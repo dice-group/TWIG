@@ -101,7 +101,7 @@ public class MessageCounter implements Serializable {
                     .max(LocalDate::compareTo)
                     .orElse(null);
 
-            setUserDayIntervall(userName, (int) ChronoUnit.DAYS.between(lowest, highest));
+            setUserDayInterval(userName, (int) ChronoUnit.DAYS.between(lowest, highest) + 1);
         });
     }
 
@@ -129,7 +129,7 @@ public class MessageCounter implements Serializable {
      * @param userName User to set.
      * @param dayInterval Amount of days.
      */
-    public void setUserDayIntervall(String userName, int dayInterval) {
+    public void setUserDayInterval(String userName, int dayInterval) {
         userMessageDayIntervalMap.put(userName, dayInterval);
     }
 
@@ -158,7 +158,7 @@ public class MessageCounter implements Serializable {
             int newMessageCount = (int) Math.round(((double) userMessageCountMap.get(userName) / days));
             if (newMessageCount > 0) {
                 messageCounter.setUserMessages(userName, newMessageCount);
-                messageCounter.setUserDayIntervall(userName, (int) normalPeriod.toDays());
+                messageCounter.setUserDayInterval(userName, (int) normalPeriod.toDays());
             } else {
                 LOGGER.info("User {} has 0 messages after normalization.", userName);
             }
@@ -168,10 +168,15 @@ public class MessageCounter implements Serializable {
     }
 
     /**
-     * Creates an exponential like distribution over values of {@link #getMessageCounts()}.
+     * Creates an exponential like distribution over values of {@link #getMessageCounts()}. There must by some messages counted in order for this method to work.
+     * Otherwise an {@link IllegalStateException} is thrown.
      * @return Distribution.
      */
     public SamplingDiscreteDistribution<Integer> getValueDistribution() {
+        if (userMessageCountMap.isEmpty()) {
+            throw new IllegalStateException("Cannot create a value distribution of an empty MessageCounter.");
+        }
+
         getMessageCounts(); // Init array list if necessary
         SimpleExponentialRegression regression = new SimpleExponentialRegression();
         for (int i = 0; i < messageCounts.size(); i++) {
