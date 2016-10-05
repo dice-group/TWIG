@@ -4,7 +4,9 @@ import org.aksw.twig.automaton.data.MessageCounter;
 import org.aksw.twig.automaton.data.TimeCounter;
 import org.aksw.twig.automaton.data.WordMatrix;
 import org.aksw.twig.automaton.data.WordSampler;
+import org.aksw.twig.model.TWIGModelWrapper;
 import org.aksw.twig.statistics.SamplingDiscreteDistribution;
+import org.apache.jena.rdf.model.Model;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.junit.Assert;
@@ -16,9 +18,6 @@ import java.io.ObjectInputStream;
 import java.time.Duration;
 import java.time.LocalDate;
 import java.time.LocalTime;
-import java.util.Set;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 public class AutomatonTest {
 
@@ -27,37 +26,37 @@ public class AutomatonTest {
 //    @Test
     public void tmpTest() {
 
-        WordMatrix wordMatrix_0;
-        try (ObjectInputStream inputStream = new ObjectInputStream(new FileInputStream("C:/users/felix/desktop/TWIG_matrix/word_matrix_0.obj"))) {
-            wordMatrix_0 = (WordMatrix) inputStream.readObject();
+        MessageCounter messageCounter;
+        try (ObjectInputStream inputStream = new ObjectInputStream(new FileInputStream("C:/users/felix/desktop/message_count_0.obj"))) {
+            messageCounter = (MessageCounter) inputStream.readObject();
         } catch (IOException | ClassNotFoundException e) {
             LOGGER.error(e.getMessage(), e);
             Assert.fail();
             return;
         }
 
-        WordMatrix wordMatrix_1;
-        try (ObjectInputStream inputStream = new ObjectInputStream(new FileInputStream("C:/users/felix/desktop/TWIG_matrix/word_matrix_1.obj"))) {
-            wordMatrix_1 = (WordMatrix) inputStream.readObject();
-        } catch (IOException | ClassNotFoundException e) {
+        SamplingDiscreteDistribution<Integer> distribution = messageCounter.getValueDistribution();
+        MessageCounter normalizedMessageCounter = messageCounter.normalized(Duration.ofDays(30));
+        SamplingDiscreteDistribution<Integer> normalizedDistribution = normalizedMessageCounter.getValueDistribution();
+
+        for (int i = 0; i < 10; i++) {
+            LOGGER.info("{}; normalized: {}", distribution.sample(), normalizedDistribution.sample());
+        }
+    }
+
+//    @Test
+    public void anotherTmpTest() {
+
+        try {
+            TWIGModelWrapper modelWrapper = TWIGModelWrapper.read(new File("C:/users/felix/desktop/tweets2009-10_0.ttl.gz"));
+            MessageCounter messageCounter = new MessageCounter();
+            Model model = modelWrapper.getModel();
+            messageCounter.addModel(model);
+            MessageCounter normalized = messageCounter.normalized(Duration.ofDays(30));
+        } catch (IOException e) {
             LOGGER.error(e.getMessage(), e);
             Assert.fail();
-            return;
         }
-
-        Set<String> predecessors_0 = wordMatrix_0.getPredecessors();
-        Set<String> predecessors_1 = wordMatrix_1.getPredecessors();
-        int size_0 = predecessors_0.size();
-        int size_1 = predecessors_1.size();
-
-        Set<String> all = Stream.concat(predecessors_0.stream(), predecessors_1.stream()).collect(Collectors.toSet());
-        int size = all.size();
-
-        double growRate = (((double) size / (double) size_0) + ((double) size / (double) size_1)) / 2;
-
-        LOGGER.info(size);
-        LOGGER.info(growRate);
-
     }
 
 //    @Test
