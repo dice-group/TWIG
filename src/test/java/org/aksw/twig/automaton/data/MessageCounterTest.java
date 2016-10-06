@@ -3,6 +3,8 @@ package org.aksw.twig.automaton.data;
 import org.junit.Assert;
 import org.junit.Test;
 
+import java.time.Duration;
+
 public class MessageCounterTest {
 
     @Test
@@ -25,5 +27,18 @@ public class MessageCounterTest {
         });
 
         Assert.assertEquals(new Integer(2), counter.getMessageCounts().get(1));
+    }
+
+    @Test
+    public void normalizationTest() {
+        MessageCounter counter = new MessageCounter();
+        counter.setUserMessages("user1", 2);
+        counter.setUserMessages("user2", 8);
+        counter.setUserDayInterval("user1", 2);
+        counter.setUserDayInterval("user2", 8);
+
+        MessageCounter normalized = counter.normalized(Duration.ofDays(4));
+        Assert.assertEquals(normalized.getUserMessages("user1"), 4);
+        Assert.assertEquals(normalized.getUserMessages("user2"), 4);
     }
 }

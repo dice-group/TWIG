@@ -153,9 +153,9 @@ public class MessageCounter implements Serializable {
 
         userMessageDayIntervalMap.entrySet().forEach(dayIntervalEntry -> {
             String userName = dayIntervalEntry.getKey();
-            double days = (double) dayIntervalEntry.getValue() / (double) normalPeriod.toDays();
+            double factor = (double) normalPeriod.toDays() / (double) dayIntervalEntry.getValue();
 
-            int newMessageCount = (int) Math.round(((double) userMessageCountMap.get(userName) / days));
+            int newMessageCount = (int) Math.round(((double) userMessageCountMap.get(userName) * factor));
             if (newMessageCount > 0) {
                 messageCounter.setUserMessages(userName, newMessageCount);
                 messageCounter.setUserDayInterval(userName, (int) normalPeriod.toDays());
