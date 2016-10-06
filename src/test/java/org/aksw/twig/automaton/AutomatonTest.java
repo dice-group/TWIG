@@ -53,6 +53,10 @@ public class AutomatonTest {
             Model model = modelWrapper.getModel();
             messageCounter.addModel(model);
             MessageCounter normalized = messageCounter.normalized(Duration.ofDays(30));
+            SamplingDiscreteDistribution<Integer> distribution = normalized.getValueDistribution();
+            for (int i = 0; i < 10; i++) {
+                LOGGER.info(distribution.sample());
+            }
         } catch (IOException e) {
             LOGGER.error(e.getMessage(), e);
             Assert.fail();
