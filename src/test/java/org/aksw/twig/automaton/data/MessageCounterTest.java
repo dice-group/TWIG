@@ -15,16 +15,8 @@ public class MessageCounterTest {
         counter.setUserMessages(userName1, 2);
         counter.setUserMessages(userName2, 2);
 
-        counter.getUserMessageCountMap().forEach(entry -> {
-            String key = entry.getKey();
-            if (key.equals(userName1)) {
-                Assert.assertEquals(new Integer(2), entry.getValue());
-            } else if (key.equals(userName2)) {
-                Assert.assertEquals(new Integer(2), entry.getValue());
-            } else {
-                Assert.fail();
-            }
-        });
+        Assert.assertEquals(2, counter.getUserMessages(userName1));
+        Assert.assertEquals(2, counter.getUserMessages(userName2));
 
         Assert.assertEquals(new Integer(2), counter.getMessageCounts().get(1));
     }
