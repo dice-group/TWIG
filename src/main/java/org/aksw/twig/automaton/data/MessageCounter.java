@@ -2,6 +2,7 @@ package org.aksw.twig.automaton.data;
 
 import org.aksw.twig.model.TWIGModelWrapper;
 import org.aksw.twig.statistics.ExponentialLikeDistribution;
+import org.aksw.twig.statistics.SamplingDiscreteDistribution;
 import org.aksw.twig.statistics.SimpleExponentialRegression;
 import org.apache.jena.rdf.model.Model;
 import org.apache.logging.log4j.LogManager;
@@ -13,7 +14,6 @@ import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
 import java.util.*;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 /**
  * Counts messages sent by users. Each users will be mapped to their message count.
@@ -28,14 +28,6 @@ public class MessageCounter implements Serializable {
     private static final long serialVersionUID = 5741136390921853596L;
 
     private Map<String, Integer> userMessageDayIntervalMap = new HashMap<>();
-
-    /**
-     * Returns all users mapped to their number of messages.
-     * @return Stream to user->message count map.
-     */
-    public Stream<Map.Entry<String, Integer>> getUserMessageCountMap() {
-        return userMessageCountMap.entrySet().stream();
-    }
 
     private ArrayList<Integer> messageCounts;
 
@@ -83,7 +75,8 @@ public class MessageCounter implements Serializable {
             }
         });
 
-        userToMessagesMapping.entrySet().forEach(entry -> {
+        Set<Map.Entry<String, Set<String>>> entrySet = userToMessagesMapping.entrySet();
+        for (Map.Entry<String, Set<String>> entry: entrySet) {
             String userName = entry.getKey();
             Set<String> tweets = entry.getValue();
             setUserMessages(userName, tweets.size());
@@ -101,7 +94,7 @@ public class MessageCounter implements Serializable {
                     .orElse(null);
 
             setUserDayInterval(userName, (int) ChronoUnit.DAYS.between(lowest, highest) + 1);
-        });
+        }
     }
 
     /**
@@ -195,14 +188,14 @@ public class MessageCounter implements Serializable {
      * @return {@code this}
      */
     public void merge(MessageCounter counter) {
-        counter.getUserMessageCountMap().forEach(entry -> {
+        counter.userMessageCountMap.entrySet().forEach(entry -> {
             String userName = entry.getKey();
-            Integer messageCount = entry.getValue();
-            if (userMessageCountMap.containsKey(userName)) {
-                userMessageCountMap.put(userName, userMessageCountMap.get(userName) + messageCount);
-            } else {
-                userMessageCountMap.put(userName, messageCount);
-            }
+            userMessageCountMap.put(userName, userMessageCountMap.getOrDefault(userName, 0) + entry.getValue());
+        });
+
+        counter.userMessageDayIntervalMap.entrySet().forEach(entry -> {
+            String userName = entry.getKey();
+            userMessageDayIntervalMap.put(userName, Math.max(userMessageDayIntervalMap.getOrDefault(userName, 0), entry.getValue()));
         });
     }
 }
