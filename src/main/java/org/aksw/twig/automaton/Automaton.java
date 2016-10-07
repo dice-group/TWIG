@@ -3,7 +3,9 @@ package org.aksw.twig.automaton;
 import org.aksw.twig.automaton.data.*;
 import org.aksw.twig.files.FileHandler;
 import org.aksw.twig.model.TWIGModelWrapper;
+import org.aksw.twig.statistics.ExponentialLikeDistribution;
 import org.aksw.twig.statistics.SamplingDiscreteDistribution;
+import org.aksw.twig.statistics.SamplingDiscreteTreeDistribution;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -27,7 +29,7 @@ public class Automaton {
 
     private static final int SECONDS = 60;
 
-    private static final int TWEET_NUMBER_NORMALIZATION = 30;
+    public static final int TWEET_NUMBER_NORMALIZATION_DAYS = 30;
 
     private static final String FILE_NAME = "generated_twig_model";
 
@@ -86,7 +88,7 @@ public class Automaton {
             User user = new User();
             Set<LocalDateTime> timeStamps = new HashSet<>();
 
-            int tweetCount = tweetNumberDistribution.sample();
+            int tweetCount = tweetNumberDistribution.sample() * simulationDays / TWEET_NUMBER_NORMALIZATION_DAYS;
             LOGGER.info("User {} tweets {} times.", user.getNameAsHexString(), tweetCount);
             for (int d = 0; d < tweetCount; d++) {
                 LocalDateTime tweetTime = LocalDateTime.of(startDate.plusDays(r.nextInt(simulationDays)), tweetTimeDistribution.sample().withSecond(r.nextInt(SECONDS)));
@@ -120,9 +122,9 @@ public class Automaton {
     /**
      * Executes {@link #simulate(int, Duration, LocalDate, long)} with following arguments:
      * <li>
-     *     <ul>{@code arg[0]} must state a path to a serialized {@link WordMatrix}</ul>
-     *     <ul>{@code arg[1]} must state a path to a serialized {@link MessageCounter}</ul>
-     *     <ul>{@code arg[2]} must state a path to a serialized {@link MessageCounter}</ul>
+     *     <ul>{@code arg[0]} must state a path to a serialized {@link WordSampler}</ul>
+     *     <ul>{@code arg[1]} must state a path to a serialized {@link ExponentialLikeDistribution}</ul>
+     *     <ul>{@code arg[2]} must state a path to a serialized {@link SamplingDiscreteTreeDistribution<Integer>}</ul>
      *     <ul>{@code arg[3]} must state an integer value for {@code userCount}</ul>
      *     <ul>{@code arg[4]} must state an integer value for {@code simulationTime}</ul>
      *     <ul>{@code arg[5]} must state a date in format {@link DateTimeFormatter#ISO_LOCAL_DATE} as {@code startDate}</ul>
@@ -137,25 +139,25 @@ public class Automaton {
             throw new IllegalArgumentException("Insufficient arguments supplied");
         }
 
-        WordMatrix wordMatrix;
+        WordSampler wordSampler;
         try (ObjectInputStream stream = new ObjectInputStream(new FileInputStream(args[0]))) {
-            wordMatrix = (WordMatrix) stream.readObject();
+            wordSampler = (WordSampler) stream.readObject();
         } catch (IOException | ClassNotFoundException e) {
             LOGGER.error(e.getMessage(), e);
             return;
         }
 
-        MessageCounter messageCounter;
+        ExponentialLikeDistribution messageDistribution;
         try (ObjectInputStream stream = new ObjectInputStream(new FileInputStream(args[1]))) {
-            messageCounter = (MessageCounter) stream.readObject();
+            messageDistribution = (ExponentialLikeDistribution) stream.readObject();
         } catch (IOException | ClassNotFoundException e) {
             LOGGER.error(e.getMessage(), e);
             return;
         }
 
-        TimeCounter timeCounter;
+        SamplingDiscreteTreeDistribution<LocalTime> timeDistribution;
         try (ObjectInputStream stream = new ObjectInputStream(new FileInputStream(args[2]))) {
-            timeCounter = (TimeCounter) stream.readObject();
+            timeDistribution = (SamplingDiscreteTreeDistribution<LocalTime>) stream.readObject();
         } catch (IOException | ClassNotFoundException e) {
             LOGGER.error(e.getMessage(), e);
             return;
@@ -171,7 +173,7 @@ public class Automaton {
             throw new IllegalArgumentException("Supplied file must be a directory");
         }
 
-        Automaton automaton = new Automaton(new WordSampler(wordMatrix), messageCounter.normalized(Duration.ofDays(TWEET_NUMBER_NORMALIZATION)).getValueDistribution(), timeCounter.getValueDistribution(), f);
+        Automaton automaton = new Automaton(wordSampler, messageDistribution, timeDistribution, f);
         automaton.simulate(userCount, Duration.ofDays(days), startDate, seed);
     }
 }

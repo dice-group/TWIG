@@ -1,10 +1,10 @@
 package org.aksw.twig;
 
 import org.aksw.twig.automaton.Automaton;
+import org.aksw.twig.automaton.TmpMainClass;
 import org.aksw.twig.automaton.data.MessageCounterHandler;
 import org.aksw.twig.automaton.data.TimeCounterHandler;
 import org.aksw.twig.automaton.data.WordMatrixHandler;
-import org.aksw.twig.automaton.data.WordSampler;
 import org.aksw.twig.parsing.Twitter7Parser;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -30,8 +30,8 @@ public class Main {
             case "MessageCounterHandler": MessageCounterHandler.main(Arrays.copyOfRange(args, 1, args.length)); break;
             case "WordMatrixHandler": WordMatrixHandler.main(Arrays.copyOfRange(args, 1, args.length)); break;
             case "TimeCounterHandler": TimeCounterHandler.main(Arrays.copyOfRange(args, 1, args.length)); break;
-            case "WordSampler": WordSampler.main(Arrays.copyOfRange(args, 1, args.length)); break;
             case "Automaton": Automaton.main(Arrays.copyOfRange(args, 1, args.length)); break;
+            case "TmpMainClass": TmpMainClass.main(Arrays.copyOfRange(args, 1, args.length)); break;
             default: LOGGER.info("No argument recognized. To get an overview please use the argument --help.");
         }
     }

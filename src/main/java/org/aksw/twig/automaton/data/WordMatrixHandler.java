@@ -16,7 +16,7 @@ import java.util.concurrent.Callable;
  * Creates multiple {@link WordMatrix} objects by parsing files as {@link TWIGModelWrapper} and adding them to the matrix.
  * Parsed objects will then be merged into one result.
  */
-public class WordMatrixHandler extends FileReadingSuspendSupplier<WordMatrix> {
+public class WordMatrixHandler extends FileReadingSuspendSupplier<WordMatrix, WordSampler> {
 
     private static final Logger LOGGER = LogManager.getLogger(WordMatrixHandler.class);
 
@@ -45,8 +45,8 @@ public class WordMatrixHandler extends FileReadingSuspendSupplier<WordMatrix> {
     }
 
     @Override
-    public WordMatrix getMergedResult() {
-        return mergedResult;
+    public WordSampler getMergedResult() {
+        return new WordSampler(mergedResult);
     }
 
     /**
@@ -58,6 +58,6 @@ public class WordMatrixHandler extends FileReadingSuspendSupplier<WordMatrix> {
     public static void main(String[] args) {
         Pair<File, Set<File>> fileArgs = FileHandler.readArgs(args);
         WordMatrixHandler handler = new WordMatrixHandler(fileArgs.getRight());
-        FileReadingSuspendSupplier.start("word_matrix.obj", fileArgs.getLeft(), handler);
+        FileReadingSuspendSupplier.start("word_sampler.obj", fileArgs.getLeft(), handler);
     }
 }

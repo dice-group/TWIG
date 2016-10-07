@@ -2,13 +2,16 @@ package org.aksw.twig.statistics;
 
 import org.aksw.twig.structs.AVLTree;
 
+import java.io.Serializable;
 import java.util.Random;
 
 /**
  * Samples discrete events by iterating through an AVL tree. Therefor sampling is in {@code O(log n)} with {@code n} being the size of the sample space.
  * @param <T> Type of the events to sample.
  */
-public class SamplingDiscreteTreeDistribution<T> implements SamplingDiscreteDistribution<T> {
+public class SamplingDiscreteTreeDistribution<T> implements SamplingDiscreteDistribution<T>, Serializable {
+
+    private static final long serialVersionUID = -1616372537342154522L;
 
     private final Random random = new Random();
 

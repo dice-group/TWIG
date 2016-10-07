@@ -5,16 +5,13 @@ import org.aksw.twig.statistics.SamplingDiscreteTreeDistribution;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.ObjectInputStream;
+import java.io.Serializable;
 import java.util.*;
 
 /**
  * Transfers a word matrix into multiple {@link SamplingDiscreteTreeDistribution} objects in order to be able to supply random words.
  */
-public class WordSampler implements SamplingWordPredecessorSuccessorDistribution {
+public class WordSampler implements SamplingWordPredecessorSuccessorDistribution, Serializable {
 
     private static final Logger LOGGER = LogManager.getLogger(WordSampler.class);
 
@@ -23,6 +20,8 @@ public class WordSampler implements SamplingWordPredecessorSuccessorDistribution
     private static final double DISTRIBUTION_CHANCE_DELTA = 0.0001;
 
     private static final int MAX_CHARS = 140;
+
+    private static final long serialVersionUID = -531197136476439196L;
 
     private Map<String, SamplingDiscreteTreeDistribution<String>> distributionMap = new HashMap<>();
 
@@ -93,8 +92,9 @@ public class WordSampler implements SamplingWordPredecessorSuccessorDistribution
      * @param matrix Matrix to create the sampler of.
      */
     public WordSampler(final WordMatrix matrix) {
-        matrix.getPredecessors().forEach(predecessor -> {
 
+        matrix.truncateTo(TRUNCATE_CHANCE);
+        matrix.getPredecessors().forEach(predecessor -> {
 
             WordChanceMapping[] wordChanceMappings = matrix.getMappings(predecessor).entrySet().stream()
                     .map(entry -> new WordChanceMapping(entry.getKey(), entry.getValue()))
@@ -149,30 +149,6 @@ public class WordSampler implements SamplingWordPredecessorSuccessorDistribution
         @Override
         public String sample(Random r) {
             return "";
-        }
-    }
-
-    /**
-     * Creates a {@link WordSampler} by parsing a {@link WordMatrix} of file stated in {@code arg[0]}.<br>
-     * Then {@code arg[1]} tweets will be sampled and outputted by {@link Logger#info(String)}.
-     * @param args Arguments.
-     */
-    public static void main(String[] args) {
-        if (args.length < 2) {
-            throw new IllegalArgumentException("Insufficient arguments");
-        }
-
-        int messages = Integer.parseInt(args[1]);
-        try (ObjectInputStream objectInputStream = new ObjectInputStream(new FileInputStream(new File(args[0])))) {
-            WordMatrix matrix = (WordMatrix) objectInputStream.readObject();
-            matrix.printInspection();
-            matrix.truncateTo(TRUNCATE_CHANCE);
-            WordSampler sampler = new WordSampler(matrix);
-            for (int i = 0; i < messages; i++) {
-                LOGGER.info("Message: {}", sampler.sample());
-            }
-        } catch (IOException | ClassNotFoundException e) {
-            LOGGER.error(e.getMessage(), e);
         }
     }
 }

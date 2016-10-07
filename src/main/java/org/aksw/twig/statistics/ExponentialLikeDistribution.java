@@ -17,6 +17,8 @@ import java.util.Random;
  */
 public class ExponentialLikeDistribution implements SamplingDiscreteDistribution<Integer>, Serializable {
 
+    private static final long serialVersionUID = 8354169480789628768L;
+
     private Random r = new Random();
 
     private double multiplier;

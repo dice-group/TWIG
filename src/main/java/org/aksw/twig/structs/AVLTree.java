@@ -1,5 +1,6 @@
 package org.aksw.twig.structs;
 
+import java.io.Serializable;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.LinkedList;
@@ -12,7 +13,9 @@ import java.util.List;
  * @see  <a href="https://en.wikipedia.org/wiki/AVL_tree">AVL tree on Wikipedia</a>
  * @param <T> Type of the tree's elements.
  */
-public class AVLTree<T extends Comparable<T>> implements Collection<T> {
+public class AVLTree<T extends Comparable<T>> implements Collection<T>, Serializable {
+
+    private static final long serialVersionUID = -7717074438414645476L;
 
     private AVLNode root;
 

@@ -17,7 +17,7 @@ import java.util.concurrent.Callable;
  * Must be executed by a {@link SelfSuspendingExecutor}.
  * @param <T> Type of parsing results.
  */
-public abstract class FileReadingSuspendSupplier<T extends Serializable> implements SuspendSupplier<T> {
+public abstract class FileReadingSuspendSupplier<T, R extends Serializable> implements SuspendSupplier<T> {
 
     private static final Logger LOGGER = LogManager.getLogger(FileReadingSuspendSupplier.class);
 
@@ -54,7 +54,7 @@ public abstract class FileReadingSuspendSupplier<T extends Serializable> impleme
      * Returns the merged result of the executed callables.
      * @return Merged result.
      */
-    protected abstract T getMergedResult();
+    protected abstract R getMergedResult();
 
     /**
      * Creates a {@link SelfSuspendingExecutor} and executes it.
@@ -64,7 +64,7 @@ public abstract class FileReadingSuspendSupplier<T extends Serializable> impleme
      * @param <T> Type of parsing results.
      * @throws IllegalArgumentException Thrown if {@code outputDirectory} is {@code null}.
      */
-    protected static <T extends Serializable> void start(String fileName, File outputDirectory, FileReadingSuspendSupplier<T> suspendSupplier) throws IllegalArgumentException {
+    protected static <T, R extends Serializable> void start(String fileName, File outputDirectory, FileReadingSuspendSupplier<T, R> suspendSupplier) throws IllegalArgumentException {
 
         if (outputDirectory == null) {
             throw new IllegalArgumentException();

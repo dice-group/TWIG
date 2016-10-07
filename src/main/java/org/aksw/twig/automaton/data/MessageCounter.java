@@ -1,7 +1,6 @@
 package org.aksw.twig.automaton.data;
 
 import org.aksw.twig.model.TWIGModelWrapper;
-import org.aksw.twig.statistics.SamplingDiscreteDistribution;
 import org.aksw.twig.statistics.ExponentialLikeDistribution;
 import org.aksw.twig.statistics.SimpleExponentialRegression;
 import org.apache.jena.rdf.model.Model;
@@ -172,7 +171,7 @@ public class MessageCounter implements Serializable {
      * Otherwise an {@link IllegalStateException} is thrown.
      * @return Distribution.
      */
-    public SamplingDiscreteDistribution<Integer> getValueDistribution() {
+    public ExponentialLikeDistribution getValueDistribution() {
         if (userMessageCountMap.isEmpty()) {
             throw new IllegalStateException("Cannot create a value distribution of an empty MessageCounter.");
         }

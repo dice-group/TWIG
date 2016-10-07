@@ -56,7 +56,7 @@ public class FileReadingSuspendSupplierTest {
         }
     }
 
-    private class SimpleFileReadingSuspendSupplier extends FileReadingSuspendSupplier<Integer> {
+    private class SimpleFileReadingSuspendSupplier extends FileReadingSuspendSupplier<Integer, Integer> {
 
         int mergedResult;
 
