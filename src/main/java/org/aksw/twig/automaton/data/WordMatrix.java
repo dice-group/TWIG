@@ -225,7 +225,30 @@ public class WordMatrix implements Serializable {
      */
     public void truncateTo(final double lowerBoundChance) {
 
-        HashMap<String, MutablePair<Long, Map<String, Long>>> newMatrix = new HashMap<>();
+        Iterator<Map.Entry<String, MutablePair<Long, Map<String, Long>>>> matrixIterator = matrix.entrySet().iterator();
+        while (matrixIterator.hasNext()) {
+            String predecessor = matrixIterator.next().getKey();
+            long lowerBound = Math.round((double) matrix.get(predecessor).getLeft() * lowerBoundChance);
+
+            long newSum = 0;
+            Iterator<Map.Entry<String, Long>> iterator = matrix.get(predecessor).getRight().entrySet().iterator();
+            while (iterator.hasNext()) {
+                Map.Entry<String, Long> successorEntry = iterator.next();
+                if (successorEntry.getValue() < lowerBound) {
+                    iterator.remove();
+                } else {
+                    newSum += successorEntry.getValue();
+                }
+            }
+
+            if (newSum == 0) {
+                matrixIterator.remove();
+            } else {
+                matrix.get(predecessor).setLeft(newSum);
+            }
+        }
+
+        /*HashMap<String, MutablePair<Long, Map<String, Long>>> newMatrix = new HashMap<>();
 
         matrix.entrySet().forEach(entry -> {
 
@@ -244,6 +267,6 @@ public class WordMatrix implements Serializable {
             }
         });
 
-        matrix = newMatrix;
+        matrix = newMatrix;*/
     }
 }
