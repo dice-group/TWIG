@@ -126,37 +126,34 @@ public class MessageCounter implements Serializable {
     }
 
     /**
-     * Returns a new message counter which has all users normalized to given time period. Each user will have it's message count modified by:<br>
+     * Returns a this message counter which has all users normalized to given time period. Each user will have it's message count modified by:<br>
      * {@code count = count / userDayInterval * normalPeriod.toDays();}<br><br>
      * A code example:
      * <pre>
      * {@code MessageCounter counter = new MessageCounter();}
      * {@code counter.setUserMessageCount("user", 10);}
      * {@code counter.setUserDayInterval("user", 5);}
-     * {@code counter = counter.normalized(Duration.ofDays(1);}
+     * {@code counter = counter.normalize(Duration.ofDays(1);}
      * {@code counter.getUserMessages("user"); // will return 2}
      * </pre>
      * @param normalPeriod Time period to normalize to.
-     * @return Normalized message counter.
+     * @return This.
      */
-    public MessageCounter normalized(Duration normalPeriod) {
+    public MessageCounter normalize(Duration normalPeriod) {
 
-        MessageCounter messageCounter = new MessageCounter();
-
-        userMessageDayIntervalMap.entrySet().forEach(dayIntervalEntry -> {
-            String userName = dayIntervalEntry.getKey();
-            double factor = (double) normalPeriod.toDays() / (double) dayIntervalEntry.getValue();
+        userMessageCountMap.keySet().forEach(userName -> {
+            double factor = (double) normalPeriod.toDays() / (double) userMessageDayIntervalMap.get(userName);
 
             int newMessageCount = (int) Math.round(((double) userMessageCountMap.get(userName) * factor));
             if (newMessageCount > 0) {
-                messageCounter.setUserMessages(userName, newMessageCount);
-                messageCounter.setUserDayInterval(userName, (int) normalPeriod.toDays());
+                setUserMessages(userName, newMessageCount);
+                setUserDayInterval(userName, (int) normalPeriod.toDays());
             } else {
                 LOGGER.info("User {} has 0 messages after normalization.", userName);
             }
         });
 
-        return messageCounter;
+        return this;
     }
 
     /**

@@ -29,8 +29,8 @@ public class MessageCounterTest {
         counter.setUserDayInterval("user1", 2);
         counter.setUserDayInterval("user2", 8);
 
-        MessageCounter normalized = counter.normalized(Duration.ofDays(4));
-        Assert.assertEquals(normalized.getUserMessages("user1"), 4);
-        Assert.assertEquals(normalized.getUserMessages("user2"), 4);
+        counter.normalize(Duration.ofDays(4));
+        Assert.assertEquals(counter.getUserMessages("user1"), 4);
+        Assert.assertEquals(counter.getUserMessages("user2"), 4);
     }
 }

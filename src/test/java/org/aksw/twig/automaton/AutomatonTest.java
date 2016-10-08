@@ -36,11 +36,11 @@ public class AutomatonTest {
         }
 
         SamplingDiscreteDistribution<Integer> distribution = messageCounter.getValueDistribution();
-        MessageCounter normalizedMessageCounter = messageCounter.normalized(Duration.ofDays(30));
+        MessageCounter normalizedMessageCounter = messageCounter.normalize(Duration.ofDays(30));
         SamplingDiscreteDistribution<Integer> normalizedDistribution = normalizedMessageCounter.getValueDistribution();
 
         for (int i = 0; i < 10; i++) {
-            LOGGER.info("{}; normalized: {}", distribution.sample(), normalizedDistribution.sample());
+            LOGGER.info("{}; normalize: {}", distribution.sample(), normalizedDistribution.sample());
         }
     }
 
@@ -52,7 +52,7 @@ public class AutomatonTest {
             MessageCounter messageCounter = new MessageCounter();
             Model model = modelWrapper.getModel();
             messageCounter.addModel(model);
-            MessageCounter normalized = messageCounter.normalized(Duration.ofDays(30));
+            MessageCounter normalized = messageCounter.normalize(Duration.ofDays(30));
             SamplingDiscreteDistribution<Integer> distribution = normalized.getValueDistribution();
             for (int i = 0; i < 10; i++) {
                 LOGGER.info(distribution.sample());

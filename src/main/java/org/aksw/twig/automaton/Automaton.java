@@ -27,7 +27,7 @@ public class Automaton {
 
     private static final int SECONDS = 60;
 
-    private static final int TWEET_NUMBER_NORMALIZATION = 30;
+    private static final int TWEET_NUMBER_NORMALIZATION_DAYS = 30;
 
     private static final String FILE_NAME = "generated_twig_model";
 
@@ -86,7 +86,7 @@ public class Automaton {
             User user = new User();
             Set<LocalDateTime> timeStamps = new HashSet<>();
 
-            int tweetCount = tweetNumberDistribution.sample();
+            int tweetCount = tweetNumberDistribution.sample() * simulationDays / TWEET_NUMBER_NORMALIZATION_DAYS;
             LOGGER.info("User {} tweets {} times.", user.getNameAsHexString(), tweetCount);
             for (int d = 0; d < tweetCount; d++) {
                 LocalDateTime tweetTime = LocalDateTime.of(startDate.plusDays(r.nextInt(simulationDays)), tweetTimeDistribution.sample().withSecond(r.nextInt(SECONDS)));
@@ -171,7 +171,7 @@ public class Automaton {
             throw new IllegalArgumentException("Supplied file must be a directory");
         }
 
-        Automaton automaton = new Automaton(new WordSampler(wordMatrix), messageCounter.normalized(Duration.ofDays(TWEET_NUMBER_NORMALIZATION)).getValueDistribution(), timeCounter.getValueDistribution(), f);
+        Automaton automaton = new Automaton(new WordSampler(wordMatrix), messageCounter.normalize(Duration.ofDays(TWEET_NUMBER_NORMALIZATION_DAYS)).getValueDistribution(), timeCounter.getValueDistribution(), f);
         automaton.simulate(userCount, Duration.ofDays(days), startDate, seed);
     }
 }
