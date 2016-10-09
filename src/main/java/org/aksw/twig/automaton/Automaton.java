@@ -137,25 +137,28 @@ public class Automaton {
             throw new IllegalArgumentException("Insufficient arguments supplied");
         }
 
-        WordMatrix wordMatrix;
+        WordSampler wordSampler;
         try (ObjectInputStream stream = new ObjectInputStream(new FileInputStream(args[0]))) {
-            wordMatrix = (WordMatrix) stream.readObject();
+            WordMatrix wordMatrix = (WordMatrix) stream.readObject();
+            wordSampler = new WordSampler(wordMatrix);
         } catch (IOException | ClassNotFoundException e) {
             LOGGER.error(e.getMessage(), e);
             return;
         }
 
-        MessageCounter messageCounter;
+        SamplingDiscreteDistribution<Integer> messageDistribution;
         try (ObjectInputStream stream = new ObjectInputStream(new FileInputStream(args[1]))) {
-            messageCounter = (MessageCounter) stream.readObject();
+            MessageCounter messageCounter = (MessageCounter) stream.readObject();
+            messageDistribution = messageCounter.normalize(Duration.ofDays(TWEET_NUMBER_NORMALIZATION_DAYS)).getValueDistribution();
         } catch (IOException | ClassNotFoundException e) {
             LOGGER.error(e.getMessage(), e);
             return;
         }
 
-        TimeCounter timeCounter;
+        SamplingDiscreteDistribution<LocalTime> timeDistribution;
         try (ObjectInputStream stream = new ObjectInputStream(new FileInputStream(args[2]))) {
-            timeCounter = (TimeCounter) stream.readObject();
+            TimeCounter timeCounter = (TimeCounter) stream.readObject();
+            timeDistribution = timeCounter.getValueDistribution();
         } catch (IOException | ClassNotFoundException e) {
             LOGGER.error(e.getMessage(), e);
             return;
@@ -171,7 +174,7 @@ public class Automaton {
             throw new IllegalArgumentException("Supplied file must be a directory");
         }
 
-        Automaton automaton = new Automaton(new WordSampler(wordMatrix), messageCounter.normalize(Duration.ofDays(TWEET_NUMBER_NORMALIZATION_DAYS)).getValueDistribution(), timeCounter.getValueDistribution(), f);
+        Automaton automaton = new Automaton(wordSampler, messageDistribution, timeDistribution, f);
         automaton.simulate(userCount, Duration.ofDays(days), startDate, seed);
     }
 }
