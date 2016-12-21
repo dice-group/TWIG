@@ -326,22 +326,21 @@ public class Twitter7Parser<T> implements Runnable {
    */
   public static void main(final String[] args) {
 
+    // output directory and files to parse
     final Pair<File, Set<File>> parsedArgs = FileHandler.readArgs(args);
-    final File outputDirectory = parsedArgs.getLeft();
-    final Set<File> filesToParse = parsedArgs.getRight();
 
     // Start parsing
-    final ExecutorService service = Executors.newFixedThreadPool(filesToParse.size());
-    filesToParse.forEach(file -> {
+    final ExecutorService service = Executors.newFixedThreadPool(N_THREADS);
+    for (final File file : parsedArgs.getRight()) {
       try {
         final InputStream inputStream = FileHandler.getDecompressionStreams(file);
-        String fileName = file.getName();
-        final int nameEndIndex = fileName.indexOf('.');
-        fileName = fileName.substring(0, nameEndIndex == -1 ? fileName.length() : nameEndIndex);
-        final Twitter7Parser<TWIGModelWrapper> parser =
-            new Twitter7Parser<>(inputStream, Twitter7BlockParser::new);
-        final Twitter7ResultCollector resultCollector =
-            new Twitter7ResultCollector(fileName, outputDirectory);
+
+        final Twitter7Parser<TWIGModelWrapper> parser;
+        parser = new Twitter7Parser<>(inputStream, Twitter7BlockParser::new);
+        final Twitter7ResultCollector resultCollector;
+        resultCollector =
+            new Twitter7ResultCollector(removeFileExtention(file.getName()), parsedArgs.getLeft());
+
         parser.addFutureCallbacks(resultCollector);
         parser.addParsingFinishedResultListeners(resultCollector::writeModel, () -> {
           try {
@@ -354,7 +353,13 @@ public class Twitter7Parser<T> implements Runnable {
       } catch (final IOException e) {
         LOGGER.error(e.getMessage(), e);
       }
-    });
+    }
     service.shutdown();
+  }
+
+  public static String removeFileExtention(String fileName) {
+    final int nameEndIndex = fileName.indexOf('.');
+    fileName = fileName.substring(0, nameEndIndex == -1 ? fileName.length() : nameEndIndex);
+    return fileName;
   }
 }
