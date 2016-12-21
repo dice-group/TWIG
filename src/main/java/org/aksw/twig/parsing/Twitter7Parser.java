@@ -50,7 +50,7 @@ public class Twitter7Parser<T> implements Runnable {
   private static final Logger LOGGER = LogManager.getLogger(Twitter7Parser.class);
 
   // TODO: parameter
-  private static final int N_THREADS = 4;
+  private static final int N_THREADS = 40;
 
   private final Function<Triple<String, String, String>, Callable<T>> resultParserSupplier;
 
@@ -71,7 +71,7 @@ public class Twitter7Parser<T> implements Runnable {
 
   /**
    * Initializes a file reader to given file and sets class variables.
-   * 
+   *
    * @param inputStream InputStream to read from.
    * @param resultParserSupplier Function to apply a triple - the twitter7 block reading result - to
    *        a callable parser.
@@ -91,7 +91,7 @@ public class Twitter7Parser<T> implements Runnable {
   /**
    * Adds callbacks to the parser. Each {@link FutureCallback} will be added as listener to by the
    * {@code resultParserSupplier} results as explained in {@link Twitter7Parser}.
-   * 
+   *
    * @param callbacks
    */
   public void addFutureCallbacks(final FutureCallback<T>... callbacks) {
@@ -100,7 +100,7 @@ public class Twitter7Parser<T> implements Runnable {
 
   /**
    * Each listener will be called as soon if reading of the input stream has finished.
-   * 
+   *
    * @param listeners Listener to call.
    */
   public void addParsingFinishedResultListeners(final Runnable... listeners) {
@@ -110,7 +110,7 @@ public class Twitter7Parser<T> implements Runnable {
   /**
    * Starts reading of the given file. If you want to read the same file twice you cannot do this
    * with the same object.
-   * 
+   *
    * @throws IllegalStateException Thrown if reader gets started twice.
    */
   @Override
@@ -205,7 +205,7 @@ public class Twitter7Parser<T> implements Runnable {
 
   /**
    * Returns whether the given state is the finishing one.
-   * 
+   *
    * @param state State to check.
    * @return True if parsing can be finished.
    */
@@ -220,7 +220,7 @@ public class Twitter7Parser<T> implements Runnable {
 
   /**
    * Returns the next state.
-   * 
+   *
    * @param oldState Current state to get the next for.
    * @return Next state.
    * @throws IllegalStateException Thrown if {@code oldState} state has no next state.
@@ -241,7 +241,7 @@ public class Twitter7Parser<T> implements Runnable {
   /**
    * Twitter7 data has lines starting with different prefixes. This method returns the line start
    * for given state.
-   * 
+   *
    * @param state State to get prefix for.
    * @return Prefix.
    * @throws IllegalStateException Thrown if {@code state} is finishing state.
@@ -261,7 +261,7 @@ public class Twitter7Parser<T> implements Runnable {
 
   /**
    * Returns consumer to a line. This consumer will set the line to the right triple element.
-   * 
+   *
    * @param state State to get the consumer for.
    * @param triple Triple to store the consumed result in.
    * @return Consumer that stores a line in the triple.
@@ -317,7 +317,7 @@ public class Twitter7Parser<T> implements Runnable {
    * Parses one or more files according to twitter7 format. Arguments must be formatted as stated in
    * {@link FileHandler#readArgs(String[])} but {@code --out=} argument is mandatory. You should not
    * parse files with the same name from different directories as that could mess up the output.
-   * 
+   *
    * @param args One or more arguments as specified above.
    * @see Twitter7Parser
    */
