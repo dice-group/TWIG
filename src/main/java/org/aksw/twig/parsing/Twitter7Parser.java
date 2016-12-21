@@ -39,7 +39,8 @@ public class Twitter7Parser<T> implements Runnable {
 
     private static final Logger LOGGER = LogManager.getLogger(Twitter7Parser.class);
 
-    private static final int N_THREADS = 32;
+    // TODO: parameter
+    private static final int N_THREADS = 4;
 
     private Function<Triple<String, String, String>, Callable<T>> resultParserSupplier;
 
@@ -107,6 +108,8 @@ public class Twitter7Parser<T> implements Runnable {
         for (int i = 0; i < N_THREADS; i++) {
             readTwitter7Block();
         }
+
+        LOGGER.info("Ended parsing file");
     }
 
     /**
@@ -120,7 +123,8 @@ public class Twitter7Parser<T> implements Runnable {
         synchronized (fileReader) {
 
             recursion:
-            while (true) { // mimics recursion iteratively
+            while (true) {
+                LOGGER.debug("mimics recursion iteratively");
                 MutableTriple<String, String, String> triple = new MutableTriple<>();
                 READ_STATE readState = START_STATE;
 
