@@ -300,16 +300,13 @@ public class Twitter7Parser<T> implements Runnable {
 
     // Shutdown threaded execution service
     service.shutdown();
-    /**
-     * <code>
-     while (!service.isTerminated()) {
-       try {
-         Thread.sleep(10);
-       } catch (final InterruptedException e) {
-         LOGGER.error(e.getMessage(), e);
-       }
-     }</code>
-     */
+    while (!service.isTerminated()) {
+      try {
+        Thread.sleep(10);
+      } catch (final InterruptedException e) {
+        LOGGER.error(e.getMessage(), e);
+      }
+    }
 
     parsingFinishedListeners.forEach(Runnable::run);
 
