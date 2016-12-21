@@ -19,10 +19,13 @@ import org.apache.logging.log4j.Logger;
 
 /**
  * Parses a {@link TWIGModelWrapper} from a twitter7 block triple.
- * 
+ *
  * @author Felix Linker
  */
 class Twitter7BlockParser implements Callable<TWIGModelWrapper> {
+
+  // TODO: parameter
+  public static long seed = 1;
 
   private static final Logger LOGGER = LogManager.getLogger(Twitter7BlockParser.class);
 
@@ -41,7 +44,7 @@ class Twitter7BlockParser implements Callable<TWIGModelWrapper> {
 
   /**
    * Getter to parsed timestamp.
-   * 
+   *
    * @return Timestamp.
    */
   LocalDateTime getMessageDateTime() {
@@ -56,7 +59,7 @@ class Twitter7BlockParser implements Callable<TWIGModelWrapper> {
 
   /**
    * Getter to parsed twitter username.
-   * 
+   *
    * @return Twitter username.
    */
   String getTwitterUserName() {
@@ -74,7 +77,7 @@ class Twitter7BlockParser implements Callable<TWIGModelWrapper> {
 
   /**
    * Getter to parsed message content.
-   * 
+   *
    * @return Message content.
    */
   String getMessageContent() {
@@ -83,7 +86,7 @@ class Twitter7BlockParser implements Callable<TWIGModelWrapper> {
 
   /**
    * Creates a new parser for given triple. Triple must contain twitter7 data for one block.
-   * 
+   *
    * @param twitter7Triple Triple to parse.
    */
   Twitter7BlockParser(final Triple<String, String, String> twitter7Triple) {
@@ -128,7 +131,7 @@ class Twitter7BlockParser implements Callable<TWIGModelWrapper> {
     }
 
     final TWIGModelWrapper model = new TWIGModelWrapper();
-    model.addTweet(twitterUserName, messageContent, messageDateTime, mentions);
+    model.addTweet(twitterUserName, messageContent, messageDateTime, mentions, seed);
 
     return model;
   }

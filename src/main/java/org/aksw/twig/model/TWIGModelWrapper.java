@@ -115,14 +115,14 @@ public class TWIGModelWrapper {
 
   /**
    * Adds a tweet to the wrapped {@link Model}.
-   * 
+   *
    * @param accountName Name of the tweeting account.
    * @param tweetContent Content of the tweet.
    * @param tweetTime Time of the tweet.
    * @param mentions All mentioned account names of the tweet.
    */
   public void addTweet(final String accountName, final String tweetContent,
-      final LocalDateTime tweetTime, final Collection<String> mentions) {
+      final LocalDateTime tweetTime, final Collection<String> mentions, final long seed) {
     final Set<String> anonymizedMentions = new HashSet<>();
     String anonymizedTweetContent = tweetContent;
     for (final String mention : mentions) {
@@ -132,23 +132,23 @@ public class TWIGModelWrapper {
     }
 
     addTweetNoAnonymization(anonymizeTwitterAccount(accountName), anonymizedTweetContent, tweetTime,
-        anonymizedMentions);
+        anonymizedMentions, seed);
   }
 
   /**
    * Same as {@link #addTweet(String, String, LocalDateTime, Collection)} but with no username
    * anonymization. Useful for already anonymized data.
-   * 
+   *
    * @param accountName See original documentation.
    * @param tweetContent See original documentation.
    * @param tweetTime See original documentation.
    * @param mentions See original documentation.
    */
   public void addTweetNoAnonymization(final String accountName, final String tweetContent,
-      final LocalDateTime tweetTime, final Collection<String> mentions) {
+      final LocalDateTime tweetTime, final Collection<String> mentions, final long seed) {
     final Resource twitterAccount = getTwitterAccount(accountName);
 
-    final Resource tweet = model.getResource(createTweetIri(accountName, tweetTime))
+    final Resource tweet = model.getResource(createTweetIri(accountName, tweetTime, seed))
         .addProperty(RDF_TYPE, OWL_NAMED_INDIVIDUAL).addProperty(RDF_TYPE, TWEET)
         .addLiteral(TWEET_CONTENT, model.createTypedLiteral(tweetContent))
         .addLiteral(TWEET_TIME, model.createTypedLiteral(tweetTime.format(DATE_TIME_FORMATTER),
@@ -161,7 +161,7 @@ public class TWIGModelWrapper {
 
   /**
    * Gets/creates a resource to a twitter account.
-   * 
+   *
    * @param accountName Name of the twitter account.
    * @return Resource of the twitter account.
    */
@@ -172,7 +172,7 @@ public class TWIGModelWrapper {
 
   /**
    * Replaces a twitter account with a unique but non deterministic twitterUser_X.
-   * 
+   *
    * @param twitterAccountName User account name.
    * @return Anonymized name.
    */
@@ -191,7 +191,7 @@ public class TWIGModelWrapper {
 
   /**
    * Creates the IRI of a twitter account.
-   * 
+   *
    * @param twitterAccountName Name of the account.
    * @return IRI of the twitter account.
    */
@@ -201,20 +201,22 @@ public class TWIGModelWrapper {
 
   /**
    * Creates the IRI of a tweet.
-   * 
+   *
    * @param twitterAccountName Name of the tweeting account.
    * @param messageTime Date and time of the tweet.
    * @return IRI of the tweet.
    */
-  private String createTweetIri(final String twitterAccountName, final LocalDateTime messageTime) {
-    final String returnValue =
-        twitterAccountName.concat("_").concat(messageTime.toString().replaceAll(":", "-"));
+  private String createTweetIri(final String twitterAccountName, final LocalDateTime messageTime,
+      final long seed) {
+    final String returnValue = twitterAccountName//
+        .concat("_").concat(messageTime.toString().replaceAll(":", "-"))//
+        .concat("_").concat(String.valueOf(seed));
     return prefixedIri(returnValue);
   }
 
   /**
    * Prefixes a string with the 'twig:' prefix.
-   * 
+   *
    * @param original String to prefix.
    * @return Prefixed string.
    */
@@ -225,7 +227,7 @@ public class TWIGModelWrapper {
   /**
    * Writes the model into the given writer and deletes the current one. <b>No</b> other methods
    * (such as {@link Writer#flush()}) are invoked at the writer.
-   * 
+   *
    * @param writer Writer to write in.
    */
   public void write(final Writer writer) {
@@ -235,7 +237,7 @@ public class TWIGModelWrapper {
 
   /**
    * Reads a TWIG rdf model from a file.
-   * 
+   *
    * @param file File to read from.
    * @return TWIGModelWrapper
    * @throws IOException IO error.

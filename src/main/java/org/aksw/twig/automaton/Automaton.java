@@ -54,7 +54,7 @@ public class Automaton {
 
   /**
    * Creates a new instance setting class variables.
-   * 
+   *
    * @param samplingWordPredecessorSuccessorDistribution Word predecessor-successor distribution
    *        will sample tweets.
    * @param tweetNumberDistribution Tweet number distribution will sample number of tweets per user.
@@ -82,7 +82,7 @@ public class Automaton {
    * Generates a TWIG model by using distributions specified in constructor
    * {@link #Automaton(SamplingWordPredecessorSuccessorDistribution, SamplingDiscreteDistribution, SamplingDiscreteDistribution, File)}
    * )}.
-   * 
+   *
    * @param userCount Users to simulate.
    * @param simulationTime Period of time to simulate. Duration will be converted to days.
    * @param startDate Starting date of the simulation period.
@@ -123,7 +123,7 @@ public class Automaton {
         final String tweetContent = samplingWordPredecessorSuccessorDistribution.sample();
 
         resultModel.addTweetNoAnonymization(user.getNameAsHexString(), tweetContent, tweetTime,
-            Collections.emptyList());
+            Collections.emptyList(), seed);
       }
 
       if (resultModel.getModel().size() > MODEL_MAX_SIZE) {
@@ -173,7 +173,7 @@ public class Automaton {
    * {@code generated_twig_model_XXX.ttl} will be created with {@code _XXX} being a generic suffix
    * </ul>
    * </li>
-   * 
+   *
    * @param args Arguments as specified above.
    */
   public static void main(final String[] args) {
