@@ -35,12 +35,18 @@ public class TWIGModelWrapper {
     // Prefix mappings
     private static final String FOAF_IRI = "http://xmlns.com/foaf/0.1/";
     private static final String FOAF_PREF = "foaf";
+
     private static final String TWIG_IRI = "http://aksw.org/twig#";
     private static final String TWIG_PREF = "twig";
+
     private static final String OWL_IRI = "http://www.w3.org/2002/07/owl#";
     private static final String OWL_PREF = "owl";
+
     private static final String RDF_IRI = "http://www.w3.org/1999/02/22-rdf-syntax-ns#";
     private static final String RDF_PREF = "rdf";
+
+    private static final String XSD_IRI = "http://www.w3.org/2001/XMLSchema#";
+    private static final String XSD_REF = "xsd";
 
     private static final PrefixMapping PREFIX_MAPPING = PrefixMapping.Factory.create();
     static
@@ -49,6 +55,7 @@ public class TWIGModelWrapper {
         PREFIX_MAPPING.setNsPrefix(TWIG_PREF, TWIG_IRI);
         PREFIX_MAPPING.setNsPrefix(OWL_PREF, OWL_IRI);
         PREFIX_MAPPING.setNsPrefix(RDF_PREF, RDF_IRI);
+        PREFIX_MAPPING.setNsPrefix(XSD_REF, XSD_IRI);
     }
 
     // RDF local names
