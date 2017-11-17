@@ -104,38 +104,44 @@ public class Automaton {
 
     final TWIGModelWrapper resultModel = new TWIGModelWrapper();
 
+    // for each user
     for (int i = 0; i < userCount; i++) {
       final User user = new User();
       final Set<LocalDateTime> timeStamps = new HashSet<>();
 
+      // number of tweet for the user
       final int tweetCount =
           (tweetNumberDistribution.sample() * simulationDays) / TWEET_NUMBER_NORMALIZATION_DAYS;
       LOGGER.info("User {} tweets {} times.", user.getNameAsHexString(), tweetCount);
+
       for (int d = 0; d < tweetCount; d++) {
-        LocalDateTime tweetTime = LocalDateTime.of(startDate.plusDays(r.nextInt(simulationDays)),
-            tweetTimeDistribution.sample().withSecond(r.nextInt(SECONDS)));
-        while (timeStamps.contains(tweetTime)) {
-          tweetTime = LocalDateTime.of(startDate.plusDays(r.nextInt(simulationDays)),
-              tweetTimeDistribution.sample().withSecond(r.nextInt(SECONDS)));
+        // find for each tweet a tweet time
+        LocalDateTime tweetTime = null;
+        while ((tweetTime == null) || timeStamps.contains(tweetTime)) {
+          final LocalDate date = startDate.plusDays(r.nextInt(simulationDays));
+          final LocalTime time = tweetTimeDistribution.sample().withSecond(r.nextInt(SECONDS));
+          tweetTime = LocalDateTime.of(date, time);
         }
         timeStamps.add(tweetTime);
 
+        // create tweet content
         final String tweetContent = samplingWordPredecessorSuccessorDistribution.sample();
 
+        // add all to the model
         resultModel.addTweetNoAnonymization(user.getNameAsHexString(), tweetContent, tweetTime,
             Collections.emptyList(), seed);
       }
 
+      // store created data
       if (resultModel.getModel().size() > MODEL_MAX_SIZE) {
         LOGGER.info("Printing result model");
-        try (FileWriter writer = new FileWriter(resultStoreFileHandler.nextFile())) {
-          resultModel.write(writer);
-        } catch (final IOException e) {
-          LOGGER.error(e.getMessage(), e);
-        }
+        write(resultModel);
       }
     }
+    write(resultModel);
+  }
 
+  private void write(final TWIGModelWrapper resultModel) {
     try (FileWriter writer = new FileWriter(resultStoreFileHandler.nextFile())) {
       resultModel.write(writer);
     } catch (final IOException e) {
@@ -153,7 +159,7 @@ public class Automaton {
    * {@code arg[1]} must state a path to a serialized {@link MessageCounter}
    * </ul>
    * <ul>
-   * {@code arg[2]} must state a path to a serialized {@link MessageCounter}
+   * {@code arg[2]} must state a path to a serialized {@link TimeCounter}
    * </ul>
    * <ul>
    * {@code arg[3]} must state an integer value for {@code userCount}
@@ -182,8 +188,22 @@ public class Automaton {
       throw new IllegalArgumentException("Insufficient arguments supplied");
     }
 
+    // read parameters
+    final String wordmatrixFile = args[0];
+    final String messageCounterFile = args[1];
+    final String timeCounterFile = args[2];
+
+    final int userCount = Integer.parseInt(args[3]);
+    final int days = Integer.parseInt(args[4]);
+    final LocalDate startDate = LocalDate.from(DateTimeFormatter.ISO_LOCAL_DATE.parse(args[5]));
+    final long seed = Long.parseLong(args[6]);
+    final File f = new File(args[7]);
+    if (!f.isDirectory()) {
+      throw new IllegalArgumentException("Supplied file must be a directory");
+    }
+    // load models
     WordSampler wordSampler;
-    try (ObjectInputStream stream = new ObjectInputStream(new FileInputStream(args[0]))) {
+    try (ObjectInputStream stream = new ObjectInputStream(new FileInputStream(wordmatrixFile))) {
       final WordMatrix wordMatrix = (WordMatrix) stream.readObject();
       wordSampler = new WordSampler(wordMatrix);
     } catch (IOException | ClassNotFoundException e) {
@@ -192,7 +212,8 @@ public class Automaton {
     }
 
     SamplingDiscreteDistribution<Integer> messageDistribution;
-    try (ObjectInputStream stream = new ObjectInputStream(new FileInputStream(args[1]))) {
+    try (
+        ObjectInputStream stream = new ObjectInputStream(new FileInputStream(messageCounterFile))) {
       final MessageCounter messageCounter = (MessageCounter) stream.readObject();
       messageDistribution = messageCounter
           .normalize(Duration.ofDays(TWEET_NUMBER_NORMALIZATION_DAYS)).getValueDistribution();
@@ -202,7 +223,7 @@ public class Automaton {
     }
 
     SamplingDiscreteDistribution<LocalTime> timeDistribution;
-    try (ObjectInputStream stream = new ObjectInputStream(new FileInputStream(args[2]))) {
+    try (ObjectInputStream stream = new ObjectInputStream(new FileInputStream(timeCounterFile))) {
       final TimeCounter timeCounter = (TimeCounter) stream.readObject();
       timeDistribution = timeCounter.getValueDistribution();
     } catch (IOException | ClassNotFoundException e) {
@@ -210,18 +231,9 @@ public class Automaton {
       return;
     }
 
-    final int userCount = Integer.parseInt(args[3]);
-    final int days = Integer.parseInt(args[4]);
-    final LocalDate startDate = LocalDate.from(DateTimeFormatter.ISO_LOCAL_DATE.parse(args[5]));
-    final long seed = Long.parseLong(args[6]);
-
-    final File f = new File(args[7]);
-    if (!f.isDirectory()) {
-      throw new IllegalArgumentException("Supplied file must be a directory");
-    }
-
-    final Automaton automaton =
-        new Automaton(wordSampler, messageDistribution, timeDistribution, f);
+    // starts automation
+    final Automaton automaton;
+    automaton = new Automaton(wordSampler, messageDistribution, timeDistribution, f);
     automaton.simulate(userCount, Duration.ofDays(days), startDate, seed);
   }
 }
