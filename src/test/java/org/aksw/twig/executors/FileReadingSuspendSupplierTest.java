@@ -14,74 +14,74 @@ import java.util.stream.Stream;
 
 public class FileReadingSuspendSupplierTest {
 
-    private static final Logger LOGGER = LogManager.getLogger(FileReadingSuspendSupplierTest.class);
+  private static final Logger LOGGER = LogManager.getLogger(FileReadingSuspendSupplierTest.class);
 
-    private final BooleanWrapper assertedHolder = new BooleanWrapper();
+  private final BooleanWrapper assertedHolder = new BooleanWrapper();
 
-    @Test
-    public void test() {
-        ClassLoader classLoader = FileReadingSuspendSupplierTest.class.getClassLoader();
-        File file0, file1;
-        try {
-            file0 = new File(classLoader.getResource("testing/file_0").getPath());
-            file1 = new File(classLoader.getResource("testing/file_1").getPath());
-        } catch (NullPointerException e) {
-            LOGGER.error(e.getMessage(), e);
-            return;
+  @Test
+  public void test() {
+    ClassLoader classLoader = FileReadingSuspendSupplierTest.class.getClassLoader();
+    File file0, file1;
+    try {
+      file0 = new File(classLoader.getResource("testing/file_0").getPath());
+      file1 = new File(classLoader.getResource("testing/file_1").getPath());
+    } catch (NullPointerException e) {
+      LOGGER.error(e.getMessage(), e);
+      return;
+    }
+    List<File> files = Stream.of(file0, file1).collect(Collectors.toList());
+
+    SimpleFileReadingSuspendSupplier suspendSupplier = new SimpleFileReadingSuspendSupplier(files);
+    SelfSuspendingExecutor<Integer> executor = new SelfSuspendingExecutor<>(suspendSupplier);
+    executor.addFinishedEventListeners(() -> {
+      Assert.assertEquals(new Integer(2), suspendSupplier.getMergedResult());
+      synchronized (assertedHolder) {
+        assertedHolder.asserted = true;
+      }
+    });
+    executor.start();
+
+    while (true) {
+      try {
+        Thread.sleep(10);
+      } catch (InterruptedException e) {
+        LOGGER.error(e.getMessage(), e);
+      }
+
+      synchronized (assertedHolder) {
+        if (assertedHolder.asserted) {
+          return;
         }
-        List<File> files = Stream.of(file0, file1).collect(Collectors.toList());
+      }
+    }
+  }
 
-        SimpleFileReadingSuspendSupplier suspendSupplier = new SimpleFileReadingSuspendSupplier(files);
-        SelfSuspendingExecutor<Integer> executor = new SelfSuspendingExecutor<>(suspendSupplier);
-        executor.addFinishedEventListeners(() -> {
-            Assert.assertEquals(new Integer(2), suspendSupplier.getMergedResult());
-            synchronized (assertedHolder) {
-                assertedHolder.asserted = true;
-            }
-        });
-        executor.start();
+  private class SimpleFileReadingSuspendSupplier extends FileReadingSuspendSupplier<Integer> {
 
-        while (true) {
-            try {
-                Thread.sleep(10);
-            } catch (InterruptedException e) {
-                LOGGER.error(e.getMessage(), e);
-            }
+    int mergedResult;
 
-            synchronized (assertedHolder) {
-                if (assertedHolder.asserted) {
-                    return;
-                }
-            }
-        }
+    SimpleFileReadingSuspendSupplier(Collection<File> filesToParse) {
+      super(filesToParse);
     }
 
-    private class SimpleFileReadingSuspendSupplier extends FileReadingSuspendSupplier<Integer> {
-
-        int mergedResult;
-
-        SimpleFileReadingSuspendSupplier(Collection<File> filesToParse) {
-            super(filesToParse);
-        }
-
-        @Override
-        public synchronized void addResult(Integer result) {
-            mergedResult++;
-        }
-
-        @Override
-        protected Callable<Integer> getFileProcessor(File file) {
-            return () -> 0;
-        }
-
-        @Override
-        protected Integer getMergedResult() {
-            return mergedResult;
-        }
+    @Override
+    public synchronized void addResult(Integer result) {
+      mergedResult++;
     }
 
-    private class BooleanWrapper {
-
-        boolean asserted = false;
+    @Override
+    protected Callable<Integer> getFileProcessor(File file) {
+      return () -> 0;
     }
+
+    @Override
+    protected Integer getMergedResult() {
+      return mergedResult;
+    }
+  }
+
+  private class BooleanWrapper {
+
+    boolean asserted = false;
+  }
 }
