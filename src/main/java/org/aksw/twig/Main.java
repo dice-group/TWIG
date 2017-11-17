@@ -16,23 +16,38 @@ import java.util.Arrays;
  */
 public class Main {
 
-    private static final Logger LOGGER = LogManager.getLogger(Main.class);
+  private static final Logger LOGGER = LogManager.getLogger(Main.class);
 
-    public static void main(String[] args) {
-        if (args.length == 0) {
-            LOGGER.error("No arguments given. To get an overview please use the argument --help.");
-            return;
-        }
-
-        switch (args[0]) {
-            case "--help": LOGGER.info("Use 'Twitter7Parser arg0 arg1 ...' to parse twitter data."); break; // TODO: alter help
-            case "Twitter7Parser": Twitter7Parser.main(Arrays.copyOfRange(args, 1, args.length)); break;
-            case "MessageCounterHandler": MessageCounterHandler.main(Arrays.copyOfRange(args, 1, args.length)); break;
-            case "WordMatrixHandler": WordMatrixHandler.main(Arrays.copyOfRange(args, 1, args.length)); break;
-            case "TimeCounterHandler": TimeCounterHandler.main(Arrays.copyOfRange(args, 1, args.length)); break;
-            case "WordSampler": WordSampler.main(Arrays.copyOfRange(args, 1, args.length)); break;
-            case "Automaton": Automaton.main(Arrays.copyOfRange(args, 1, args.length)); break;
-            default: LOGGER.info("No argument recognized. To get an overview please use the argument --help.");
-        }
+  public static void main(String[] args) {
+    if (args.length == 0) {
+      LOGGER.error("No arguments given. To get an overview please use the argument --help.");
+      return;
     }
+
+    switch (args[0]) {
+      case "--help":
+        LOGGER.info("Use 'Twitter7Parser arg0 arg1 ...' to parse twitter data.");
+        break; // TODO: alter help
+      case "Twitter7Parser":
+        Twitter7Parser.main(Arrays.copyOfRange(args, 1, args.length));
+        break;
+      case "MessageCounterHandler":
+        MessageCounterHandler.main(Arrays.copyOfRange(args, 1, args.length));
+        break;
+      case "WordMatrixHandler":
+        WordMatrixHandler.main(Arrays.copyOfRange(args, 1, args.length));
+        break;
+      case "TimeCounterHandler":
+        TimeCounterHandler.main(Arrays.copyOfRange(args, 1, args.length));
+        break;
+      case "WordSampler":
+        WordSampler.main(Arrays.copyOfRange(args, 1, args.length));
+        break;
+      case "Automaton":
+        Automaton.main(Arrays.copyOfRange(args, 1, args.length));
+        break;
+      default:
+        LOGGER.info("No argument recognized. To get an overview please use the argument --help.");
+    }
+  }
 }

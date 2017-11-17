@@ -80,7 +80,7 @@ public class Twitter7Parser<T> implements Runnable {
    */
   public Twitter7Parser(final InputStream inputStream,
       final Function<Triple<String, String, String>, Callable<T>> resultParserSupplier)
-          throws IOException, NullPointerException {
+      throws IOException, NullPointerException {
     if ((resultParserSupplier == null) || (inputStream == null)) {
       throw new NullPointerException();
     }
