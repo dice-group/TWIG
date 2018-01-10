@@ -13,9 +13,11 @@ import java.util.concurrent.Callable;
 import java.util.concurrent.Executor;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
+import org.aksw.twig.Const;
 import org.aksw.twig.files.FileHandler;
 import org.aksw.twig.model.TWIGModelWrapper;
 import org.apache.commons.lang3.tuple.MutableTriple;
@@ -49,13 +51,10 @@ public class Twitter7Parser<T> implements Runnable {
 
   private static final Logger LOGGER = LogManager.getLogger(Twitter7Parser.class);
 
-  // TODO: parameter
-  private static final int N_THREADS = 40;
-
   private final Function<Triple<String, String, String>, Callable<T>> resultParserSupplier;
 
   private final ListeningExecutorService service =
-      MoreExecutors.listeningDecorator(Executors.newFixedThreadPool(N_THREADS));
+      MoreExecutors.listeningDecorator(Executors.newFixedThreadPool(Const.N_THREADS));
 
   private final Executor listenerExecutor = MoreExecutors.directExecutor();
 
@@ -123,7 +122,7 @@ public class Twitter7Parser<T> implements Runnable {
     LOGGER.info("Started parsing file");
 
     // Start the initial threads.
-    for (int i = 0; i < N_THREADS; i++) {
+    for (int i = 0; i < Const.N_THREADS; i++) {
       readTwitter7Block();
     }
 
@@ -144,7 +143,6 @@ public class Twitter7Parser<T> implements Runnable {
         LOGGER.debug("mimics recursion iteratively");
         final MutableTriple<String, String, String> triple = new MutableTriple<>();
         READ_STATE readState = START_STATE;
-
         try {
           while (!readingFinished(readState)) {
 
@@ -184,6 +182,7 @@ public class Twitter7Parser<T> implements Runnable {
         }
 
         final ListenableFuture<T> fut = service.submit(resultParserSupplier.apply(triple));
+
         futureCallbacks.forEach(callback -> Futures.addCallback(fut, callback));
         fut.addListener(threadTerminatedListener, listenerExecutor);
         return;
@@ -298,16 +297,26 @@ public class Twitter7Parser<T> implements Runnable {
       }
     }
 
-    // Shutdown threaded execution service
+    // FIXME: service will not terminate
     service.shutdown();
-    while (!service.isTerminated()) {
+
+    if (!service.isTerminated()) {
       try {
-        Thread.sleep(10);
+        LOGGER.info("Await termination...");
+        service.awaitTermination(1, TimeUnit.MINUTES);
+        service.shutdownNow();
+
+        if (!service.awaitTermination(1, TimeUnit.MINUTES)) {
+          LOGGER.warn("Service could not terminate.");
+        }
+
       } catch (final InterruptedException e) {
-        LOGGER.error(e.getMessage(), e);
+        service.shutdownNow();
+        Thread.currentThread().interrupt();
       }
     }
 
+    LOGGER.info("parsingFinishedListeners ...");
     parsingFinishedListeners.forEach(Runnable::run);
 
     LOGGER.info("Finished parsing file");
@@ -327,7 +336,7 @@ public class Twitter7Parser<T> implements Runnable {
     final Pair<File, Set<File>> parsedArgs = FileHandler.readArgs(args);
 
     // Start parsing
-    final ExecutorService service = Executors.newFixedThreadPool(N_THREADS);
+    final ExecutorService service = Executors.newFixedThreadPool(Const.N_THREADS);
     for (final File file : parsedArgs.getRight()) {
       try {
         final InputStream inputStream = FileHandler.getDecompressionStreams(file);
@@ -352,6 +361,14 @@ public class Twitter7Parser<T> implements Runnable {
       }
     }
     service.shutdown();
+
+    while (!service.isTerminated()) {
+      try {
+        service.awaitTermination(5, TimeUnit.SECONDS);
+      } catch (final InterruptedException e) {
+        LOGGER.error(e.getMessage(), e);
+      }
+    }
   }
 
   public static String removeFileExtention(String fileName) {

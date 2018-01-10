@@ -12,6 +12,7 @@ import java.util.concurrent.Callable;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import org.aksw.twig.Const;
 import org.aksw.twig.model.TWIGModelWrapper;
 import org.apache.commons.lang3.tuple.Triple;
 import org.apache.logging.log4j.LogManager;
@@ -23,9 +24,6 @@ import org.apache.logging.log4j.Logger;
  * @author Felix Linker
  */
 class Twitter7BlockParser implements Callable<TWIGModelWrapper> {
-
-  // TODO: parameter
-  public static long seed = 1;
 
   private static final Logger LOGGER = LogManager.getLogger(Twitter7BlockParser.class);
 
@@ -121,7 +119,6 @@ class Twitter7BlockParser implements Callable<TWIGModelWrapper> {
     } catch (final MalformedURLException e) {
       throw new Twitter7BlockParseException(Twitter7BlockParseException.Error.URL_MALFORMED);
     }
-
     // Parse message content
     messageContent = lineW.trim();
 
@@ -131,8 +128,7 @@ class Twitter7BlockParser implements Callable<TWIGModelWrapper> {
     }
 
     final TWIGModelWrapper model = new TWIGModelWrapper();
-    model.addTweet(twitterUserName, messageContent, messageDateTime, mentions, seed);
-
+    model.addTweet(twitterUserName, messageContent, messageDateTime, mentions, Const.seed);
     return model;
   }
 }

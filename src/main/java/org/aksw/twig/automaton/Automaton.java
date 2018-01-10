@@ -15,6 +15,7 @@ import java.util.HashSet;
 import java.util.Random;
 import java.util.Set;
 
+import org.aksw.twig.Const;
 import org.aksw.twig.automaton.data.MessageCounter;
 import org.aksw.twig.automaton.data.SamplingWordPredecessorSuccessorDistribution;
 import org.aksw.twig.automaton.data.TimeCounter;
@@ -36,13 +37,11 @@ public class Automaton {
 
   private static final int SECONDS = 60;
 
-  private static final int TWEET_NUMBER_NORMALIZATION_DAYS = 30;
+  public static final int TWEET_NUMBER_NORMALIZATION_DAYS = 30;
 
   private static final String FILE_NAME = "generated_twig_model";
 
   private static final String FILE_ENDING = ".ttl";
-
-  private static final int MODEL_MAX_SIZE = 1000000;
 
   private final FileHandler resultStoreFileHandler;
 
@@ -89,7 +88,7 @@ public class Automaton {
    * @param seed Seed for the random number generator.
    * @return TWIG model containing users and tweets.
    */
-  public void simulate(final int userCount, final Duration simulationTime,
+  public TWIGModelWrapper simulate(final int userCount, final Duration simulationTime,
       final LocalDate startDate, final long seed) {
 
     LOGGER.info("Starting simulation with {} users over {} days.", userCount,
@@ -133,12 +132,13 @@ public class Automaton {
       }
 
       // store created data
-      if (resultModel.getModel().size() > MODEL_MAX_SIZE) {
+      if (resultModel.getModel().size() > Const.MODEL_MAX_SIZE) {
         LOGGER.info("Printing result model");
         write(resultModel);
       }
     }
     write(resultModel);
+    return resultModel;
   }
 
   private void write(final TWIGModelWrapper resultModel) {
