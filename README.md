@@ -2,4 +2,4 @@
 TWitter Benchmark Generator
 
 ##
-[documentation] (doc/Readme.md)
+[documentation] [doc/Readme.md]
