@@ -140,7 +140,6 @@ public class Twitter7Parser<T> implements Runnable {
     synchronized (fileReader) {
 
       recursion: while (true) {
-        LOGGER.debug("mimics recursion iteratively");
         final MutableTriple<String, String, String> triple = new MutableTriple<>();
         READ_STATE readState = START_STATE;
         try {
