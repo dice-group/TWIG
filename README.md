@@ -1,5 +1,7 @@
+[1]: ./doc/Readme.md
+
 # TWIG
 TWitter Benchmark Generator
 
 ##
-[documentation] [doc/Readme.md]
+[documentation][1]
