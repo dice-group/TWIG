@@ -1,0 +1,3 @@
+## mimic
+
+run: mimic.sh

@@ -11,91 +11,94 @@ import java.util.stream.Collectors;
 
 public class AVLTreeTest {
 
-    @Test
-    public void readWriteTest() {
-        Integer[] values = new Integer[] { 5, 4, 3, 1, 2 };
-        List<Integer> valuesList = Arrays.asList(values);
-        AVLTree<Integer> tree = new AVLTree<>();
-        tree.addAll(valuesList);
-        Assert.assertFalse(tree.isEmpty());
-        Assert.assertEquals(values.length, tree.size());
-        Assert.assertTrue(tree.containsAll(valuesList));
+  @Test
+  public void readWriteTest() {
+    Integer[] values = new Integer[] {5, 4, 3, 1, 2};
+    List<Integer> valuesList = Arrays.asList(values);
+    AVLTree<Integer> tree = new AVLTree<>();
+    tree.addAll(valuesList);
+    Assert.assertFalse(tree.isEmpty());
+    Assert.assertEquals(values.length, tree.size());
+    Assert.assertTrue(tree.containsAll(valuesList));
 
-        Assert.assertTrue("Tree does not contain 1 (as object)", tree.contains((Object) 1));
-        Assert.assertFalse("Tree does contain 0 (as object)", tree.contains((Object) 0));
-        Assert.assertFalse("Tree does contain 0", tree.contains(0));
+    Assert.assertTrue("Tree does not contain 1 (as object)", tree.contains((Object) 1));
+    Assert.assertFalse("Tree does contain 0 (as object)", tree.contains((Object) 0));
+    Assert.assertFalse("Tree does contain 0", tree.contains(0));
 
-        Assert.assertTrue(tree.remove(4));
-        Assert.assertFalse(tree.contains(4));
+    Assert.assertTrue(tree.remove(4));
+    Assert.assertFalse(tree.contains(4));
 
-        Assert.assertFalse(tree.retainAll(valuesList));
-        List<Integer> retain = new LinkedList<>();
+    Assert.assertFalse(tree.retainAll(valuesList));
+    List<Integer> retain = new LinkedList<>();
 
-        retain.add(1);
-        Assert.assertTrue(tree.retainAll(retain));
-        Assert.assertTrue(tree.containsAll(retain));
+    retain.add(1);
+    Assert.assertTrue(tree.retainAll(retain));
+    Assert.assertTrue(tree.containsAll(retain));
 
-        tree.clear();
-        Assert.assertEquals(0, tree.size());
-        Assert.assertTrue(tree.isEmpty());
+    tree.clear();
+    Assert.assertEquals(0, tree.size());
+    Assert.assertTrue(tree.isEmpty());
+  }
+
+  @Test
+  public void iteratorAndArrayTest() {
+    Integer[] values = new Integer[] {4, 2, 6, 1, 3, 5, 7}; // this order will lead into no
+                                                            // rebalancing
+    AVLTree<Integer> tree = new AVLTree<>();
+    tree.addAll(Arrays.asList(values));
+
+    Integer[] depthSearchOrder = new Integer[] {4, 2, 1, 3, 6, 5, 7}; // this is the expected order
+                                                                      // for depth search
+    Object[] treeArray = tree.toArray();
+    Integer[] integerTreeArray = tree.toArray(new Integer[tree.size()]);
+    Assert.assertEquals(depthSearchOrder.length, treeArray.length);
+    Assert.assertEquals(depthSearchOrder.length, integerTreeArray.length);
+    for (int i = 0; i < depthSearchOrder.length; i++) {
+      Assert.assertEquals(depthSearchOrder[i], treeArray[i]);
+      Assert.assertEquals(depthSearchOrder[i], integerTreeArray[i]);
     }
+  }
 
-    @Test
-    public void iteratorAndArrayTest() {
-        Integer[] values = new Integer[]{ 4, 2, 6, 1, 3, 5, 7 }; // this order will lead into no rebalancing
-        AVLTree<Integer> tree = new AVLTree<>();
-        tree.addAll(Arrays.asList(values));
+  @Test
+  public void equalsTest() {
+    Integer[] values = new Integer[] {5, 4, 3, 1, 2};
+    AVLTree<Integer> tree1 = new AVLTree<>();
+    AVLTree<Integer> tree2 = new AVLTree<>();
+    tree1.addAll(Arrays.asList(values));
+    tree2.addAll(Arrays.asList(values));
 
-        Integer[] depthSearchOrder = new Integer[] { 4, 2, 1, 3, 6, 5, 7 }; // this is the expected order for depth search
-        Object[] treeArray = tree.toArray();
-        Integer[] integerTreeArray = tree.toArray(new Integer[tree.size()]);
-        Assert.assertEquals(depthSearchOrder.length, treeArray.length);
-        Assert.assertEquals(depthSearchOrder.length, integerTreeArray.length);
-        for (int i = 0; i < depthSearchOrder.length; i++) {
-            Assert.assertEquals(depthSearchOrder[i], treeArray[i]);
-            Assert.assertEquals(depthSearchOrder[i], integerTreeArray[i]);
-        }
+    Assert.assertEquals(tree1, tree1);
+    Assert.assertEquals(tree1, tree2);
+    tree2.remove(1);
+    Assert.assertNotEquals(tree1, tree2);
+    Assert.assertNotEquals(tree1, 0);
+    Assert.assertNotEquals(tree1, null);
+  }
+
+  @Test
+  public void findGreaterTest() {
+    Integer[] values = new Integer[] {1, 2, 3, 4, 5, 6};
+    AVLTree<Integer> tree = new AVLTree<>();
+    tree.addAll(Arrays.asList(values));
+
+    Integer min = Arrays.stream(values).min((a, b) -> a.compareTo(b)).orElse(null);
+    Assert.assertNotEquals(null, min);
+    Assert.assertEquals(min, tree.findGreater(min - 1));
+  }
+
+  @Test
+  public void findGreatestTest() {
+    Integer[] values = new Integer[] {0, 1, 2, 3, 4, 5, 6, 7, 9};
+    List<Integer> valuesList = Arrays.stream(values).collect(Collectors.toList());
+
+    for (int i = 0; i < 10; i++) {
+      Collections.shuffle(valuesList);
+
+      AVLTree<Integer> tree = new AVLTree<>();
+      tree.addAll(valuesList);
+
+      Assert.assertEquals(valuesList.stream().max(Integer::compare).orElse(null),
+          tree.getGreatest());
     }
-
-    @Test
-    public void equalsTest() {
-        Integer[] values = new Integer[] { 5, 4, 3, 1, 2 };
-        AVLTree<Integer> tree1 = new AVLTree<>();
-        AVLTree<Integer> tree2 = new AVLTree<>();
-        tree1.addAll(Arrays.asList(values));
-        tree2.addAll(Arrays.asList(values));
-
-        Assert.assertEquals(tree1, tree1);
-        Assert.assertEquals(tree1, tree2);
-        tree2.remove(1);
-        Assert.assertNotEquals(tree1, tree2);
-        Assert.assertNotEquals(tree1, 0);
-        Assert.assertNotEquals(tree1, null);
-    }
-
-    @Test
-    public void findGreaterTest() {
-        Integer[] values = new Integer[] { 1, 2, 3, 4, 5, 6 };
-        AVLTree<Integer> tree = new AVLTree<>();
-        tree.addAll(Arrays.asList(values));
-
-        Integer min = Arrays.stream(values).min((a, b) -> a.compareTo(b)).orElse(null);
-        Assert.assertNotEquals(null, min);
-        Assert.assertEquals(min, tree.findGreater(min - 1));
-    }
-
-    @Test
-    public void findGreatestTest() {
-        Integer[] values = new Integer[] { 0, 1, 2, 3, 4, 5, 6, 7, 9 };
-        List<Integer> valuesList = Arrays.stream(values).collect(Collectors.toList());
-
-        for (int i = 0; i < 10; i++) {
-            Collections.shuffle(valuesList);
-
-            AVLTree<Integer> tree = new AVLTree<>();
-            tree.addAll(valuesList);
-
-            Assert.assertEquals(valuesList.stream().max(Integer::compare).orElse(null), tree.getGreatest());
-        }
-    }
+  }
 }

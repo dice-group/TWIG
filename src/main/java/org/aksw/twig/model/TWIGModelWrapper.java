@@ -50,7 +50,7 @@ public class TWIGModelWrapper {
   private static final String RDF_PREF = "rdf";
 
   private static final String XSD_IRI = "http://www.w3.org/2001/XMLSchema#";
-  private static final String XSD_REF = "xsd";
+  private static final String XSD_PREF = "xsd";
 
   private static final PrefixMapping PREFIX_MAPPING = PrefixMapping.Factory.create();
 
@@ -59,7 +59,7 @@ public class TWIGModelWrapper {
     PREFIX_MAPPING.setNsPrefix(TWIG_PREF, TWIG_IRI);
     PREFIX_MAPPING.setNsPrefix(OWL_PREF, OWL_IRI);
     PREFIX_MAPPING.setNsPrefix(RDF_PREF, RDF_IRI);
-    PREFIX_MAPPING.setNsPrefix(XSD_REF, XSD_IRI);
+    PREFIX_MAPPING.setNsPrefix(XSD_PREF, XSD_IRI);
   }
 
   // RDF local names

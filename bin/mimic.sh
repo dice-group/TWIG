@@ -1,5 +1,5 @@
 #!/bin/bash
-
+cd ..
 # First three arguments are serialized objects resulting from calls in line 6, 8 and 10.
 # 10 -> number of users
 # 14 -> period to simulate in days
