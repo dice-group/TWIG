@@ -177,7 +177,7 @@ public class Twitter7Parser<T> implements Runnable {
             }
           }
         } catch (final IOException e) {
-          LOGGER.error(e.getMessage());
+          LOGGER.error(e.getLocalizedMessage(), e);
           continue; // "recursive" call
         }
 
@@ -297,19 +297,17 @@ public class Twitter7Parser<T> implements Runnable {
       }
     }
 
-    // FIXME: service will not terminate
     service.shutdown();
 
     if (!service.isTerminated()) {
       try {
         LOGGER.info("Await termination...");
-        service.awaitTermination(1, TimeUnit.MINUTES);
+        service.awaitTermination(15, TimeUnit.SECONDS);
         service.shutdownNow();
 
         if (!service.awaitTermination(1, TimeUnit.MINUTES)) {
           LOGGER.warn("Service could not terminate.");
         }
-
       } catch (final InterruptedException e) {
         service.shutdownNow();
         Thread.currentThread().interrupt();
@@ -374,13 +372,6 @@ public class Twitter7Parser<T> implements Runnable {
       } catch (final InterruptedException e) {
         LOGGER.error(e.getMessage(), e);
       }
-    }
-    try {
-      if (inputStream != null) {
-        inputStream.close();
-      }
-    } catch (final IOException e) {
-      LOGGER.error(e.getMessage(), e);
     }
   }
 
