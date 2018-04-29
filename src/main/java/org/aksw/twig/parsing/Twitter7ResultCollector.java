@@ -51,7 +51,7 @@ class Twitter7ResultCollector implements FutureCallback<TWIGModelWrapper> {
 
   @Override
   public void onFailure(final Throwable t) {
-    LOGGER.error(t.getMessage(), t);
+    LOGGER.warn(t.getMessage());
   }
 
   /**

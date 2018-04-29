@@ -15,23 +15,23 @@ public class SimpleExponentialRegression {
 
   /**
    * Adds data to the data set.
-   * 
+   *
    * @param x x-axis value.
    * @param y y-axis value.
    */
-  public void addData(double x, double y) {
+  public void addData(final double x, final double y) {
     linearRegression.addData(x, Math.log(y));
   }
 
   /**
    * Adds multiple entries to the data set. Added values will be:
    * {@code addData(data[0][0], data[0][1])}, {@code addData(data[1][0], data[1][1])} and so on.
-   * 
+   *
    * @param data Data to add.
    * @throws ModelSpecificationException Exception on malformed data.
    */
-  public void addData(double[][] data) throws ModelSpecificationException {
-    double[][] logarithmized = new double[data.length][];
+  public void addData(final double[][] data) throws ModelSpecificationException {
+    final double[][] logarithmized = new double[data.length][];
     for (int i = 0; i < data.length; i++) {
       logarithmized[i] = new double[data[i].length];
       logarithmized[i][0] = data[i][0];
@@ -40,27 +40,27 @@ public class SimpleExponentialRegression {
       }
     }
 
-    this.linearRegression.addData(logarithmized);
+    linearRegression.addData(logarithmized);
   }
 
   /**
    * Returns the alpha value for the result of the exponential regression:
    * {@code f(x) = alpha * e^(beta * x)}.
-   * 
+   *
    * @return Alpha value of the exponential regression result.
    */
   public double getAlpha() {
-    return Math.exp(this.linearRegression.getIntercept());
+    return Math.exp(linearRegression.getIntercept());
   }
 
   /**
    * Returns the beta value for the result of the exponential resgression:
    * {@code f(x) = alpha * e^(beta * x)}.
-   * 
+   *
    * @return Beta value of te exponential regression result.
    */
   public double getBeta() {
-    return this.linearRegression.getSlope();
+    return linearRegression.getSlope();
   }
 
   // TODO: add error calculation

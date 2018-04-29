@@ -2,10 +2,12 @@ package org.aksw.twig.parsing;
 
 /**
  * Exception thrown by {@link Twitter7BlockParser} upon malformed data.
- * 
+ *
  * @author Felix Linker
  */
 class Twitter7BlockParseException extends Exception {
+
+  private static final long serialVersionUID = -8527029001231285333L;
 
   enum Error {
     DATETIME_MALFORMED, NO_TWITTER_ACCOUNT, NO_TWITTER_LINK, URL_MALFORMED
@@ -22,14 +24,14 @@ class Twitter7BlockParseException extends Exception {
 
   /**
    * Creates a new exception with error type.
-   * 
+   *
    * @param error Error type.
    */
-  Twitter7BlockParseException(Error error) {
+  Twitter7BlockParseException(final Error error) {
     super(getErrorMessage(error));
   }
 
-  private static String getErrorMessage(Error error) {
+  private static String getErrorMessage(final Error error) {
     switch (error) {
       case DATETIME_MALFORMED:
         return ERROR_MSG_DATETIME_MALFORMED;

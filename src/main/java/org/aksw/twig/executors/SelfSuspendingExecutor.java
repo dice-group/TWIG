@@ -7,6 +7,7 @@ import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
+import org.aksw.twig.Const;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -18,14 +19,14 @@ import org.apache.logging.log4j.Logger;
  * there are available threads. When there are no free threads available the executor will wait
  * until there are. This is especially useful if queued tasks on normal executors consume a lot of
  * RAM or task creation is much more faster than task processing.
- * 
+ *
  * @param <T> Type of the results provided by the {@link Callable} objects.
  */
 public class SelfSuspendingExecutor<T> {
 
   private static final Logger LOGGER = LogManager.getLogger(SelfSuspendingExecutor.class);
 
-  private int nThreads = 32;
+  private int nThreads = Const.N_THREADS_SELFSUSPENDINGEXECUTOR;
 
   private final SuspendSupplier<T> suspendSupplier;
 
@@ -45,7 +46,7 @@ public class SelfSuspendingExecutor<T> {
 
   /**
    * Creates a new instance setting class variables.
-   * 
+   *
    * @param suspendSupplier Supplier for new callables.
    */
   public SelfSuspendingExecutor(final SuspendSupplier<T> suspendSupplier) {
@@ -56,7 +57,7 @@ public class SelfSuspendingExecutor<T> {
 
   /**
    * Creates a new instance setting class variables.
-   * 
+   *
    * @param suspendSupplier Supplier for new callables.
    * @param nThreads Number of threads to work on callables.
    */
@@ -68,7 +69,7 @@ public class SelfSuspendingExecutor<T> {
   /**
    * Adds finished listeners to the executor. Listeners will be executed once all callables have
    * been executed. If every callable has already been executed listeners will be run immediately.
-   * 
+   *
    * @param listeners Listeners to execute.
    */
   public void addFinishedEventListeners(final Runnable... listeners) {
@@ -140,7 +141,7 @@ public class SelfSuspendingExecutor<T> {
 
   /**
    * Returns whether every callable has been executed.
-   * 
+   *
    * @return True iff every callable has been executed.
    */
   public boolean isFinished() {
@@ -151,7 +152,7 @@ public class SelfSuspendingExecutor<T> {
 
   /**
    * Executes a callable.
-   * 
+   *
    * @param callable Callable to execute.
    */
   private void runCallable(final Callable<T> callable) {

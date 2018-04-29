@@ -46,6 +46,9 @@ import com.google.common.util.concurrent.MoreExecutors;
  * @param <T> Data type that will be returned by threaded parsers.
  *
  * @author Felix Linker
+ * @author Ren&eacute; Speck <speck@informatik.uni-leipzig.de>
+ *
+ * @param <T>
  */
 public class Twitter7Parser<T> implements Runnable {
 
@@ -53,8 +56,8 @@ public class Twitter7Parser<T> implements Runnable {
 
   private final Function<Triple<String, String, String>, Callable<T>> resultParserSupplier;
 
-  private final ListeningExecutorService service =
-      MoreExecutors.listeningDecorator(Executors.newFixedThreadPool(Const.N_THREADS));
+  private final ListeningExecutorService service = MoreExecutors
+      .listeningDecorator(Executors.newFixedThreadPool(Const.N_THREADS_TWITTER7PARSER));
 
   private final Executor listenerExecutor = MoreExecutors.directExecutor();
 
@@ -122,7 +125,7 @@ public class Twitter7Parser<T> implements Runnable {
     LOGGER.info("Started parsing file");
 
     // Start the initial threads.
-    for (int i = 0; i < Const.N_THREADS; i++) {
+    for (int i = 0; i < Const.N_THREADS_TWITTER7PARSER; i++) {
       readTwitter7Block();
     }
 
@@ -160,9 +163,7 @@ public class Twitter7Parser<T> implements Runnable {
               triplePutLine(readState, triple).accept(line.substring(linePrefix.length()));
               readState = nextState(readState);
             } else {
-
               LOGGER.error("Encountered malformed block in twitter7 data.");
-
               // Skip non-empty lines
               while (((line = fileReader.readLine()) != null) && !line.isEmpty()) {
                 ;
@@ -176,7 +177,7 @@ public class Twitter7Parser<T> implements Runnable {
             }
           }
         } catch (final IOException e) {
-          LOGGER.error(e.getMessage(), e);
+          LOGGER.error(e.getMessage());
           continue; // "recursive" call
         }
 
@@ -331,28 +332,34 @@ public class Twitter7Parser<T> implements Runnable {
    */
   public static void main(final String[] args) {
 
+    LOGGER.info("Twitter7Parser main");
+
     // output directory and files to parse
     final Pair<File, Set<File>> parsedArgs = FileHandler.readArgs(args);
 
-    // Start parsing
-    final ExecutorService service = Executors.newFixedThreadPool(Const.N_THREADS);
-    for (final File file : parsedArgs.getRight()) {
-      try {
-        final InputStream inputStream = FileHandler.getDecompressionStreams(file);
+    LOGGER.info(parsedArgs);
 
+    // Start parsing
+    final ExecutorService service = Executors.//
+        newFixedThreadPool(Const.N_THREADS_TWITTER7PARSER_MAIN);
+
+    InputStream inputStream = null;
+    for (final File file : parsedArgs.getRight()) {
+      LOGGER.info("file: " + file.getName().toString());
+
+      try {
+        LOGGER.info("Decompression ... ");
+        inputStream = FileHandler.getDecompressionStreams(file);
+
+        LOGGER.info("Parsing ... ");
         final Twitter7Parser<TWIGModelWrapper> parser;
         parser = new Twitter7Parser<>(inputStream, Twitter7BlockParser::new);
-        final Twitter7ResultCollector resultCollector;
-        resultCollector =
+        final Twitter7ResultCollector resultCollector =
             new Twitter7ResultCollector(removeFileExtention(file.getName()), parsedArgs.getLeft());
 
         parser.addFutureCallbacks(resultCollector);
         parser.addParsingFinishedResultListeners(resultCollector::writeModel, () -> {
-          try {
-            inputStream.close();
-          } catch (final IOException e) {
-            LOGGER.error(e.getMessage(), e);
-          }
+
         });
         service.execute(parser);
       } catch (final IOException e) {
@@ -367,6 +374,13 @@ public class Twitter7Parser<T> implements Runnable {
       } catch (final InterruptedException e) {
         LOGGER.error(e.getMessage(), e);
       }
+    }
+    try {
+      if (inputStream != null) {
+        inputStream.close();
+      }
+    } catch (final IOException e) {
+      LOGGER.error(e.getMessage(), e);
     }
   }
 

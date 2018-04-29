@@ -1,11 +1,59 @@
 package org.aksw.twig;
 
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Paths;
+import java.util.List;
+
+import org.aksw.twig.automaton.data.WordMatrix;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.json.JSONObject;
+
+import com.google.common.io.Files;
+
 public class Const {
 
-  public static final int N_THREADS = 1;
+  private static final Logger LOGGER = LogManager.getLogger(WordMatrix.class);
+  static {
+    load("config/config.json");
+  }
 
-  public static final long seed = 1;
+  // how many twitter blocks we use at the same time
+  public static int N_THREADS_TWITTER7PARSER;
+
+  // How many Twitter7Parser threads we use, each Twitter7Parser has one file
+  public static int N_THREADS_TWITTER7PARSER_MAIN;
+
+  //
+  public static int N_THREADS_SELFSUSPENDINGEXECUTOR;
+
+  // seed for random generator
+  public static long seed;
 
   // number of statements in model
-  public static final int MODEL_MAX_SIZE = 10000000;
+  public static int MODEL_MAX_SIZE;
+
+  /**
+   * Loads the config file and inits the constants.
+   */
+  public static void load(final String configFile) {
+
+    try {
+      final List<String> lines =
+          Files.readLines(Paths.get(configFile).toFile(), StandardCharsets.UTF_8);
+      final String cfg = String.join("", lines);
+
+      final JSONObject o = new JSONObject(cfg);
+
+      N_THREADS_TWITTER7PARSER = o.getInt("twitterBlockThreads");
+      N_THREADS_TWITTER7PARSER_MAIN = o.getInt("twitter7ParserThreads");
+      N_THREADS_SELFSUSPENDINGEXECUTOR = o.getInt("selfsuspendingexecutor");
+      seed = o.getInt("seed");
+      MODEL_MAX_SIZE = o.getInt("modelSize");
+
+    } catch (final IOException e) {
+      LOGGER.error(e.getLocalizedMessage());
+    }
+  }
 }

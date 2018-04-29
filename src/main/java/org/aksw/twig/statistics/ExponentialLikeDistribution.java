@@ -1,9 +1,9 @@
 package org.aksw.twig.statistics;
 
-import org.apache.commons.math3.exception.NumberIsTooLargeException;
-
 import java.io.Serializable;
 import java.util.Random;
+
+import org.apache.commons.math3.exception.NumberIsTooLargeException;
 
 /**
  * This class implements a discrete distribution using an exponential function for calculating
@@ -20,56 +20,58 @@ import java.util.Random;
 public class ExponentialLikeDistribution
     implements SamplingDiscreteDistribution<Integer>, Serializable {
 
-  private Random r = new Random();
+  private static final long serialVersionUID = -2178614327372507943L;
 
-  private double multiplier;
+  private final Random r = new Random();
 
-  private double lambda;
+  private final double multiplier;
+
+  private final double lambda;
 
   /**
    * Creates a new exponential like distribution with given lambda.
-   * 
+   *
    * @param lambdaArg Characteristic variable to the distribution. Must be negative.
    */
-  public ExponentialLikeDistribution(double lambdaArg) {
+  public ExponentialLikeDistribution(final double lambdaArg) {
     if (lambdaArg >= 0) {
       throw new IllegalArgumentException("lambdaArg must be < 0");
     }
 
     lambda = lambdaArg;
-    double expLambda = Math.exp(lambda);
+    final double expLambda = Math.exp(lambda);
     multiplier = (1d - expLambda);
   }
 
   /**
    * Returns the probability {@code P(X = x)}.
-   * 
+   *
    * @param x Event to get the probability for.
    * @return Probability {@code P(X = x)}.
    */
-  double probability(int x) {
+  double probability(final int x) {
     return multiplier * Math.exp(lambda * x);
   }
 
   /**
    * Returns the probability of {@code P(X <= x)}.
-   * 
+   *
    * @param x Upper bound of events to get the accumulated probability for.
    * @return Probability {@code P(X <= x)}.
    */
-  double cumulativeProbability(int x) {
+  double cumulativeProbability(final int x) {
     return 1 - Math.exp(lambda * (x + 1));
   }
 
   /**
    * Returns the probability of {@code P(x0 <= X <= x1)}.
-   * 
+   *
    * @param x0 Lower bound of events to get the accumulated probability for.
    * @param x1 Upper bound of events to get the accumulated probability for.
    * @return Probability of {@code P(x0 <= X <= x1)}.
    * @throws NumberIsTooLargeException Thrown iff {@code x0 > x1}.
    */
-  double cumulativeProbability(int x0, int x1) throws NumberIsTooLargeException {
+  double cumulativeProbability(final int x0, final int x1) throws NumberIsTooLargeException {
     if (x0 > x1) {
       throw new NumberIsTooLargeException(x0, x1, true);
     }
@@ -82,7 +84,7 @@ public class ExponentialLikeDistribution
   }
 
   @Override
-  public void reseedRandomGenerator(long seed) {
+  public void reseedRandomGenerator(final long seed) {
     r.setSeed(seed);
   }
 
@@ -92,19 +94,19 @@ public class ExponentialLikeDistribution
   }
 
   @Override
-  public Integer sample(Random randomSource) {
+  public Integer sample(final Random randomSource) {
     int lowerK = 0;
     int upperK = Integer.MAX_VALUE - 1;
     int pivot = upperK / 2;
 
     while (true) {
-      if (randomSource.nextDouble() < cumulativeProbability(lowerK - 1, pivot)
-          / cumulativeProbability(lowerK - 1, upperK)) {
+      if (randomSource.nextDouble() < (cumulativeProbability(lowerK - 1, pivot)
+          / cumulativeProbability(lowerK - 1, upperK))) {
         upperK = pivot;
       } else {
         lowerK = pivot + 1;
       }
-      pivot = lowerK + (upperK - lowerK) / 2;
+      pivot = lowerK + ((upperK - lowerK) / 2);
 
       if (lowerK >= upperK) {
         return upperK;
@@ -115,11 +117,11 @@ public class ExponentialLikeDistribution
   /**
    * Creates an exponential like distribution by taking the given exponential regression as
    * frequency distribution.
-   * 
+   *
    * @param regression Frequency distribution.
    * @return Exponential like distribution.
    */
-  public static ExponentialLikeDistribution of(SimpleExponentialRegression regression) {
+  public static ExponentialLikeDistribution of(final SimpleExponentialRegression regression) {
     if (regression.getBeta() >= 0) {
       throw new IllegalArgumentException("The regression's beta must be < 0.");
     }

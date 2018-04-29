@@ -1,0 +1,7 @@
+{
+	"twitterBlockThreads": 4,
+	"twitter7ParserThreads": 1,
+	"selfsuspendingexecutor": 4,
+    "seed" :1,
+	"modelSize": 10000000
+}

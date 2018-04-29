@@ -12,7 +12,7 @@ import java.util.List;
  * Note that in this implementation only {@link #contains(Comparable)}, {@link #remove(Comparable)}
  * are guaranteed to run in {@code O(log n)} whereas {@link #contains(Object)},
  * {@link #remove(Object)} will run in {@code O(n)}.
- * 
+ *
  * @see <a href="https://en.wikipedia.org/wiki/AVL_tree">AVL tree on Wikipedia</a>
  * @param <T> Type of the tree's elements.
  */
@@ -27,11 +27,11 @@ public class AVLTree<T extends Comparable<T>> implements Collection<T> {
    * <br>
    * More formal: Returned value is the minimum by {@link Comparable#compareTo(Object)} comparison
    * of the set: {@code { x in tree | x.compareTo(toCompare) > 0 }}
-   * 
+   *
    * @param toCompare Element to compare by.
    * @return Minimal greater element.
    */
-  public T findGreater(T toCompare) {
+  public T findGreater(final T toCompare) {
     if (root == null) {
       return null;
     }
@@ -43,7 +43,7 @@ public class AVLTree<T extends Comparable<T>> implements Collection<T> {
         return best == null ? root.val : best.val;
       }
 
-      int comparison = current.val.compareTo(toCompare);
+      final int comparison = current.val.compareTo(toCompare);
       if (comparison == 0) {
         current = current.gtr;
       } else if (comparison > 0) {
@@ -57,7 +57,7 @@ public class AVLTree<T extends Comparable<T>> implements Collection<T> {
 
   /**
    * Returns the greatest element in the tree or {@code null} if the tree is empty.
-   * 
+   *
    * @return Greatest element in the tree.
    */
   public T getGreatest() {
@@ -91,17 +91,17 @@ public class AVLTree<T extends Comparable<T>> implements Collection<T> {
    * Same as {@link #contains(Object)} but is guaranteed to run in {@code O(log n)} with {@code n}
    * being amount of values in this tree. The default implementation of {@link #contains(Object)}
    * will run in {@code O(n)}.
-   * 
+   *
    * @param value Value to check presence of.
    * @return {@code true} if and only if value is present in the tree.
    */
   public boolean contains(final T value) {
-    if (root == null || value == null) {
+    if ((root == null) || (value == null)) {
       return false;
     }
 
-    AVLNode node = root.traverse(value, true);
-    return node != null && node.val.equals(value);
+    final AVLNode node = root.traverse(value, true);
+    return (node != null) && node.val.equals(value);
   }
 
   @Override
@@ -110,7 +110,7 @@ public class AVLTree<T extends Comparable<T>> implements Collection<T> {
       return false;
     }
 
-    Iterator<T> iterator = iterator();
+    final Iterator<T> iterator = iterator();
     while (iterator.hasNext()) {
       if (iterator.next().equals(o)) {
         return true;
@@ -124,7 +124,7 @@ public class AVLTree<T extends Comparable<T>> implements Collection<T> {
    * Returns an iterator over all elements of the AVL tree. Iteration will be executed by
    * depth-first search. Iterator is not safe for concurrent modification and will behave undefined
    * after collection altering.
-   * 
+   *
    * @see <a href="https://en.wikipedia.org/wiki/Depth-first_search">Depth-first search on
    *      Wikipedia</a>
    * @return Iterator over all elements of the AVL tree.
@@ -136,8 +136,8 @@ public class AVLTree<T extends Comparable<T>> implements Collection<T> {
 
   @Override
   public Object[] toArray() {
-    Iterator<T> iterator = iterator();
-    Object[] array = new Object[size()];
+    final Iterator<T> iterator = iterator();
+    final Object[] array = new Object[size()];
     int i = 0;
     while (iterator.hasNext()) {
       array[i++] = iterator.next();
@@ -152,8 +152,8 @@ public class AVLTree<T extends Comparable<T>> implements Collection<T> {
       return (V[]) toArray();
     }
 
-    Iterator<T> iterator = iterator();
-    Object[] result = a;
+    final Iterator<T> iterator = iterator();
+    final Object[] result = a;
     int i = 0;
     while (iterator.hasNext()) {
       result[i++] = iterator.next();
@@ -188,12 +188,12 @@ public class AVLTree<T extends Comparable<T>> implements Collection<T> {
    * Same as {@link #remove(Object)} but is guaranteed to run in {@code O(log n)} with {@code n}
    * being amount of values in this tree. The default implementation of {@link #remove(Object)} will
    * run in {@code O(n)}.
-   * 
+   *
    * @param t Value to remove.
    * @return {@code true} if and only if value is present in the tree.
    */
   public boolean remove(final T t) {
-    if (root == null || t == null) {
+    if ((root == null) || (t == null)) {
       return false;
     }
 
@@ -203,7 +203,7 @@ public class AVLTree<T extends Comparable<T>> implements Collection<T> {
       return true;
     }
 
-    AVLNode toRemove = root.traverse(t, true);
+    final AVLNode toRemove = root.traverse(t, true);
     if (toRemove.val.equals(t)) {
       toRemove.parent.remove(toRemove);
       root = root.root();
@@ -220,9 +220,9 @@ public class AVLTree<T extends Comparable<T>> implements Collection<T> {
       return false;
     }
 
-    AVLIterator iterator = new AVLIterator();
+    final AVLIterator iterator = new AVLIterator();
     while (iterator.hasNext()) {
-      AVLNode node = iterator.nextNode();
+      final AVLNode node = iterator.nextNode();
       if (node.val.equals(o)) {
         node.parent.remove(node);
         root = root.root();
@@ -242,7 +242,7 @@ public class AVLTree<T extends Comparable<T>> implements Collection<T> {
   @Override
   public boolean addAll(final Collection<? extends T> c) {
     boolean changed = false;
-    for (T element : c) {
+    for (final T element : c) {
       changed |= add(element);
     }
 
@@ -252,7 +252,7 @@ public class AVLTree<T extends Comparable<T>> implements Collection<T> {
   @Override
   public boolean removeAll(final Collection<?> c) {
     boolean changed = false;
-    for (Object element : c) {
+    for (final Object element : c) {
       changed |= remove(element);
     }
     return changed;
@@ -260,10 +260,10 @@ public class AVLTree<T extends Comparable<T>> implements Collection<T> {
 
   @Override
   public boolean retainAll(final Collection<?> c) {
-    List<T> toRemove = new LinkedList<>();
-    Iterator<T> iterator = new AVLIterator();
+    final List<T> toRemove = new LinkedList<>();
+    final Iterator<T> iterator = new AVLIterator();
     while (iterator.hasNext()) {
-      T next = iterator.next();
+      final T next = iterator.next();
       if (!c.contains(next)) {
         toRemove.add(next);
       }
@@ -280,7 +280,7 @@ public class AVLTree<T extends Comparable<T>> implements Collection<T> {
     size = 0;
   }
 
-  private AVLNode merge(AVLNode tree1, AVLNode tree2) {
+  private AVLNode merge(final AVLNode tree1, final AVLNode tree2) {
     if (tree1 != null) {
       tree1.parent = null;
     }
@@ -302,7 +302,7 @@ public class AVLTree<T extends Comparable<T>> implements Collection<T> {
   }
 
   @Override
-  public boolean equals(Object obj) {
+  public boolean equals(final Object obj) {
     if (obj == null) {
       return false;
     }
@@ -315,8 +315,8 @@ public class AVLTree<T extends Comparable<T>> implements Collection<T> {
       return false;
     }
 
-    Iterator iterator = ((AVLTree) obj).iterator();
-    Iterator<T> thisIterator = iterator();
+    final Iterator iterator = ((AVLTree) obj).iterator();
+    final Iterator<T> thisIterator = iterator();
     while (iterator.hasNext()) {
       if (!thisIterator.hasNext()) {
         return false;
@@ -335,7 +335,7 @@ public class AVLTree<T extends Comparable<T>> implements Collection<T> {
    */
   private class AVLNode {
 
-    private T val;
+    private final T val;
 
     private AVLNode parent;
 
@@ -355,7 +355,7 @@ public class AVLTree<T extends Comparable<T>> implements Collection<T> {
     /**
      * Traverses the AVL tree looking for {@code toFind.val}. Further information at
      * {@link #traverse(Comparable, boolean)}.
-     * 
+     *
      * @param toFind Element to look for.
      * @param lookup Traverse parameter.
      * @return Search result.
@@ -368,7 +368,7 @@ public class AVLTree<T extends Comparable<T>> implements Collection<T> {
      * Traverses the AVL tree looking for {@code toFind}. If {@code lookup} is {@code true} a search
      * for an AVL node containing {@code toFind} will be performed. If {@code lookup} is
      * {@code false} traversal will search for a leaf to insert {@code toFind}.
-     * 
+     *
      * @param toFind Value to look for.
      * @param lookup Traverse parameter.
      * @return Search result.
@@ -379,7 +379,7 @@ public class AVLTree<T extends Comparable<T>> implements Collection<T> {
           return traversed;
         }
 
-        AVLNode tmp = traversed.val.compareTo(toFind) > 0 ? traversed.leq : traversed.gtr;
+        final AVLNode tmp = traversed.val.compareTo(toFind) > 0 ? traversed.leq : traversed.gtr;
         if (tmp == null) {
           if (lookup) {
             return null;
@@ -392,7 +392,7 @@ public class AVLTree<T extends Comparable<T>> implements Collection<T> {
 
     /**
      * Returns the root of the node.
-     * 
+     *
      * @return Root.
      */
     AVLNode root() {
@@ -405,7 +405,7 @@ public class AVLTree<T extends Comparable<T>> implements Collection<T> {
 
     /**
      * Adds a value to this AVL node as direct child.
-     * 
+     *
      * @param value Value to add.
      */
     void add(final T value) {
@@ -414,17 +414,19 @@ public class AVLTree<T extends Comparable<T>> implements Collection<T> {
 
     /**
      * Adds a tree to the AVL node as direct child.
-     * 
+     *
      * @param toAdd Tree to add.
      */
     void addTree(final AVLNode toAdd) {
       if (val.compareTo(toAdd.val) > 0) {
-        if (leq != null)
+        if (leq != null) {
           throw new IllegalStateException();
+        }
         leq = toAdd;
       } else {
-        if (gtr != null)
+        if (gtr != null) {
           throw new IllegalStateException();
+        }
         gtr = toAdd;
       }
       toAdd.parent = this;
@@ -434,11 +436,11 @@ public class AVLTree<T extends Comparable<T>> implements Collection<T> {
 
     /**
      * Removes a direct child from this node.
-     * 
+     *
      * @param toRemove Child to remove.
      */
     void remove(final AVLNode toRemove) {
-      AVLNode merged = merge(toRemove.gtr, toRemove.leq);
+      final AVLNode merged = merge(toRemove.gtr, toRemove.leq);
       if (merged != null) {
         merged.parent = this;
       }
@@ -456,8 +458,8 @@ public class AVLTree<T extends Comparable<T>> implements Collection<T> {
      * Refreshes the {@link #balanceFactor}.
      */
     void refreshBalance() {
-      int gtrHeight = gtr == null ? 0 : gtr.height;
-      int leqHeight = leq == null ? 0 : leq.height;
+      final int gtrHeight = gtr == null ? 0 : gtr.height;
+      final int leqHeight = leq == null ? 0 : leq.height;
       height = Math.max(gtrHeight, leqHeight) + 1;
       balanceFactor = gtrHeight - leqHeight;
     }
@@ -468,7 +470,7 @@ public class AVLTree<T extends Comparable<T>> implements Collection<T> {
         rebalance();
       }
 
-      if (balanceFactor != 0 && parent != null) {
+      if ((balanceFactor != 0) && (parent != null)) {
         parent.checkBalance();
       }
     }
@@ -508,7 +510,7 @@ public class AVLTree<T extends Comparable<T>> implements Collection<T> {
         }
       }
 
-      AVLNode gtrLeq = gtr.leq;
+      final AVLNode gtrLeq = gtr.leq;
       gtr.leq = this;
       parent = gtr;
 
@@ -536,7 +538,7 @@ public class AVLTree<T extends Comparable<T>> implements Collection<T> {
         }
       }
 
-      AVLNode leqGtr = leq.gtr;
+      final AVLNode leqGtr = leq.gtr;
       leq.gtr = this;
       parent = leq;
 
@@ -570,7 +572,7 @@ public class AVLTree<T extends Comparable<T>> implements Collection<T> {
     /**
      * Saves the path to next output node.
      */
-    private Object[] traverseArray = new Object[height()];
+    private final Object[] traverseArray = new Object[height()];
 
     AVLIterator() {
       if (root != null) {
@@ -594,7 +596,7 @@ public class AVLTree<T extends Comparable<T>> implements Collection<T> {
         return null;
       }
 
-      AVLNode output = (AVLNode) traverseArray[traverseIndex];
+      final AVLNode output = (AVLNode) traverseArray[traverseIndex];
       setNext();
 
       return output;
@@ -617,20 +619,20 @@ public class AVLTree<T extends Comparable<T>> implements Collection<T> {
           continue; // "recursive" call
         }
 
-        AVLNode parent = (AVLNode) traverseArray[traverseIndex - 1];
+        final AVLNode parent = (AVLNode) traverseArray[traverseIndex - 1];
 
-        if (parent.leq == null && parent.gtr == null) {
+        if ((parent.leq == null) && (parent.gtr == null)) {
           traverseIndex -= 2;
           continue; // "recursive" call
         }
 
-        AVLNode outputChild = (AVLNode) traverseArray[traverseIndex];
+        final AVLNode outputChild = (AVLNode) traverseArray[traverseIndex];
 
-        if (outputChild == null || (outputChild != parent.leq && outputChild != parent.gtr)) {
-          AVLNode next = parent.leq != null ? parent.leq : parent.gtr;
+        if ((outputChild == null) || ((outputChild != parent.leq) && (outputChild != parent.gtr))) {
+          final AVLNode next = parent.leq != null ? parent.leq : parent.gtr;
           traverseArray[traverseIndex] = next;
           return;
-        } else if (outputChild == parent.leq && parent.gtr != null) {
+        } else if ((outputChild == parent.leq) && (parent.gtr != null)) {
           traverseArray[traverseIndex] = parent.gtr;
           return;
         }

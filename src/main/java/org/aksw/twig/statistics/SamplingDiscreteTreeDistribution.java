@@ -1,13 +1,13 @@
 package org.aksw.twig.statistics;
 
-import org.aksw.twig.structs.AVLTree;
-
 import java.util.Random;
+
+import org.aksw.twig.structs.AVLTree;
 
 /**
  * Samples discrete events by iterating through an AVL tree. Therefor sampling is in
  * {@code O(log n)} with {@code n} being the size of the sample space.
- * 
+ *
  * @param <T> Type of the events to sample.
  */
 public class SamplingDiscreteTreeDistribution<T> implements SamplingDiscreteDistribution<T> {
@@ -53,10 +53,10 @@ public class SamplingDiscreteTreeDistribution<T> implements SamplingDiscreteDist
    * Creates a new instance setting class variables. {@code aggregatedChanceDelta} sets the
    * clearance to the aggregated chance. More information to be found here:
    * {@link #aggregatedChanceDelta}.
-   * 
+   *
    * @param aggregatedChanceDelta Clearance for the maximum aggregated chance.
    */
-  public SamplingDiscreteTreeDistribution(double aggregatedChanceDelta) {
+  public SamplingDiscreteTreeDistribution(final double aggregatedChanceDelta) {
     this.aggregatedChanceDelta = aggregatedChanceDelta;
   }
 
@@ -64,14 +64,14 @@ public class SamplingDiscreteTreeDistribution<T> implements SamplingDiscreteDist
 
   /**
    * Adds a discrete event with its chance to the sample space.
-   * 
+   *
    * @param event Event to add to the sample space.
    * @param chance Chance of the event.
    * @throws IllegalArgumentException Thrown if the aggregated chance of all events is truly greater
    *         than {@code 1 + }{@link #aggregatedChanceDelta} of if {@code chance} is {@code 0}.
    * @throws IllegalStateException Thrown if the aggregated chance of all events was {@code >= 1}.
    */
-  public void addDiscreteEvent(T event, double chance)
+  public void addDiscreteEvent(final T event, final double chance)
       throws IllegalArgumentException, IllegalStateException {
     if (aggregatedChance >= 1) {
       throw new IllegalStateException(
@@ -82,7 +82,7 @@ public class SamplingDiscreteTreeDistribution<T> implements SamplingDiscreteDist
   }
 
   @Override
-  public void reseedRandomGenerator(long seed) {
+  public void reseedRandomGenerator(final long seed) {
     random.setSeed(seed);
   }
 
@@ -92,12 +92,12 @@ public class SamplingDiscreteTreeDistribution<T> implements SamplingDiscreteDist
   }
 
   @Override
-  public T sample(Random r) {
+  public T sample(final Random r) {
     if (sampleTree.isEmpty()) {
       return null;
     }
 
-    ChanceMapping closest = sampleTree.findGreater(new ChanceMapping(r.nextDouble()));
+    final ChanceMapping closest = sampleTree.findGreater(new ChanceMapping(r.nextDouble()));
     if (closest == null) {
       return sampleTree.getGreatest().val;
     }
@@ -113,35 +113,29 @@ public class SamplingDiscreteTreeDistribution<T> implements SamplingDiscreteDist
     T val;
 
     /**
-     * Chance of this event.
-     */
-    double chance;
-
-    /**
      * Aggregated chance of this event plus chance of all events that have been added prior to this.
      */
     double aggregatedChanceToThis;
 
     /**
      * Creates a new instance setting class variables.
-     * 
+     *
      * @param val Value of the event.
      * @param chance Chance of the event.
      * @throws IllegalArgumentException Thrown if the aggregated chance of all events is truly
      *         greater than {@code 1 + }{@link #aggregatedChanceDelta} of if {@code chance} is
      *         {@code 0}.
      */
-    ChanceMapping(T val, double chance) throws IllegalArgumentException {
+    ChanceMapping(final T val, final double chance) throws IllegalArgumentException {
       if (chance == 0) {
         throw new IllegalArgumentException("Chance must not be 0");
       }
 
       this.val = val;
-      this.chance = chance;
       aggregatedChance += chance;
 
-      if (aggregatedChance > 1 + aggregatedChanceDelta) {
-        String exceptionMessage = "Aggregated chance was greater than (1 + delta) was "
+      if (aggregatedChance > (1 + aggregatedChanceDelta)) {
+        final String exceptionMessage = "Aggregated chance was greater than (1 + delta) was "
             .concat(Double.toString(SamplingDiscreteTreeDistribution.this.aggregatedChance));
         aggregatedChance -= chance;
         throw new IllegalArgumentException(exceptionMessage);
@@ -150,12 +144,12 @@ public class SamplingDiscreteTreeDistribution<T> implements SamplingDiscreteDist
       aggregatedChanceToThis = aggregatedChance;
     }
 
-    ChanceMapping(double chance) {
+    ChanceMapping(final double chance) {
       aggregatedChanceToThis = chance;
     }
 
     @Override
-    public int compareTo(ChanceMapping mapping) {
+    public int compareTo(final ChanceMapping mapping) {
       return Double.compare(aggregatedChanceToThis, mapping.aggregatedChanceToThis);
     }
   }
