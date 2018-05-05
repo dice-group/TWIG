@@ -204,16 +204,6 @@ public class Automaton {
     }
 
     // load models
-    LOGGER.info("loads WordMatrix");
-    WordSampler wordSampler;
-    try (ObjectInputStream stream =
-        new ObjectInputStream(new BufferedInputStream(new FileInputStream(wordmatrixFile)))) {
-      final WordMatrix wordMatrix = (WordMatrix) stream.readObject();
-      wordSampler = new WordSampler(wordMatrix);
-    } catch (IOException | ClassNotFoundException e) {
-      LOGGER.error(e.getMessage(), e);
-      return;
-    }
 
     LOGGER.info("loads MessageCounter");
     SamplingDiscreteDistribution<Integer> messageDistribution;
@@ -233,6 +223,17 @@ public class Automaton {
         new ObjectInputStream(new BufferedInputStream(new FileInputStream(timeCounterFile)))) {
       final TimeCounter timeCounter = (TimeCounter) stream.readObject();
       timeDistribution = timeCounter.getValueDistribution();
+    } catch (IOException | ClassNotFoundException e) {
+      LOGGER.error(e.getMessage(), e);
+      return;
+    }
+
+    LOGGER.info("loads WordMatrix");
+    WordSampler wordSampler;
+    try (ObjectInputStream stream =
+        new ObjectInputStream(new BufferedInputStream(new FileInputStream(wordmatrixFile)))) {
+      final WordMatrix wordMatrix = (WordMatrix) stream.readObject();
+      wordSampler = new WordSampler(wordMatrix);
     } catch (IOException | ClassNotFoundException e) {
       LOGGER.error(e.getMessage(), e);
       return;
