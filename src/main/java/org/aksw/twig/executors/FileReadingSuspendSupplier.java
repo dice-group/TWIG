@@ -1,5 +1,6 @@
 package org.aksw.twig.executors;
 
+import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -21,7 +22,7 @@ import org.apache.logging.log4j.Logger;
  * result by implementing classes. The merged result can be queried via
  * {@link FileReadingSuspendSupplier#getMergedResult()}.<br>
  * Must be executed by a {@link SelfSuspendingExecutor}.
- * 
+ *
  * @param <T> Type of parsing results.
  */
 public abstract class FileReadingSuspendSupplier<T extends Serializable>
@@ -33,7 +34,7 @@ public abstract class FileReadingSuspendSupplier<T extends Serializable>
 
   /**
    * Creates a new instance setting class variables.
-   * 
+   *
    * @param filesToParse
    */
   public FileReadingSuspendSupplier(final Collection<File> filesToParse) {
@@ -54,7 +55,7 @@ public abstract class FileReadingSuspendSupplier<T extends Serializable>
 
   /**
    * Returns a {@link Callable} parsing given file.
-   * 
+   *
    * @param file File to parse.
    * @return Parsing callable.
    */
@@ -62,14 +63,14 @@ public abstract class FileReadingSuspendSupplier<T extends Serializable>
 
   /**
    * Returns the merged result of the executed callables.
-   * 
+   *
    * @return Merged result.
    */
   protected abstract T getMergedResult();
 
   /**
    * Creates a {@link SelfSuspendingExecutor} and executes it.
-   * 
+   *
    * @param fileName File name to serialize merged result.
    * @param outputDirectory Output directory for merged result.
    * @param suspendSupplier Suspend supplier to be executed.
@@ -97,7 +98,7 @@ public abstract class FileReadingSuspendSupplier<T extends Serializable>
     final SelfSuspendingExecutor<T> executor = new SelfSuspendingExecutor<>(suspendSupplier);
     executor.addFinishedEventListeners(() -> {
       try (ObjectOutputStream objectOutputStream =
-          new ObjectOutputStream(new FileOutputStream(outputFile))) {
+          new ObjectOutputStream(new BufferedOutputStream(new FileOutputStream(outputFile)))) {
         objectOutputStream.writeObject(suspendSupplier.getMergedResult());
         objectOutputStream.flush();
       } catch (final IOException e) {

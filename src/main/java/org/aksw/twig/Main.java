@@ -36,7 +36,7 @@ public class Main {
         Twitter7Parser.main(Arrays.copyOfRange(args, 1, args.length));
         break;
       /**
-       * 
+       *
        */
       case "WordSampler":
         WordSampler.main(Arrays.copyOfRange(args, 1, args.length));

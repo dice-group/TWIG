@@ -1,5 +1,6 @@
 package org.aksw.twig.automaton;
 
+import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileWriter;
@@ -201,9 +202,12 @@ public class Automaton {
     if (!f.isDirectory()) {
       throw new IllegalArgumentException("Supplied file must be a directory");
     }
+
     // load models
+    LOGGER.info("loads WordMatrix");
     WordSampler wordSampler;
-    try (ObjectInputStream stream = new ObjectInputStream(new FileInputStream(wordmatrixFile))) {
+    try (ObjectInputStream stream =
+        new ObjectInputStream(new BufferedInputStream(new FileInputStream(wordmatrixFile)))) {
       final WordMatrix wordMatrix = (WordMatrix) stream.readObject();
       wordSampler = new WordSampler(wordMatrix);
     } catch (IOException | ClassNotFoundException e) {
@@ -211,9 +215,10 @@ public class Automaton {
       return;
     }
 
+    LOGGER.info("loads MessageCounter");
     SamplingDiscreteDistribution<Integer> messageDistribution;
-    try (
-        ObjectInputStream stream = new ObjectInputStream(new FileInputStream(messageCounterFile))) {
+    try (ObjectInputStream stream =
+        new ObjectInputStream(new BufferedInputStream(new FileInputStream(messageCounterFile)))) {
       final MessageCounter messageCounter = (MessageCounter) stream.readObject();
       messageDistribution = messageCounter
           .normalize(Duration.ofDays(TWEET_NUMBER_NORMALIZATION_DAYS)).getValueDistribution();
@@ -222,8 +227,10 @@ public class Automaton {
       return;
     }
 
+    LOGGER.info("loads TimeCounter");
     SamplingDiscreteDistribution<LocalTime> timeDistribution;
-    try (ObjectInputStream stream = new ObjectInputStream(new FileInputStream(timeCounterFile))) {
+    try (ObjectInputStream stream =
+        new ObjectInputStream(new BufferedInputStream(new FileInputStream(timeCounterFile)))) {
       final TimeCounter timeCounter = (TimeCounter) stream.readObject();
       timeDistribution = timeCounter.getValueDistribution();
     } catch (IOException | ClassNotFoundException e) {
@@ -231,6 +238,7 @@ public class Automaton {
       return;
     }
 
+    LOGGER.info("loads automation");
     // starts automation
     final Automaton automaton;
     automaton = new Automaton(wordSampler, messageDistribution, timeDistribution, f);

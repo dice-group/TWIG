@@ -34,6 +34,11 @@ public class Const {
   // number of statements in model
   public static int MODEL_MAX_SIZE;
 
+  // WordSampler
+  public static double DISTRIBUTION_CHANCE_DELTA;
+  // WordSampler
+  public static double TRUNCATE_CHANCE;
+
   /**
    * Loads the config file and inits the constants.
    */
@@ -51,6 +56,8 @@ public class Const {
       N_THREADS_SELFSUSPENDINGEXECUTOR = o.getInt("selfsuspendingexecutor");
       seed = o.getInt("seed");
       MODEL_MAX_SIZE = o.getInt("modelSize");
+      DISTRIBUTION_CHANCE_DELTA = o.getDouble("DISTRIBUTION_CHANCE_DELTA");
+      TRUNCATE_CHANCE = o.getDouble("TRUNCATE_CHANCE");
 
     } catch (final IOException e) {
       LOGGER.error(e.getLocalizedMessage());

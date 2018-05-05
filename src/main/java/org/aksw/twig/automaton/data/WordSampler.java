@@ -10,6 +10,7 @@ import java.util.LinkedList;
 import java.util.Map;
 import java.util.Random;
 
+import org.aksw.twig.Const;
 import org.aksw.twig.statistics.SamplingDiscreteDistribution;
 import org.aksw.twig.statistics.SamplingDiscreteTreeDistribution;
 import org.apache.logging.log4j.LogManager;
@@ -23,9 +24,9 @@ public class WordSampler implements SamplingWordPredecessorSuccessorDistribution
 
   private static final Logger LOGGER = LogManager.getLogger(WordSampler.class);
 
-  private static final double TRUNCATE_CHANCE = 0.001;
+  private static final double TRUNCATE_CHANCE = Const.TRUNCATE_CHANCE;
 
-  private static final double DISTRIBUTION_CHANCE_DELTA = 0.0001;
+  private static final double DISTRIBUTION_CHANCE_DELTA = Const.DISTRIBUTION_CHANCE_DELTA;
 
   private static final int MAX_CHARS = 140;
 
@@ -34,12 +35,16 @@ public class WordSampler implements SamplingWordPredecessorSuccessorDistribution
 
   private final Random r = new Random();
 
+  public WordMatrix matrix = null;
+
   /**
    * Creates a {@link WordSampler} of given {@link WordMatrix}.
    *
    * @param matrix Matrix to create the sampler of.
    */
   public WordSampler(final WordMatrix matrix) {
+
+    this.matrix = matrix;
 
     matrix.getPredecessors().forEach(predecessor -> {
       final WordChanceMapping[] wordChanceMappings = matrix.getMappings(predecessor).entrySet()
