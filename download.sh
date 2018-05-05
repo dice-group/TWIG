@@ -1,3 +1,4 @@
+#!/bin/bash
 # 
 # 1. Clones the repository 'https://github.com/AKSW/TWIG'
 # 2. Executes 'build.sh' to build the application.
