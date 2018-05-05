@@ -3,7 +3,7 @@
 	"twitter7ParserThreads": 1,
 	"selfsuspendingexecutor": 4,
     "seed" :1,
-	"modelSize": 10000000,
-	"DISTRIBUTION_CHANCE_DELTA": 0.0001,
-	"TRUNCATE_CHANCE": 0.001
+	"modelSize": 100000000000,
+	"DISTRIBUTION_CHANCE_DELTA": 0.1,
+	"TRUNCATE_CHANCE": 0.1
 }
