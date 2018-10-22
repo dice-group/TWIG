@@ -1,4 +1,7 @@
-[Installation] (Installation.md)
+[1]: ./Installation.md
+[2]: ./Start.md
 
-[Start] (Start.md)
 
+[Installation][1]
+
+[Start][2]
