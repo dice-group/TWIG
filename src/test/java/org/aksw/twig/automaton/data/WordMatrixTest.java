@@ -65,14 +65,14 @@ public class WordMatrixTest {
     Assert.assertEquals(0.5, matrix.getChance("a", "a"), 0.0);
     Assert.assertEquals(0.5, matrix.getChance("a", "b"), 0.0);
 
-    final Map<Integer, Double> mappings = matrix.getMappings("a");
-    Assert.assertTrue(mappings.containsKey(matrix.indexReverse.get("a")));
-    Assert.assertEquals(0.5, mappings.get(matrix.indexReverse.get("a")), 0.0);
-    Assert.assertTrue(mappings.containsKey(matrix.indexReverse.get("b")));
-    Assert.assertEquals(0.5, mappings.get(matrix.indexReverse.get("b")), 0.0);
+    final Map<String, Double> mappings = matrix.getMappings("a");
+    Assert.assertTrue(mappings.containsKey("a"));
+    Assert.assertEquals(0.5, mappings.get("a"), 0.0);
+    Assert.assertTrue(mappings.containsKey("b"));
+    Assert.assertEquals(0.5, mappings.get("b"), 0.0);
 
     matrix.matrix.entrySet().forEach(entry -> {
-      final Pair<Long, Map<Integer, Long>> value = entry.getValue();
+      final Pair<Long, Map<String, Long>> value = entry.getValue();
       final Long sum =
           value.getRight().entrySet().stream().map(Map.Entry::getValue).reduce(0L, Long::sum);
       Assert.assertEquals(value.getLeft(), sum);

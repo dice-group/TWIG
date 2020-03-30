@@ -2,7 +2,6 @@ package org.aksw.twig.automaton.data;
 
 import java.io.Serializable;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -49,10 +48,7 @@ public class WordMatrix implements Serializable {
 
   private static final Logger LOGGER = LogManager.getLogger(WordMatrix.class);
 
-  public final Map<Integer, String> index = new HashMap<>();
-  public final Map<String, Integer> indexReverse = new HashMap<>();
-
-  public final Map<Integer, MutablePair<Long, Map<Integer, Long>>> matrix = new HashMap<>();
+  public Map<String, MutablePair<Long, Map<String, Long>>> matrix = new HashMap<>();
 
   private boolean alteredSinceCached = true;
 
@@ -62,27 +58,6 @@ public class WordMatrix implements Serializable {
 
   private static final double[] INSPECTION_BOUNDS =
       new double[] {0.5, 0.1, 0.05, 0.01, 0.005, 0.001, 0.0005, 0.0001, 0.00005, 0.00001};
-
-  /**
-   * Adds {@link w} to index and gets its id.
-   *
-   * @param word
-   * @return id
-   */
-  private Integer addAndGet(final String word) {
-    if (word == null) {
-      throw new NullPointerException("Parameter is Null!");
-    }
-    Integer key = null;
-    if (!indexReverse.containsKey(word)) {
-      key = index.size();
-      index.put(key, word);
-      indexReverse.put(word, key);
-    } else {
-      key = indexReverse.get(word);
-    }
-    return key;
-  }
 
   /**
    * Alters the frequency distribution: You add {@code count} more occurences of the word
@@ -96,15 +71,13 @@ public class WordMatrix implements Serializable {
 
     alteredSinceCached = true;
 
-    final Integer i = addAndGet(predecessor);
-    final Integer ii = addAndGet(successor);
+    final MutablePair<Long, Map<String, Long>> mapping =
+        matrix.computeIfAbsent(predecessor, key -> new MutablePair<>(0L, new HashMap<>()));
 
-    final MutablePair<Long, Map<Integer, Long>> mapping;
-    mapping = matrix.computeIfAbsent(i, key -> new MutablePair<>(0L, new HashMap<>()));
     mapping.setLeft(mapping.getLeft() + count);
-
-    final Long val = mapping.getRight().get(ii);
-    mapping.getRight().put(ii, val == null ? count : val + count);
+    final Map<String, Long> columns = mapping.getRight();
+    final Long val = columns.get(successor);
+    columns.put(successor, val == null ? count : val + count);
   }
 
   /**
@@ -136,16 +109,15 @@ public class WordMatrix implements Serializable {
   }
 
   /**
-   * Merges the frequency distribution of given {@link wordMatrix} into this.
+   * Merges the frequency distribution of given {@link WordMatrix} into this.
    *
    * @param wordMatrix Matrix to merge.
    */
   public void merge(final WordMatrix wordMatrix) {
     wordMatrix.matrix.entrySet().forEach(entry -> {
-      final String predecessor = wordMatrix.index.get(entry.getKey());
+      final String predecessor = entry.getKey();
       entry.getValue().getRight().entrySet().forEach(mappedEntry -> {
-        final String successor = wordMatrix.index.get(mappedEntry.getKey());
-        alterFrequency(predecessor, successor, mappedEntry.getValue());
+        alterFrequency(predecessor, mappedEntry.getKey(), mappedEntry.getValue());
       });
     });
   }
@@ -160,16 +132,12 @@ public class WordMatrix implements Serializable {
    */
   public double getChance(final String predecessor, final String successor)
       throws IllegalArgumentException {
-
-    final int i = addAndGet(predecessor);
-    final int ii = addAndGet(successor);
-
-    final MutablePair<Long, Map<Integer, Long>> mapping = matrix.get(i);
+    final MutablePair<Long, Map<String, Long>> mapping = matrix.get(predecessor);
     if (mapping == null) {
       throw new IllegalArgumentException("No mapping found.");
     }
 
-    return (double) mapping.getRight().get(ii) / (double) mapping.getLeft();
+    return (double) mapping.getRight().get(successor) / (double) mapping.getLeft();
   }
 
   /**
@@ -179,7 +147,7 @@ public class WordMatrix implements Serializable {
    * @return Set of predecessors.
    */
   public Set<String> getPredecessors() {
-    return matrix.keySet().stream().map(key -> index.get(key)).collect(Collectors.toSet());
+    return matrix.keySet();
   }
 
   /**
@@ -189,12 +157,8 @@ public class WordMatrix implements Serializable {
    * @param predecessor Predecessor.
    * @return Map of successor to succeeding chance.
    */
-  public Map<Integer, Double> getMappings(final String predecessor)
-      throws IllegalArgumentException {
-
-    final Integer i = addAndGet(predecessor);
-
-    final MutablePair<Long, Map<Integer, Long>> mapping = matrix.get(i);
+  public Map<String, Double> getMappings(final String predecessor) throws IllegalArgumentException {
+    final MutablePair<Long, Map<String, Long>> mapping = matrix.get(predecessor);
     if (mapping == null) {
       throw new IllegalArgumentException("No mapping found.");
     }
@@ -217,7 +181,7 @@ public class WordMatrix implements Serializable {
     }
 
     matrix.entrySet().forEach(entry -> {
-      Set<Map.Entry<Integer, Long>> entries = entry.getValue().getRight().entrySet();
+      Set<Map.Entry<String, Long>> entries = entry.getValue().getRight().entrySet();
       final double allEntries = entries.size();
       final double count = entry.getValue().getLeft();
       for (final double bound : INSPECTION_BOUNDS) {
@@ -293,55 +257,26 @@ public class WordMatrix implements Serializable {
    */
   public void truncateTo(final double lowerBoundChance) {
 
-    final Iterator<Map.Entry<Integer, MutablePair<Long, Map<Integer, Long>>>> i;
-    i = matrix.entrySet().iterator();
+    final HashMap<String, MutablePair<Long, Map<String, Long>>> newMatrix = new HashMap<>();
 
-    while (i.hasNext()) {
-      final int predecessorIndex = i.next().getKey();
+    matrix.entrySet().forEach(entry -> {
 
-      final long lowerBound;
-      lowerBound = Math.round((double) matrix.get(predecessorIndex).getLeft() * lowerBoundChance);
+      final Set<Map.Entry<String, Long>> entrySet = entry.getValue().getRight().entrySet();
 
-      final Iterator<Map.Entry<Integer, Long>> ii;
-      ii = matrix.get(predecessorIndex).getRight().entrySet().iterator();
+      final double count = entry.getValue().getLeft();
 
-      long newSum = 0;
-      while (ii.hasNext()) {
-        final Map.Entry<Integer, Long> successorEntry = ii.next();
-        if (successorEntry.getValue() < lowerBound) {
-          ii.remove();
-        } else {
-          newSum += successorEntry.getValue();
-        }
+      final Map<String, Long> newSuccessorMap = entrySet.stream()
+          .filter(successorEntry -> (double) successorEntry.getValue() / count >= lowerBoundChance)
+          .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
+
+      final long newCount =
+          newSuccessorMap.entrySet().stream().map(Map.Entry::getValue).reduce(0L, Long::sum);
+
+      if (!newSuccessorMap.isEmpty()) {
+        newMatrix.put(entry.getKey(), new MutablePair<>(newCount, newSuccessorMap));
       }
+    });
 
-      if (newSum == 0) {
-        i.remove();
-      } else {
-        matrix.get(predecessorIndex).setLeft(newSum);
-      }
-    }
-
-    /*
-     * HashMap<String, MutablePair<Long, Map<String, Long>>> newMatrix = new HashMap<>();
-     *
-     * matrix.entrySet().forEach(entry -> {
-     *
-     * Set<Map.Entry<String, Long>> entrySet = entry.getValue().getRight().entrySet();
-     *
-     * final double count = (double) entry.getValue().getLeft();
-     *
-     * Map<String, Long> newSuccessorMap = entrySet.stream() .filter(successorEntry -> (double)
-     * successorEntry.getValue() / count >= lowerBoundChance)
-     * .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
-     *
-     * long newCount = newSuccessorMap.entrySet().stream().map(Map.Entry::getValue).reduce(0L,
-     * Long::sum);
-     *
-     * if (!newSuccessorMap.isEmpty()) { newMatrix.put(entry.getKey(), new MutablePair<>(newCount,
-     * newSuccessorMap)); } });
-     *
-     * matrix = newMatrix;
-     */
+    matrix = newMatrix;
   }
 }

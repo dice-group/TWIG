@@ -47,10 +47,12 @@ public class WordSampler implements SamplingWordPredecessorSuccessorDistribution
     this.matrix = matrix;
 
     matrix.getPredecessors().forEach(predecessor -> {
-      final WordChanceMapping[] wordChanceMappings = matrix.getMappings(predecessor).entrySet()
-          .stream()
-          .map(entry -> new WordChanceMapping(matrix.index.get(entry.getKey()), entry.getValue()))
-          .toArray(WordChanceMapping[]::new);
+      final WordChanceMapping[] wordChanceMappings =
+          matrix.getMappings(predecessor).entrySet().stream()
+              // .map(entry -> new WordChanceMapping(matrix.index.get(entry.getKey()),
+              // entry.getValue()))
+              .map(entry -> new WordChanceMapping(entry.getKey(), entry.getValue()))
+              .toArray(WordChanceMapping[]::new);
 
       // Sort successors alphabetically
       Arrays.sort(wordChanceMappings, WordChanceMapping::compareTo);
