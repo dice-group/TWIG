@@ -1,4 +1,5 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 
@@ -100,7 +101,7 @@
 			<artifactId>commons-compress</artifactId>
 			<version>1.2</version>
 		</dependency>
-		<!--  deeplearning4j -->
+		<!-- deeplearning4j -->
 		<dependency>
 			<groupId>org.deeplearning4j</groupId>
 			<artifactId>deeplearning4j-core</artifactId>
@@ -111,13 +112,13 @@
 			<artifactId>deeplearning4j-nlp</artifactId>
 			<version>${dl4j.version}</version>
 		</dependency>
-				<dependency>
+		<dependency>
 			<groupId>org.nd4j</groupId>
 			<artifactId>nd4j-native</artifactId>
 			<version>${nd4j.version}</version>
 		</dependency>
 		<!-- httpcomponents -->
-			<dependency>
+		<dependency>
 			<groupId>org.apache.httpcomponents</groupId>
 			<artifactId>fluent-hc</artifactId>
 			<version>4.4</version>
@@ -133,23 +134,29 @@
 			<artifactId>json</artifactId>
 			<version>20140107</version>
 		</dependency>
-		<!-- https://mvnrepository.com/artifact/org.apache.commons/commons-math3
+		<!-- https://mvnrepository.com/artifact/org.apache.commons/commons-math3 -->
 		<dependency>
-		    <groupId>org.apache.commons</groupId>
-		    <artifactId>commons-math3</artifactId>
-		    <version>3.6.1</version>
-		</dependency>-->
-		<!-- https://mvnrepository.com/artifact/nz.ac.waikato.cms.weka/weka-stable 
+			<groupId>org.apache.commons</groupId>
+			<artifactId>commons-math3</artifactId>
+			<version>3.6.1</version>
+		</dependency>
+		<!-- https://mvnrepository.com/artifact/nz.ac.waikato.cms.weka/weka-stable -->
 		<dependency>
-		    <groupId>nz.ac.waikato.cms.weka</groupId>
-		    <artifactId>weka-stable</artifactId>
-		    <version>3.8.2</version>
-		</dependency>-->
-		<!-- https://mvnrepository.com/artifact/de.lmu.ifi.dbs.elki/elki
+			<groupId>nz.ac.waikato.cms.weka</groupId>
+			<artifactId>weka-stable</artifactId>
+			<version>3.8.2</version>
+		</dependency>
+		<!-- https://mvnrepository.com/artifact/de.lmu.ifi.dbs.elki/elki -->
 		<dependency>
 			<groupId>de.lmu.ifi.dbs.elki</groupId>
 			<artifactId>elki</artifactId>
 			<version>0.7.1</version>
-		</dependency>-->
+		</dependency>
+		<!-- https://mvnrepository.com/artifact/edu.cmu.cs/ark-tweet-nlp -->
+		<dependency>
+			<groupId>edu.cmu.cs</groupId>
+			<artifactId>ark-tweet-nlp</artifactId>
+			<version>0.3.2</version>
+		</dependency>
 	</dependencies>
 </project>
