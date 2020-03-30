@@ -130,7 +130,7 @@ public class WordMatrix implements Serializable {
       if (statement.getPredicate().getLocalName()
           .equals(TWIGModelWrapper.TWEET_CONTENT_PROPERTY_NAME)) {
         final String tweet = statement.getObject().asLiteral().getString();
-        putAll(new TweetSplitter(tweet));
+        putAll(new TweetSplitterTwo(tweet));
       }
     });
   }
