@@ -15,8 +15,6 @@ import java.util.regex.Pattern;
 import org.aksw.twig.Const;
 import org.aksw.twig.model.TWIGModelWrapper;
 import org.apache.commons.lang3.tuple.Triple;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 
 /**
  * Parses a {@link TWIGModelWrapper} from a twitter7 block triple.
@@ -24,8 +22,6 @@ import org.apache.logging.log4j.Logger;
  * @author Felix Linker
  */
 class Twitter7BlockParser implements Callable<TWIGModelWrapper> {
-
-  private static final Logger LOGGER = LogManager.getLogger(Twitter7BlockParser.class);
 
   private static final DateTimeFormatter DATE_TIME_FORMATTER =
       DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
