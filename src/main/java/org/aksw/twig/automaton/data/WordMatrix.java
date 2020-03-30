@@ -51,6 +51,7 @@ public class WordMatrix implements Serializable {
 
   public final Map<Integer, String> index = new HashMap<>();
   public final Map<String, Integer> indexReverse = new HashMap<>();
+
   public final Map<Integer, MutablePair<Long, Map<Integer, Long>>> matrix = new HashMap<>();
 
   private boolean alteredSinceCached = true;
@@ -69,7 +70,7 @@ public class WordMatrix implements Serializable {
    * @return id
    */
   private Integer addAndGet(final String word) {
-    if ((word == null)) {
+    if (word == null) {
       throw new NullPointerException("Parameter is Null!");
     }
     Integer key = null;
@@ -221,7 +222,7 @@ public class WordMatrix implements Serializable {
       final double count = entry.getValue().getLeft();
       for (final double bound : INSPECTION_BOUNDS) {
         entries = entries.stream()
-            .filter(successorEntry -> ((double) successorEntry.getValue() / count) <= bound)
+            .filter(successorEntry -> (double) successorEntry.getValue() / count <= bound)
             .collect(Collectors.toSet());
         boundsMap.get(bound).add(entries.size() / allEntries);
       }
@@ -255,8 +256,8 @@ public class WordMatrix implements Serializable {
 
     cachedMeanChance = chances.stream().reduce(0d, Double::sum) / chances.size();
     cachedChanceStdDeviation =
-        Math.sqrt((chances.stream().reduce(0d, (a, b) -> a + (b * b)) / chances.size())
-            - (cachedMeanChance * cachedMeanChance));
+        Math.sqrt(chances.stream().reduce(0d, (a, b) -> a + b * b) / chances.size()
+            - cachedMeanChance * cachedMeanChance);
   }
 
   /**

@@ -5,7 +5,6 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Paths;
 import java.util.List;
 
-import org.aksw.twig.automaton.data.WordMatrix;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.json.JSONObject;
@@ -14,7 +13,7 @@ import com.google.common.io.Files;
 
 public class Const {
 
-  private static final Logger LOGGER = LogManager.getLogger(WordMatrix.class);
+  private static final Logger LOG = LogManager.getLogger(Const.class);
   static {
     load("config/config.json");
   }
@@ -60,7 +59,7 @@ public class Const {
       TRUNCATE_CHANCE = o.getDouble("TRUNCATE_CHANCE");
 
     } catch (final IOException e) {
-      LOGGER.error(e.getLocalizedMessage());
+      LOG.error(e.getLocalizedMessage());
     }
   }
 }

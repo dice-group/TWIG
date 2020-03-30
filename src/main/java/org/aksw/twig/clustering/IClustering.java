@@ -9,11 +9,11 @@ import java.util.Set;
  */
 public interface IClustering {
 
-  public void add(Set<String> words);
+  void add(Set<String> words);
 
-  public void cluster();
+  void cluster();
 
   // public Map<Integer, Set<String>> getClusters();
 
-  public String getRandomWordFromCluster(String word);
+  String getRandomWordFromCluster(String word);
 }

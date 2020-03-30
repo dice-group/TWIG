@@ -56,8 +56,8 @@ public class Twitter7Parser<T> implements Runnable {
 
   private final Function<Triple<String, String, String>, Callable<T>> resultParserSupplier;
 
-  private final ListeningExecutorService service = MoreExecutors
-      .listeningDecorator(Executors.newFixedThreadPool(Const.N_THREADS_TWITTER7PARSER));
+  private final ListeningExecutorService service = MoreExecutors.listeningDecorator(//
+      Executors.newFixedThreadPool(Const.N_THREADS_TWITTER7PARSER));
 
   private final Executor listenerExecutor = MoreExecutors.directExecutor();
 
@@ -83,7 +83,7 @@ public class Twitter7Parser<T> implements Runnable {
   public Twitter7Parser(final InputStream inputStream,
       final Function<Triple<String, String, String>, Callable<T>> resultParserSupplier)
       throws IOException, NullPointerException {
-    if ((resultParserSupplier == null) || (inputStream == null)) {
+    if (resultParserSupplier == null || inputStream == null) {
       throw new NullPointerException();
     }
     this.resultParserSupplier = resultParserSupplier;
@@ -150,7 +150,7 @@ public class Twitter7Parser<T> implements Runnable {
 
             // Skip empty lines
             String line;
-            while (((line = fileReader.readLine()) != null) && line.isEmpty()) {
+            while ((line = fileReader.readLine()) != null && line.isEmpty()) {
               ;
             }
             if (line == null) {
@@ -165,7 +165,7 @@ public class Twitter7Parser<T> implements Runnable {
             } else {
               LOGGER.error("Encountered malformed block in twitter7 data.");
               // Skip non-empty lines
-              while (((line = fileReader.readLine()) != null) && !line.isEmpty()) {
+              while ((line = fileReader.readLine()) != null && !line.isEmpty()) {
                 ;
               }
               if (line == null) {
@@ -314,7 +314,7 @@ public class Twitter7Parser<T> implements Runnable {
       }
     }
 
-    LOGGER.info("parsingFinishedListeners ...");
+    LOGGER.info("parsing finished listeners ...");
     parsingFinishedListeners.forEach(Runnable::run);
 
     LOGGER.info("Finished parsing file");

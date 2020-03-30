@@ -101,7 +101,7 @@ public class TWIGClustering implements IClustering {
       // get a random element
       final int min = 0;
       final int max = clusterIds.length - 1;
-      final int randomNum = rand.nextInt((max - min) + 1) + min;
+      final int randomNum = rand.nextInt(max - min + 1) + min;
       final int randomId = clusterIds[randomNum];
       randomWord = wordEmbeddings.index.get(randomId);
     } else {
@@ -192,7 +192,7 @@ public class TWIGClustering implements IClustering {
     // Textbook k-means clustering:
     final double epsilon = 0.5D;
     final int minpts = 2;
-    final DBSCAN<NumberVector> km = new DBSCAN<NumberVector>(dist, epsilon, minpts);
+    final DBSCAN<NumberVector> km = new DBSCAN<>(dist, epsilon, minpts);
     // new DBSCAN<>(dist, //
     // 2 /* k - number of partitions */, //
     // 0 /* maximum number of iterations: no limit */, init);
