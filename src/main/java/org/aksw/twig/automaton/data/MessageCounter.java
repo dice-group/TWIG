@@ -35,10 +35,22 @@ public class MessageCounter implements Serializable {
 
   private ArrayList<Integer> messageCounts;
 
+  public int getUserSize() {
+    return userMessageCountMap.keySet().size();
+  }
+
+  public int getSumOfAllMessages() {
+    return userMessageCountMap.values().stream().mapToInt(Integer::intValue).sum();
+  }
+
+  public Map<String, Integer> getUserMessageCountMap() {
+    return userMessageCountMap;
+  }
+
   /**
    * Returns an array list with following semantics: {@code x := arrayList[i]} means that {@code x}
    * users have sent {@code i + 1} messages.
-   * 
+   *
    * @return Array list with message numbers.
    */
   public ArrayList<Integer> getMessageCounts() {
@@ -46,7 +58,7 @@ public class MessageCounter implements Serializable {
       messageCounts = new ArrayList<>();
       userMessageCountMap.values().forEach(count -> {
         if (count != 0) {
-          while (messageCounts.size() <= (count - 1)) {
+          while (messageCounts.size() <= count - 1) {
             messageCounts.add(0);
           }
           messageCounts.set(count - 1, messageCounts.get(count - 1) + 1);
@@ -59,7 +71,7 @@ public class MessageCounter implements Serializable {
 
   /**
    * Adds all messages in the model to the counter. TODO
-   * 
+   *
    * @param model Model to add.
    */
   public void addModel(final Model model) {
@@ -102,7 +114,7 @@ public class MessageCounter implements Serializable {
 
   /**
    * Adds given number of messages to the user.
-   * 
+   *
    * @param userName User to add to.
    * @param messages Message number to add.
    */
@@ -113,7 +125,7 @@ public class MessageCounter implements Serializable {
 
   /**
    * Returns how many messages have been sent by the user.
-   * 
+   *
    * @param userName User to check.
    * @return Message count of the user.
    */
@@ -123,7 +135,7 @@ public class MessageCounter implements Serializable {
 
   /**
    * Sets the amount of days by which the user has sent his tweets.
-   * 
+   *
    * @param userName User to set.
    * @param dayInterval Amount of days.
    */
@@ -137,7 +149,7 @@ public class MessageCounter implements Serializable {
    * {@code count = count / userDayInterval * normalPeriod.toDays();}<br>
    * <br>
    * A code example:
-   * 
+   *
    * <pre>
    * {@code MessageCounter counter = new MessageCounter();}
    * {@code counter.setUserMessageCount("user", 10);}
@@ -145,7 +157,7 @@ public class MessageCounter implements Serializable {
    * {@code counter = counter.normalize(Duration.ofDays(1);}
    * {@code counter.getUserMessages("user"); // will return 2}
    * </pre>
-   * 
+   *
    * @param normalPeriod Time period to normalize to.
    * @return This.
    */
@@ -156,7 +168,7 @@ public class MessageCounter implements Serializable {
           (double) normalPeriod.toDays() / (double) userMessageDayIntervalMap.get(userName);
 
       final int newMessageCount =
-          (int) Math.round(((double) userMessageCountMap.get(userName) * factor));
+          (int) Math.round((double) userMessageCountMap.get(userName) * factor);
       if (newMessageCount > 0) {
         setUserMessages(userName, newMessageCount);
         setUserDayInterval(userName, (int) normalPeriod.toDays());
@@ -172,7 +184,7 @@ public class MessageCounter implements Serializable {
    * Creates an exponential like distribution over values of {@link #getMessageCounts()}. There must
    * by some messages counted in order for this method to work. Otherwise an
    * {@link IllegalStateException} is thrown.
-   * 
+   *
    * @return Distribution.
    */
   public SamplingDiscreteDistribution<Integer> getValueDistribution() {
@@ -196,7 +208,7 @@ public class MessageCounter implements Serializable {
 
   /**
    * Merges the message counts of given {@link MessageCounter} into this.
-   * 
+   *
    * @param counter {@link MessageCounter} to merge.
    * @return {@code this}
    */
