@@ -6,7 +6,6 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.util.Arrays;
 import java.util.HashMap;
-import java.util.LinkedList;
 import java.util.Map;
 import java.util.Random;
 
@@ -37,6 +36,8 @@ public class WordSampler implements SamplingWordPredecessorSuccessorDistribution
 
   public WordMatrix matrix = null;
 
+  WordFilter filter = new WordFilter();
+
   /**
    * Creates a {@link WordSampler} of given {@link WordMatrix}.
    *
@@ -48,10 +49,8 @@ public class WordSampler implements SamplingWordPredecessorSuccessorDistribution
 
     matrix.getPredecessors().forEach(predecessor -> {
       final WordChanceMapping[] wordChanceMappings =
-          matrix.getMappings(predecessor).entrySet().stream()
-              // .map(entry -> new WordChanceMapping(matrix.index.get(entry.getKey()),
-              // entry.getValue()))
-              .map(entry -> new WordChanceMapping(entry.getKey(), entry.getValue()))
+          matrix.getMappings(predecessor).entrySet().stream()//
+              .map(entry -> new WordChanceMapping(entry.getKey(), entry.getValue()))//
               .toArray(WordChanceMapping[]::new);
 
       // Sort successors alphabetically
@@ -107,29 +106,46 @@ public class WordSampler implements SamplingWordPredecessorSuccessorDistribution
   }
 
   @Override
-  public String sample(final Random randomSource) {
-    String currentPredecessor = getSuccessorDistribution("").sample(randomSource);
-    int charactersCount = currentPredecessor.length();
+  public String sample(final Random rand) {
 
-    final LinkedList<String> tweet = new LinkedList<>();
-    tweet.add(currentPredecessor);
+    final int maxTries = 10;
+    final StringBuffer sb = new StringBuffer();
+
+    String pre = getSuccessorDistribution("").sample(rand);
+    int charactersCount = pre.length();
+
+    int tries = 0;
+    while (!filter.isPredecessor(pre) && tries++ < maxTries) {
+      pre = getSuccessorDistribution("").sample(rand);
+    }
+    sb.append(pre);
+    String next = null;
 
     while (charactersCount < MAX_CHARS) {
-      final String next = getSuccessorDistribution(currentPredecessor).sample(randomSource);
+      next = getSuccessorDistribution(pre).sample(rand);
+      tries = 0;
+      while (!filter.isSuccessor(next) && tries++ < maxTries) {
+        next = getSuccessorDistribution(pre).sample(rand);
+      }
+
       if (next.equals("")) {
         break;
       }
 
-      tweet.add(next);
-      currentPredecessor = next;
-      charactersCount += next.length() + 1; // + 1 for space character
+      if (filter.needsSpace(next)) {
+        sb.append(" ");
+        charactersCount++;// + 1 for space character
+      }
+      sb.append(next);
+      pre = next;
+      charactersCount += next.length();
     }
 
     if (charactersCount > MAX_CHARS) {
-      tweet.removeLast();
+      sb.replace(sb.length() - next.length(), sb.length(), "");
     }
 
-    return tweet.stream().reduce("", (a, b) -> a.concat(" ").concat(b)).trim();
+    return sb.toString().trim();
   }
 
   /**
@@ -139,7 +155,6 @@ public class WordSampler implements SamplingWordPredecessorSuccessorDistribution
 
     private final String word;
 
-    // TODO: never used?
     private final double chance;
 
     WordChanceMapping(final String word, final double chance) {
