@@ -71,8 +71,8 @@ public class WordMatrix implements Serializable {
 
     alteredSinceCached = true;
 
-    final MutablePair<Long, Map<String, Long>> mapping =
-        matrix.computeIfAbsent(predecessor, key -> new MutablePair<>(0L, new HashMap<>()));
+    final MutablePair<Long, Map<String, Long>> mapping;
+    mapping = matrix.computeIfAbsent(predecessor, key -> new MutablePair<>(0L, new HashMap<>()));
 
     mapping.setLeft(mapping.getLeft() + count);
     final Map<String, Long> columns = mapping.getRight();
