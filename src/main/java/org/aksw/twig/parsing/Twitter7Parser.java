@@ -341,13 +341,12 @@ public class Twitter7Parser<T> implements Runnable {
     final ExecutorService service = Executors.//
         newFixedThreadPool(Const.N_THREADS_TWITTER7PARSER_MAIN);
 
-    InputStream inputStream = null;
     for (final File file : parsedArgs.getRight()) {
       LOGGER.info("file: " + file.getName().toString());
 
       try {
         LOGGER.info("Decompression ... ");
-        inputStream = FileHandler.getDecompressionStreams(file);
+        final InputStream inputStream = FileHandler.getDecompressionStreams(file);
 
         LOGGER.info("Parsing ... ");
         final Twitter7Parser<TWIGModelWrapper> parser;
@@ -357,7 +356,11 @@ public class Twitter7Parser<T> implements Runnable {
 
         parser.addFutureCallbacks(resultCollector);
         parser.addParsingFinishedResultListeners(resultCollector::writeModel, () -> {
-
+          try {
+            inputStream.close();
+          } catch (final IOException e) {
+            LOGGER.error(e.getMessage(), e);
+          }
         });
         service.execute(parser);
       } catch (final IOException e) {
