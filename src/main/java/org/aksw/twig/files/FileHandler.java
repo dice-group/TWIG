@@ -1,12 +1,13 @@
 package org.aksw.twig.files;
 
-import org.apache.commons.compress.archivers.tar.TarArchiveInputStream;
-import org.apache.commons.lang3.tuple.ImmutablePair;
-import org.apache.commons.lang3.tuple.Pair;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-
-import java.io.*;
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.Reader;
 import java.nio.file.DirectoryStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -18,6 +19,12 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import java.util.zip.GZIPInputStream;
 import java.util.zip.ZipInputStream;
+
+import org.apache.commons.compress.archivers.tar.TarArchiveInputStream;
+import org.apache.commons.lang3.tuple.ImmutablePair;
+import org.apache.commons.lang3.tuple.Pair;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 /**
  * An instance of this class handles creation of new files. It also has some static functions that
@@ -31,20 +38,20 @@ public class FileHandler {
 
   private int maxAttempts = 100;
 
-  private File outputDirectory;
+  private final File outputDirectory;
 
-  private String fileName;
+  private final String fileName;
 
-  private String fileType;
+  private final String fileType;
 
   /**
    * Creates a new file handler.
-   * 
+   *
    * @param outputDirectory Directory to output the files into.
    * @param fileName Basic file name.
    * @param fileType File type (including '.').
    */
-  public FileHandler(File outputDirectory, String fileName, String fileType) {
+  public FileHandler(final File outputDirectory, final String fileName, final String fileType) {
     this.outputDirectory = outputDirectory;
     this.fileName = fileName;
     this.fileType = fileType;
@@ -52,13 +59,14 @@ public class FileHandler {
 
   /**
    * Creates a new file handler.
-   * 
+   *
    * @param outputDirectory Directory to output the files into.
    * @param fileName Basic file name.
    * @param fileType File type (including '.').
    * @param maxAttempts How many times should the file handler attempt to create a new file?
    */
-  public FileHandler(File outputDirectory, String fileName, String fileType, int maxAttempts) {
+  public FileHandler(final File outputDirectory, final String fileName, final String fileType,
+      final int maxAttempts) {
     this(outputDirectory, fileName, fileType);
     this.maxAttempts = maxAttempts;
   }
@@ -66,7 +74,7 @@ public class FileHandler {
   /**
    * Creates a new file to write into. File will be name like: {@code NAME_NUMBER.TYPE}. If creation
    * of a new file fails, it will try {@link #maxAttempts} times to create a new one.
-   * 
+   *
    * @return New file.
    * @throws IOException Thrown if no new file could be created.
    */
@@ -87,7 +95,7 @@ public class FileHandler {
     while (!writeFile.exists() && attempt < maxAttempts) {
       try {
         writeFile.createNewFile();
-      } catch (IOException e) {
+      } catch (final IOException e) {
         attempt++;
       }
     }
@@ -101,27 +109,27 @@ public class FileHandler {
 
   /**
    * Creates a new file without any checks.
-   * 
+   *
    * @return New file.
    */
   private File incrementFile() {
     return new File(outputDirectory,
-        this.fileName.concat("_").concat(Integer.toString(id++)).concat(fileType));
+        fileName.concat("_").concat(Integer.toString(id++)).concat(fileType));
   }
 
   /**
    * Gets all files from a directory.
-   * 
+   *
    * @param f Directory to search.
    * @param allowRecursion {@code true} if you want to look for files in sub-folders, too.
    * @return Stream of all files.
    */
-  public static Stream<File> getFiles(File f, boolean allowRecursion) {
+  public static Stream<File> getFiles(final File f, final boolean allowRecursion) {
     Stream<File> fileStream = Stream.empty();
 
     try (DirectoryStream<Path> stream = Files.newDirectoryStream(f.toPath())) {
-      for (Path iteratePath : stream) {
-        File file = iteratePath.toFile();
+      for (final Path iteratePath : stream) {
+        final File file = iteratePath.toFile();
 
         if (file.isDirectory()) {
           if (allowRecursion) {
@@ -131,7 +139,7 @@ public class FileHandler {
           fileStream = Stream.concat(fileStream, Stream.of(file));
         }
       }
-    } catch (IOException e) {
+    } catch (final IOException e) {
       LOGGER.error("Couldn't read path {}", f.getPath());
     }
 
@@ -155,17 +163,18 @@ public class FileHandler {
    * to the set of read files.</li>
    * <li>{@code PATH} will add given file to the set of read files.</li>
    * </ul>
-   * 
+   *
    * @param args One or more arguments as specified above.
    * @return Pair of output directory (left value) and set of read files (right value).
    */
-  public static Pair<File, Set<File>> readArgs(String[] args) throws IllegalArgumentException {
+  public static Pair<File, Set<File>> readArgs(final String[] args)
+      throws IllegalArgumentException {
     if (args.length < 1) {
       throw new IllegalArgumentException("Too few arguments given.");
     }
 
-    Matcher outDirectoryMatcher = ARG_PREF_OUT.matcher(args[0]);
-    File outputDirectory =
+    final Matcher outDirectoryMatcher = ARG_PREF_OUT.matcher(args[0]);
+    final File outputDirectory =
         outDirectoryMatcher.find() ? new File(outDirectoryMatcher.group(1)) : null;
 
     int argsStartIndex = 1;
@@ -176,7 +185,7 @@ public class FileHandler {
     }
 
     // Get all files to parse
-    Set<File> filesToParse = new HashSet<>();
+    final Set<File> filesToParse = new HashSet<>();
     for (int i = argsStartIndex; i < args.length; i++) {
       Matcher matcher = ARG_PREF_IN.matcher(args[i]);
       if (matcher.find()) {
@@ -206,14 +215,14 @@ public class FileHandler {
    * <li>.zip</li>
    * <li>.tar</li>
    * </ul>
-   * 
+   *
    * @param file File to read.
    * @return Reader that decodes the file.
    * @throws IOException Thrown during reader creation.
    */
-  public static BufferedReader getDecodingReader(File file) throws IOException {
-    InputStream fileStream = getDecompressionStreams(file);
-    Reader decoder = new InputStreamReader(fileStream);
+  public static BufferedReader getDecodingReader(final File file) throws IOException {
+    final InputStream fileStream = getDecompressionStreams(file);
+    final Reader decoder = new InputStreamReader(fileStream);
     return new BufferedReader(decoder);
   }
 
@@ -224,14 +233,14 @@ public class FileHandler {
    * <li>.zip</li>
    * <li>.tar</li>
    * </ul>
-   * 
+   *
    * @param file File to decompress.
    * @return InputStream decompressing the file.
    * @throws IOException Thrown during reader creation.
    */
-  public static InputStream getDecompressionStreams(File file) throws IOException {
+  public static InputStream getDecompressionStreams(final File file) throws IOException {
     InputStream fileStream = new FileInputStream(file);
-    String[] split = file.getName().split("\\.");
+    final String[] split = file.getName().split("\\.");
     for (int i = split.length - 1; i >= 0; i--) {
       switch (split[i]) {
         case "gz":
