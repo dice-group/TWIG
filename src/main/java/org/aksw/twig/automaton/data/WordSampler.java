@@ -27,8 +27,9 @@ public class WordSampler implements SamplingWordPredecessorSuccessorDistribution
 
   private static final double DISTRIBUTION_CHANCE_DELTA = Const.DISTRIBUTION_CHANCE_DELTA;
 
+  // TODO: Add to config
   private static final int MAX_CHARS = 140;
-
+  final int maxTries = 10;
   private final Map<String, SamplingDiscreteTreeDistribution<String>> distributionMap =
       new HashMap<>();
 
@@ -108,7 +109,6 @@ public class WordSampler implements SamplingWordPredecessorSuccessorDistribution
   @Override
   public String sample(final Random rand) {
 
-    final int maxTries = 10;
     final StringBuffer sb = new StringBuffer();
 
     String pre = getSuccessorDistribution("").sample(rand);
@@ -141,7 +141,7 @@ public class WordSampler implements SamplingWordPredecessorSuccessorDistribution
       charactersCount += next.length();
     }
 
-    if (charactersCount > MAX_CHARS) {
+    if (next != null && charactersCount > MAX_CHARS) {
       sb.replace(sb.length() - next.length(), sb.length(), "");
     }
 
