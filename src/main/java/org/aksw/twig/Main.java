@@ -2,6 +2,7 @@ package org.aksw.twig;
 
 import java.util.Arrays;
 
+import org.aksw.twig.application.LoadModels;
 import org.aksw.twig.automaton.Automaton;
 import org.aksw.twig.automaton.data.MessageCounterHandler;
 import org.aksw.twig.automaton.data.TimeCounterHandler;
@@ -26,8 +27,20 @@ public class Main {
 
     switch (args[0]) {
       case "--help":
-        LOGGER.info("Use 'Twitter7Parser arg0 arg1 ...' to parse twitter data.");
+        LOGGER.info(//
+            "\nUsage: <command>".concat(System.lineSeparator())//
+                + "Commands:".concat(System.lineSeparator())//
+                + "Twitter7Parser arg0 arg1\t\t to parse twitter7 data files arg0 and arg1"
+                    .concat(System.lineSeparator())//
+                + "WordSampler \t\t".concat(System.lineSeparator())//
+                + "Automaton \t\t".concat(System.lineSeparator())//
+                + "MessageCounterHandler \t\t".concat(System.lineSeparator())//
+                + "WordMatrixHandler \t\t".concat(System.lineSeparator())//
+                + "TimeCounterHandler \t\t".concat(System.lineSeparator())//
+                + "MergeModels \t\t".concat(System.lineSeparator())//
+        );
         break;
+
       /*
        * parses twitter data into an RDF model
        *
@@ -35,18 +48,21 @@ public class Main {
       case "Twitter7Parser":
         Twitter7Parser.main(Arrays.copyOfRange(args, 1, args.length));
         break;
+
       /**
        *
        */
       case "WordSampler":
         WordSampler.main(Arrays.copyOfRange(args, 1, args.length));
         break;
+
       /*
        * Mimicking approach
        */
       case "Automaton":
         Automaton.main(Arrays.copyOfRange(args, 1, args.length));
         break;
+
       /*
        * creates models
        *
@@ -54,11 +70,20 @@ public class Main {
       case "MessageCounterHandler":
         MessageCounterHandler.main(Arrays.copyOfRange(args, 1, args.length));
         break;
+
       case "WordMatrixHandler":
         WordMatrixHandler.main(Arrays.copyOfRange(args, 1, args.length));
         break;
+
       case "TimeCounterHandler":
         TimeCounterHandler.main(Arrays.copyOfRange(args, 1, args.length));
+        break;
+
+      /*
+      *
+      */
+      case "MergeModels":
+        LoadModels.main(Arrays.copyOfRange(args, 1, args.length));
         break;
 
       default:
