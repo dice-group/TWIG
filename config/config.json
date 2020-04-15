@@ -1,9 +1,12 @@
 {
 	"twitterBlockThreads": 4,
 	"twitter7ParserThreads": 1,
-	"selfsuspendingexecutor": 4,
-    "seed" :1,
-	"modelSize": 100000000000,
-	"DISTRIBUTION_CHANCE_DELTA": 0.1,
-	"TRUNCATE_CHANCE": 0.1
+	"selfsuspendingexecutor": 1,
+	"seed" :1,
+	"modelSize": 10000000,
+	"delta": 0.1,
+	"truncateChance": 0.1,
+	"defaultTruncateTo": 0.1,
+	"defaultMaxMemory" :0,
+	"memoryUse" : 0.5
 }
