@@ -1,6 +1,5 @@
 package org.aksw.twig;
 
-import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Paths;
 import java.util.List;
@@ -28,7 +27,7 @@ public class Const {
   public static int N_THREADS_SELFSUSPENDINGEXECUTOR;
 
   // seed for random generator
-  public static long seed;
+  public static long SEED;
 
   // number of statements in model
   public static int MODEL_MAX_SIZE;
@@ -38,27 +37,35 @@ public class Const {
   // WordSampler
   public static double TRUNCATE_CHANCE;
 
+  // LoadModels
+  public static double DEFAULT_TRUNCATE_TO;
+  // LoadModels
+  public static long DEFAULT_MAX_MEMORY;
+  // LoadModels
+  public static double MEMORY_USE;
+  // LoadModels
+
   /**
    * Loads the config file and inits the constants.
    */
   public static void load(final String configFile) {
-
     try {
-      final List<String> lines =
-          Files.readLines(Paths.get(configFile).toFile(), StandardCharsets.UTF_8);
-      final String cfg = String.join("", lines);
-
-      final JSONObject o = new JSONObject(cfg);
+      final List<String> lines;
+      lines = Files.readLines(Paths.get(configFile).toFile(), StandardCharsets.UTF_8);
+      final JSONObject o = new JSONObject(String.join("", lines));
 
       N_THREADS_TWITTER7PARSER = o.getInt("twitterBlockThreads");
       N_THREADS_TWITTER7PARSER_MAIN = o.getInt("twitter7ParserThreads");
       N_THREADS_SELFSUSPENDINGEXECUTOR = o.getInt("selfsuspendingexecutor");
-      seed = o.getInt("seed");
+      SEED = o.getInt("seed");
       MODEL_MAX_SIZE = o.getInt("modelSize");
-      DISTRIBUTION_CHANCE_DELTA = o.getDouble("DISTRIBUTION_CHANCE_DELTA");
-      TRUNCATE_CHANCE = o.getDouble("TRUNCATE_CHANCE");
+      DISTRIBUTION_CHANCE_DELTA = o.getDouble("delta");
+      TRUNCATE_CHANCE = o.getDouble("truncateChance");
 
-    } catch (final IOException e) {
+      DEFAULT_TRUNCATE_TO = o.getDouble("defaultTruncateTo");
+      DEFAULT_MAX_MEMORY = o.getLong("defaultMaxMemory");
+      MEMORY_USE = o.getDouble("memoryUse");
+    } catch (final Exception e) {
       LOG.error(e.getLocalizedMessage());
     }
   }

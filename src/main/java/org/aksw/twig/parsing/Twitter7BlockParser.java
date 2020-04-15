@@ -124,7 +124,7 @@ class Twitter7BlockParser implements Callable<TWIGModelWrapper> {
     }
 
     final TWIGModelWrapper model = new TWIGModelWrapper();
-    model.addTweet(twitterUserName, messageContent, messageDateTime, mentions, Const.seed);
+    model.addTweet(twitterUserName, messageContent, messageDateTime, mentions, Const.SEED);
     return model;
   }
 }
