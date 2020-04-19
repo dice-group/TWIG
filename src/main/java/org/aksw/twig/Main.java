@@ -3,6 +3,7 @@ package org.aksw.twig;
 import java.util.Arrays;
 
 import org.aksw.twig.application.LoadModels;
+import org.aksw.twig.application.Samples;
 import org.aksw.twig.automaton.Automaton;
 import org.aksw.twig.automaton.data.MessageCounterHandler;
 import org.aksw.twig.automaton.data.TimeCounterHandler;
@@ -38,6 +39,7 @@ public class Main {
                 + "WordMatrixHandler \t\t".concat(System.lineSeparator())//
                 + "TimeCounterHandler \t\t".concat(System.lineSeparator())//
                 + "MergeModels \t\t".concat(System.lineSeparator())//
+                + "Samples \t\t".concat(System.lineSeparator())//
         );
         break;
 
@@ -84,6 +86,13 @@ public class Main {
       */
       case "MergeModels":
         LoadModels.main(Arrays.copyOfRange(args, 1, args.length));
+        break;
+
+      /*
+      *
+      */
+      case "Samples":
+        Samples.main(Arrays.copyOfRange(args, 1, args.length));
         break;
 
       default:
