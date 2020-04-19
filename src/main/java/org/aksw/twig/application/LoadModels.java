@@ -103,6 +103,8 @@ public class LoadModels {
         final long newCount =
             successors.entrySet().stream().map(Map.Entry::getValue).reduce(0L, Long::sum);
         matrix.put(predecessor, new MutablePair<>(newCount, successors));
+      } else {
+        matrix.remove(predecessor);
       }
     });
     return matrix;
