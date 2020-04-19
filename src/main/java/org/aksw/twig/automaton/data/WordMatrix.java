@@ -73,8 +73,8 @@ public class WordMatrix implements Serializable {
 
     final MutablePair<Long, Map<String, Long>> mapping;
     mapping = matrix.computeIfAbsent(predecessor, key -> new MutablePair<>(0L, new HashMap<>()));
-
     mapping.setLeft(mapping.getLeft() + count);
+
     final Map<String, Long> columns = mapping.getRight();
     final Long val = columns.get(successor);
     columns.put(successor, val == null ? count : val + count);
@@ -233,7 +233,6 @@ public class WordMatrix implements Serializable {
     if (alteredSinceCached) {
       calculateStatisticalValues();
     }
-
     return cachedMeanChance;
   }
 
@@ -246,7 +245,6 @@ public class WordMatrix implements Serializable {
     if (alteredSinceCached) {
       calculateStatisticalValues();
     }
-
     return cachedChanceStdDeviation;
   }
 
@@ -258,25 +256,21 @@ public class WordMatrix implements Serializable {
   public void truncateTo(final double lowerBoundChance) {
 
     final HashMap<String, MutablePair<Long, Map<String, Long>>> newMatrix = new HashMap<>();
+    LOGGER.info("matrix size: {}", matrix.size());
 
-    matrix.entrySet().forEach(entry -> {
-
-      final Set<Map.Entry<String, Long>> entrySet = entry.getValue().getRight().entrySet();
-
-      final double count = entry.getValue().getLeft();
-
-      final Map<String, Long> newSuccessorMap = entrySet.stream()
-          .filter(successorEntry -> (double) successorEntry.getValue() / count >= lowerBoundChance)
+    matrix.forEach((k, v) -> {
+      final Set<Map.Entry<String, Long>> successors = v.getRight().entrySet();
+      final double count = v.getLeft();
+      final Map<String, Long> newSuccessorMap = successors.stream()//
+          .filter(successor -> successor.getValue().doubleValue() / count >= lowerBoundChance)
           .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
-
-      final long newCount =
-          newSuccessorMap.entrySet().stream().map(Map.Entry::getValue).reduce(0L, Long::sum);
-
+      final long newCount = newSuccessorMap.entrySet().stream()//
+          .map(Map.Entry::getValue).reduce(0L, Long::sum);
       if (!newSuccessorMap.isEmpty()) {
-        newMatrix.put(entry.getKey(), new MutablePair<>(newCount, newSuccessorMap));
+        newMatrix.put(k, new MutablePair<>(newCount, newSuccessorMap));
       }
     });
-
+    LOGGER.info("matrix size: {}", newMatrix.size());
     matrix = newMatrix;
   }
 }
